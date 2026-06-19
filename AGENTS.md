@@ -24,6 +24,16 @@ Before making substantive claims, inspect the relevant source artifacts in `~/pr
 
 Do not treat prose summaries as sufficient evidence for paper claims when raw logs or generated tables are available.
 
+## Messaging direction sources
+
+Use these documents for narrative framing, audience, and slide-derived messaging direction:
+
+- Notion: [Evaluating Models for Security Operations](https://app.notion.com/p/Evaluating-Models-for-Security-Operations-3806c323786880faa4a2cfde52eefb2d)
+- Notion: [Actual Deck](https://app.notion.com/p/Actual-Deck-3826c3237868805a8c13e4917ebbb71f?source=copy_link)
+- `~/projects/inspect-cyber-eval/docs/actual-deck.odp` — local OpenDocument presentation corresponding to the deck messaging.
+
+Treat these as messaging and positioning guidance, not evidence for numeric claims. When drafting paper prose, align framing with these documents where appropriate, but continue to verify quantitative and methodological claims against the source-of-truth artifacts above.
+
 ## Working rules
 
 - Do not modify `~/projects/inspect-cyber-eval/` unless the user explicitly asks; read from it for evidence.
