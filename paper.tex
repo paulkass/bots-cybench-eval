@@ -1,0 +1,277 @@
+\documentclass{article}
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc}
+% The upstream arxiv style defaults to Times (ptm). Latin Modern keeps
+% the same clean layout while compiling on a minimal TeX Live install.
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{array}
+
+\graphicspath{{figures/}}
+
+\title{Offensive CTFs and SOC Investigations Measure Different Agent Skills}
+
+\author{
+  Paul\\
+  Independent Researcher
+}
+
+\date{Independent Research Preprint\\\today}
+
+\renewcommand{\headeright}{Independent Research Preprint}
+\renewcommand{\undertitle}{Independent Research Preprint}
+\renewcommand{\shorttitle}{Offensive and Defensive Agent Evaluation}
+
+\hypersetup{
+  pdftitle={Offensive CTFs and SOC Investigations Measure Different Agent Skills},
+  pdfsubject={Cybersecurity benchmark evaluation},
+  pdfauthor={Paul},
+  pdfkeywords={cybersecurity benchmarks, AI agents, Cybench, BOTS, Inspect, SOC}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+AI security evaluations often emphasize exploit-finding, application-security, or capture-the-flag tasks, yet security operations center (SOC) work asks a different question: can an agent navigate telemetry, pivot through evidence, use enrichment sparingly, and answer incident questions with analyst discipline?  I report experiments from an Inspect-based evaluation harness that runs contemporary models on two public benchmark families: Cybench hard-variant CTF challenges and Splunk Boss of the SOC (BOTS) v1 investigations.  The headline result is not a single universal model ranking.  On Cybench, GPT-5.5 reached 94.1\% pass@1 and DeepSeek v4 Flash improved from 64.1\% to 86.4\% when its per-sample budget was raised, suggesting that offensive CTF performance can benefit substantially from additional compute/tool budget.  On BOTSv1, however, Claude Opus 4.8 earned 9,666.7/10,300 competition points (93.9\%) with 603 tool calls and \$13.24 in model-plus-priced-tool spend, while GPT-5.5 earned roughly 81\% of points with more than twice the tool calls and over three times the cost.  These results support a practical evaluation message: offensive and defensive security tasks have different scaling behaviors, and SOC aptitude should be benchmarked with SOC-native tools, scoring, and cost accounting rather than inferred from CTF performance alone.
+\end{abstract}
+
+\keywords{cybersecurity benchmarks \and AI agents \and SOC \and Cybench \and BOTS \and Inspect}
+
+\section{Introduction}
+
+The current discussion around AI for security is strongly shaped by application-security demonstrations: models find bugs, reason about code, and sometimes exploit vulnerable services.  Those capabilities matter, but they do not exhaust the work of security teams.  Incident-response guidance and cybersecurity workforce taxonomies emphasize detection, analysis, evidence handling, and response coordination as distinct work from vulnerability discovery \citep{nist_sp800_61r3,nist_nice_800_181r1}.  A SOC analyst spends much of a shift formulating searches over telemetry, validating weak signals, correlating host/network/application evidence, and deciding when an external enrichment call is worth its cost and latency.  A model that is strong at an offensive CTF may not be the model that best performs defensive incident investigation.
+
+This paper describes a set of experiments in a local evaluation repository, \path{~/projects/inspect-cyber-eval/}, and the paper-writing artifacts in the present repository.  The experiments use Inspect \citep{inspect_ai_2024}, a task/solver/scorer framework with sandboxed tools, to run two public benchmark families.  Cybench \citep{zhang2024cybench,inspect_evals_cybench} represents offensive, CTF-style tasks: agents work in per-challenge sandboxes with shell/Python tools and submit flags.  Splunk Boss of the SOC (BOTS) \citep{splunk_botsv1,splunk_botsv2,splunk_botsv3} represents defensive, SOC-style questions over pre-indexed Splunk telemetry.  The BOTS harness packages the public datasets as Inspect tasks, gives agents Splunk and enrichment tools, and scores with the original competition point economy rather than only exact-match accuracy.
+
+The experiments are best read as an engineering-and-evaluation study rather than as a perfectly controlled model bake-off.  The source repository's chart audit records several non-invariants: per-sample cost limits, OpenRouter provider routing, challenge-set size for one Cybench row, concurrency, and provider-specific cost accounting differed across runs.  I therefore avoid claims such as ``model A is intrinsically better than model B'' unless the comparison is especially direct.  Instead, I emphasize patterns that matter for security evaluation design:
+
+\begin{itemize}
+  \item Offensive CTF and defensive SOC tasks reward different behavior.  Cybench rewards sustained exploration of challenge sandboxes; BOTS rewards targeted evidence gathering and disciplined tool use.
+  \item More compute/tool budget helped some offensive runs.  The clearest ablation is DeepSeek v4 Flash on Cybench, where raising the per-sample cap from \$0.80 to \$2.10 raised pass@1 from 64.1\% to 86.4\%.
+  \item More tool use was not automatically better for SOC.  In BOTSv1, the best run used the fewest total tool calls among the compared full runs, suggesting that defensive benchmark performance depends heavily on tool quality and tool-selection policy.
+  \item Cost should be reported in the units that matter for the task family.  For Cybench, I report model-token spend per solve.  For BOTS, I also include priced external enrichment calls because SOC workflows routinely pay for search, reputation, and WHOIS-style lookups.
+\end{itemize}
+
+\section{Benchmarks and Harness}
+
+\subsection{Cybench as an offensive CTF benchmark}
+
+Cybench was introduced as a framework for evaluating language-model agents on professional CTF cybersecurity tasks \citep{zhang2024cybench}.  The local experiments used the Inspect Evals implementation of \texttt{inspect\_evals/cybench}.  In the evaluated logs, each full hard-variant run contains 39 challenge instances and was run with three epochs and a mean reducer, so the reported pass@1 can be fractional.  The agent scaffold for the charted ``+ac'' rows was \path{agents/react_autocompact.py@react_autocompact}: an upstream Cybench ReAct prompt \citep{yao2023react}, bash and Python tools with 180-second timeouts, a three-attempt loop, Inspect automatic compaction, and a one-refusal abort rule.  The Cybench sandbox was Docker.
+
+The headline metric is the upstream \texttt{includes} accuracy: a challenge epoch is correct if the submitted answer includes the target flag.  I report ``solved'' as the mean-correct equivalent out of 39 challenges.  For example, 36.7 solved means that, across 39 challenges and three epochs, the model's mean success rate is equivalent to 36.7 challenges solved at pass@1.
+
+\subsection{BOTS as a defensive SOC benchmark}
+
+BOTS is Splunk's Boss of the SOC competition data.  Version 1 centers on the Po1s0n1vy/APT web compromise and Cerber ransomware scenario against Wayne Enterprises.  The source repository packages BOTS v1, v2, and v3 as one parameterized Inspect task, but the results in this paper focus on BOTSv1 because the available charted comparison is a complete, audited multi-model set.
+
+For full BOTSv1 runs, the task excludes the official warm-up question 1, leaving 31 scored benchmark questions.  Each question is an Inspect sample over a per-sample Splunk sandbox.  The agent receives Splunk discovery/search/event tools, limited external enrichment tools (VirusTotal, WhoisXMLAPI, Brave Search, DNS, WHOIS), and guarded bash/Python tools.  The BOTS runs reported here used the Kubernetes sandbox path recorded in the logs: the local Inspect driver launched per-sample pods in the approved non-prod context with the BOTS data mounted read-only in the sandbox.  No additional experiments were launched while drafting this paper.
+
+BOTS is not naturally a binary benchmark.  The original competition assigns base points by question difficulty and reveals hints after incorrect submissions, with point penalties.  The harness therefore uses \texttt{bots\_points} as the primary scorer: a correct answer earns \(\max(0,\text{base points}-\text{hint penalty})\), and a wrong answer earns 0.  I also report the secondary \texttt{includes} binary accuracy because it is useful for comparison, but BOTS points are the headline SOC metric.
+
+\section{Methodology}
+
+All quantitative claims in this paper were checked against source artifacts in \path{~/projects/inspect-cyber-eval/}.  The generated tables and figures come from \path{charts/*.html}, \path{charts/*.csv}, and \path{charts/*.png}; the raw Inspect logs in \path{logs/*.eval} are treated as the highest-fidelity source for model configuration, samples, costs, and transcripts.  The most important source files are listed in Appendix~\ref{app:audit}.
+
+\paragraph{Cost accounting.}  Cybench costs are model-token costs from Inspect's model-usage ledger when available, with provider-specific caveats recorded in \path{charts/README.md}.  OpenRouter and OpenAI rows use Inspect's ledger; Anthropic costs were computed from token counts and registered rates where the API did not populate \texttt{total\_cost}.  BOTSv1 costs start with Inspect model costs and add priced external enrichment tools when a charged provider call appears in the transcript.  The tool-cost report charges Brave Search at \$0.005/request, treats VirusTotal public API use, DNS, and live WHOIS as zero marginal cost, and converts WhoisXMLAPI DRS credits to USD at the user-provided paid-plan rate \$129/5,000 credits.
+
+\paragraph{Resource curves.}  The source charts include cost-budget curves and tool-call cap curves.  For Cybench and BOTS, the tool-call cap curve asks: if each sample epoch were allowed at most \(X\) non-submit tool calls, what share of sample epochs would still be solved?  Sample epochs that originally required more than \(X\) calls are counted as unsolved.  For BOTS, the cost-budget chart has both model-token-only and model-plus-priced-tool curves.
+
+\paragraph{Threats to direct comparison.}  The charted rows are not a fully controlled model-only experiment.  On Cybench, per-sample cost limits varied, OpenRouter provider routing differed for some rows, DeepSeek v4 Pro used 38 rather than 39 challenges because \texttt{chunky} had a deterministic sandbox initialization failure, and same-day failed retries are included in some cost totals.  On BOTSv1, the rows are more uniform at the task level (all are full v1, three epochs, mean reducer, message limit 250, Kubernetes sandbox), but model defaults such as reasoning effort still differ by provider and row.  These caveats are central to the interpretation: the results support benchmark-design and task-family claims more strongly than leaderboard claims.
+
+\section{Results}
+
+\subsection{Cybench: compute budget can buy offensive progress}
+
+Table~\ref{tab:cybench} summarizes the charted Cybench rows.  GPT-5.5 is the top row at 94.1\% pass@1, followed by a higher-budget DeepSeek v4 Flash run at 86.4\%.  The same DeepSeek v4 Flash model at its earlier \$0.80 per-sample cap reached 64.1\%.  This is the cleanest budget-scaling signal in the Cybench data: holding the model and core solver fixed, raising the cap to \$2.10 moved the run from 25.0 to 33.7 solved-equivalent challenges.
+
+\begin{table*}[t]
+\centering
+\caption{Cybench hard-variant results.  Source: source-repository \texttt{charts/cybench\_cost\_table.csv}, \texttt{charts/cybench\_report.html}, and raw logs listed in Appendix~\ref{app:audit}.  Tool calls are non-submit Inspect tool events per sample epoch computed from the same logs.}
+\label{tab:cybench}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+Model & pass@1 & solved & refused & run cost & \$/solve & mean tool calls \\
+\midrule
+GPT-5.5 + autocompact & 94.1\% & 36.7 & 0.0\% & \$42.47 & \$1.16 & 20.6 \\
+DeepSeek v4 Flash + autocompact (\$2.10 cap) & 86.4\% & 33.7 & 0.0\% & \$48.88 & \$1.45 & 144.7 \\
+Claude Opus 4.7 + autocompact & 71.0\% & 27.7 & 0.0\% & \$92.75 & \$3.35 & 19.7 \\
+DeepSeek v4 Flash + autocompact (\$0.80 cap) & 64.1\% & 25.0 & 0.0\% & \$43.09 & \$1.72 & 65.4 \\
+Kimi K2.6 + autocompact & 55.6\% & 21.7 & 0.0\% & \$58.55 & \$2.70 & 38.1 \\
+DeepSeek v4 Pro + autocompact & 43.8\% & 17.1 & 0.0\% & \$64.58 & \$3.78 & 21.3 \\
+GPT-5.4 Mini + autocompact & 29.0\% & 11.3 & 60.7\% & \$13.77 & \$1.22 & 20.9 \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+The cost-per-solve column shows why a single accuracy leaderboard is insufficient.  GPT-5.5 is both the highest-accuracy row and near the lowest \$/solve row.  GPT-5.4 Mini has a superficially competitive \$/solve (\$1.22) but only because it often aborts after policy refusals, producing a low overall solve rate.  DeepSeek v4 Flash at the higher budget nearly closes the accuracy gap while remaining at \$1.45/solve, but it uses far more tool calls per sample epoch than GPT-5.5.  In other words, more budget can matter, but the mode of spending that budget also matters.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{cybench_comparison.png}
+\caption{Cybench hard-variant comparison generated by source-repository \texttt{charts/make\_report.py}.  Bars show solved, refused, and missed shares over 39 hard-variant challenges with three epochs.}
+\label{fig:cybench-comparison}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{cybench_tool_calls.png}
+\caption{Cybench non-submit tool-call cap curve.  At cap \(X\), sample epochs needing more than \(X\) non-submit tool calls are counted as unsolved.  The curve illustrates that high tool volume is not itself a sufficient explanation of success.}
+\label{fig:cybench-tools}
+\end{figure}
+
+The tool-call data complicates the naive ``more actions equals better'' story.  GPT-5.5 solved the most challenges with a mean of 20.6 non-submit tool events per sample epoch.  The higher-budget DeepSeek v4 Flash run used a mean of 144.7 non-submit tool events and solved many more challenges than its lower-budget version, but it still trailed GPT-5.5.  GPT-5.4 Mini used about the same mean number of tool events as GPT-5.5 but solved far fewer challenges and refused 60.7\% of sample epochs.  The result is better summarized as: on offensive CTF tasks, additional budget can enable longer exploration and recovery from dead ends, but model competence and refusal behavior still dominate.
+
+\subsection{BOTSv1: SOC performance tracks tool quality more than brute force}
+
+Table~\ref{tab:bots} gives the BOTSv1 leaderboard.  Claude Opus 4.8 is the clear top row by BOTS points: 9,666.7 of 10,300 possible points, or 93.9\%, with 96.8\% binary accuracy.  It is also the most tool-efficient full run in the table: 603 total tool calls across 31 questions and three epochs.  GPT-5.5, by contrast, reaches roughly 81\% of points with 1,481--1,580 tool calls depending on reasoning-effort setting.  DeepSeek v4 Pro and Flash use still more calls and trail in points.  GPT-5.4 Mini performs poorly on this SOC benchmark despite extensive cache-read token volume.
+
+\begin{table*}[t]
+\centering
+\caption{BOTSv1 full-run results.  Source: source-repository \texttt{charts/botsv1\_report.html}; source logs and configuration are listed in Appendix~\ref{app:audit}.  BOTS points are the primary \texttt{bots\_points} metric with hint penalties; binary accuracy is the secondary \texttt{includes} scorer.}
+\label{tab:bots}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrr}
+\toprule
+Model & BOTS points & points & binary acc. & model cost & tool cost & model+tools & tool calls \\
+\midrule
+Claude Opus 4.8 & 9{,}666.7 / 10{,}300 & 93.9\% & 96.8\% & \$11.81 & \$1.43 & \$13.24 & 603 \\
+GPT-5.5 (high effort) & 8{,}383.3 / 10{,}300 & 81.4\% & 91.4\% & \$46.05 & \$2.94 & \$48.98 & 1{,}580 \\
+GPT-5.5 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & \$41.75 & \$5.54 & \$47.28 & 1{,}481 \\
+DeepSeek v4 Pro & 8{,}013.3 / 10{,}300 & 77.8\% & 84.9\% & \$46.44 & \$0.48 & \$46.92 & 3{,}363 \\
+DeepSeek v4 Flash (\$4.20 cap) & 7{,}610.0 / 10{,}300 & 73.9\% & 81.7\% & \$22.76 & \$0.53 & \$23.29 & 4{,}938 \\
+DeepSeek v4 Flash & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & \$21.89 & \$0.64 & \$22.53 & 4{,}450 \\
+GPT-5.4 Mini & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \$18.16 & \$1.63 & \$19.79 & 1{,}693 \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+The scenario breakdown shows that the same ordering is not merely an artifact of one subsection of the competition.  Claude Opus 4.8 earned 6,046.7/6,600 points (91.6\%) on the APT portion and 3,620/3,700 points (97.8\%) on the ransomware portion.  GPT-5.5 did better on ransomware (3,433.3/3,700; 92.8\%) than on APT (4,911.7/6,600; 74.4\%), suggesting that some SOC subtasks remain more sensitive to long-horizon pivots and external enrichment.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{botsv1_comparison.png}
+\caption{BOTSv1 points comparison generated from full v1 Inspect logs.  The chart uses competition points rather than only exact-match accuracy.}
+\label{fig:bots-comparison}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{botsv1_cost_with_tools.png}
+\caption{BOTSv1 cost-budget curve including priced external-tool calls.  Solid/dashed curves include model plus priced-tool cost; dotted baselines in the source report show model-token-only cost.}
+\label{fig:bots-cost}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{botsv1_tool_calls.png}
+\caption{BOTSv1 non-submit tool-call cap curve.  The best run uses fewer total calls, supporting the qualitative conclusion that SOC tasks reward targeted, high-quality tool use more than brute-force search.}
+\label{fig:bots-tools}
+\end{figure}
+
+The BOTS result is the strongest evidence for the paper's defensive-evaluation message.  In a SOC setting, the agent's job is not to exhaustively enumerate every possible SPL query.  It must choose discriminating searches, inspect the returned fields, pivot through the incident chain, and reserve external enrichment calls for high-value indicators.  The best BOTSv1 run appears to do more with fewer actions.  That is exactly the failure mode hidden by an offense-only benchmark: an agent can look capable when the objective is to keep trying until a flag falls out, yet be inefficient or brittle when the task is evidence triage under scoring and tool constraints.
+
+\section{Discussion}
+
+\paragraph{Do not extrapolate SOC readiness from CTF results.}  Cybench is valuable because it measures autonomous challenge solving in realistic sandboxes.  But its task shape is closer to offensive exploitation and reverse engineering than to SOC work.  BOTS asks for a different bundle of skills: familiarity with log schemas, SPL query formulation, hypothesis pruning, external enrichment, and answer formatting under a point-and-hint economy.  The model ordering changes across these task families, which means an organization selecting a model for security operations should evaluate on SOC-native workloads.
+
+\paragraph{Compute scaling and tool scaling differ by task family.}  The DeepSeek v4 Flash Cybench ablation is a concrete example where additional per-sample budget unlocked more solves.  By contrast, in BOTSv1, raising DeepSeek v4 Flash's cap from \$2.10 to \$4.20 moved points only from 7,518.3 to 7,610.0 while increasing total tool calls from 4,450 to 4,938.  In this dataset, defensive performance was not primarily a matter of allowing more calls.  It depended on whether the model could spend calls well.
+
+\paragraph{Tool-cost accounting changes the evaluation question.}  In offensive CTFs, model token spend is often the dominant marginal cost.  In SOC workflows, external data providers can be part of the actual marginal cost of analysis.  The BOTS report therefore separates model cost, tool cost, and combined cost.  This distinction matters: some runs look inexpensive on model tokens but rely on paid WHOIS history or search calls; others are more selective.  A production SOC evaluation should make that accounting explicit before optimizing prompts or selecting a model.
+
+\paragraph{The harness is itself a research contribution.}  The BOTS implementation is not just a chart.  It packages three public BOTS datasets as a single Inspect task, uses one lean data-free Splunk image, supports Docker and Kubernetes sandboxes, excludes the warm-up from benchmark scoring, restores prerequisite context for questions that refer to previous answers, and preserves competition-style scoring.  These engineering choices make the benchmark more faithful to the original SOC game while keeping model transcripts and costs auditable in Inspect logs.
+
+\section{Limitations}
+
+First, the experiments were not a randomized, fully controlled model-only benchmark.  Cybench rows differ in cost limits, provider routing, concurrency, and in one case challenge count.  Same-day failed retries are included in selected cost rows.  The paper therefore treats the results as evidence about task-family behavior and evaluation design, not as final public rankings of proprietary models.
+
+Second, the model names and provider routes reflect the local experimental environment.  Some rows use future or provider-specific model identifiers, and OpenRouter routes may aggregate multiple providers.  Readers should reproduce the harness with their own model endpoints before making procurement decisions.
+
+Third, the BOTSv1 analysis covers only version 1.  The source harness supports BOTS v2 and v3, and the repository contains additional logs, but the complete multi-model report used here is BOTSv1.  The v2 and v3 datasets differ in scenario, size, and question dependencies; they should be analyzed before claiming full SOC generality.
+
+Fourth, BOTS includes live or time-sensitive enrichment tasks.  Whois and malware-reputation data can drift relative to the original competition era.  The harness mitigates some dependency issues by appending prerequisite context, but external data drift remains a threat to validity and should be tracked question-by-question.
+
+Finally, cost numbers are useful but imperfect.  Cybench costs are model-token costs with provider-specific ledger caveats.  BOTS adds priced tool calls only where the transcript shows a charged provider API call and where a pricing model was available.  These numbers are good enough to compare orders of magnitude and to motivate cost-aware evaluation, but they should not be read as universal production costs.
+
+\section{Ethics and Safety}
+
+The experiments use public cybersecurity benchmarks and sandboxed environments.  Cybench challenges run in per-challenge containers; BOTS runs against local or Kubernetes Splunk sandboxes with pre-indexed public datasets.  The paper does not publish raw transcripts, secrets, API keys, or exploit instructions beyond high-level benchmark descriptions.  No additional benchmark runs, Docker workloads, or Kubernetes experiments were launched for this draft.  If future experiments are added, they should follow the source repository's operational constraints: run from a checked-in repository state, use the approved research Kubernetes namespace for new k8s work, cap spend, and preserve Inspect logs for audit.
+
+\section{Conclusion}
+
+The central finding is simple: not all security tasks are the same.  Offensive CTF benchmarks and defensive SOC investigations stress different agent skills and show different scaling behavior.  In the experiments reported here, additional compute helped an offensive Cybench run substantially, while the strongest BOTSv1 SOC run won by using tools more selectively and cheaply.  Evaluation programs should therefore stop treating cybersecurity as one scalar capability.  They should report task-family-specific results, use scoring that matches the real workflow, and account for the full cost of model tokens and external tools.  For SOC adoption in particular, the right benchmark is not ``can the model solve CTFs?'' but ``can the model investigate incidents like an analyst?''
+
+\section*{Acknowledgments}
+
+Thanks to the maintainers of Inspect, Inspect Evals, Cybench, and Splunk's public BOTS datasets.  The analysis in this paper depends on the local experiment logs and charting scripts in \path{~/projects/inspect-cyber-eval/}.
+
+\appendix
+
+\section{Audit trail and provenance}
+\label{app:audit}
+
+\subsection{Source artifacts inspected}
+
+The paper claims were checked against these source files in \path{~/projects/inspect-cyber-eval/}: \path{CLAUDE.md}, \path{README.md}, \path{bots/README.md}, \path{bots/bots.py}, \path{agents/bots_scoring.py}, \path{charts/README.md}, \path{charts/cybench_cost_table.csv}, \path{charts/cybench_cost_table.md}, \path{charts/cybench_report.html}, \path{charts/botsv1_report.html}, \path{charts/make_report.py}, \path{charts/make_botsv1_report.py}, and the raw Inspect logs listed below.  Messaging was aligned with \path{docs/actual-deck.odp}; that deck was used for framing, not numeric evidence.
+
+\subsection{Cybench source logs}
+
+\begin{table*}[h]
+\centering
+\scriptsize
+\caption{Cybench log provenance for Table~\ref{tab:cybench}.  All paths are under source-repository \texttt{logs/}.}
+\label{tab:cybench-provenance}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llp{0.42\textwidth}}
+\toprule
+Model row & Source log & Notes \\
+\midrule
+GPT-5.5 + autocompact & \path{2026-05-14T21-03-03-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval} & Successful run; chart cost also aggregates same-day failed retries. \\
+DeepSeek v4 Flash (\$2.10 cap) & \path{2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval} & Same model as earlier Flash row with higher per-sample cap. \\
+Claude Opus 4.7 & \path{2026-05-26T06-06-51-00-00_cybench_nhMeY9ziwx7dguUqQbVYkG.eval} & Current local log is present; chart README records that this row was missing during an earlier 2026-06-11 audit. \\
+DeepSeek v4 Flash (\$0.80 cap) & \path{2026-05-14T03-39-12-00-00_cybench_YysW3bBz56oRtEaQUFQnED.eval} & Phase-B autocompact run. \\
+Kimi K2.6 & \path{2026-05-18T18-00-18-00-00_cybench_MGadcz7L9SsafZCWfb3FMY.eval} & Constrained OpenRouter providers; chart README records \$0.85 cost limit in source log. \\
+DeepSeek v4 Pro & \path{2026-05-15T23-44-23-00-00_cybench_VWFUUdor5Useewi4zjrRdo.eval} & 38 challenges because \texttt{chunky} was excluded after deterministic sandbox-init failure; constrained OpenRouter providers. \\
+GPT-5.4 Mini & \path{2026-05-15T06-49-32-00-00_cybench_FJTzVLJ9wmDDWQxm3wWAEh.eval} & \$0.80 cost limit; high refusal rate in charted report. \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\subsection{BOTSv1 source logs}
+
+\begin{table*}[h]
+\centering
+\scriptsize
+\caption{BOTSv1 log provenance for Table~\ref{tab:bots}.  All paths are under source-repository \texttt{logs/}; configuration table in \texttt{charts/botsv1\_report.html} records three epochs, mean reducer, message limit 250, \texttt{max\_samples=10}, \texttt{max\_sandboxes=10}, and k8s chart sandbox for these rows.}
+\label{tab:bots-provenance}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llp{0.32\textwidth}}
+\toprule
+Model row & Source log & Notes \\
+\midrule
+Claude Opus 4.8 & \path{2026-06-15T04-30-45-00-00_botsv_iusRJmJKvQTdrAcnhqVFU3.eval} & Cost limit \$2.10; high/default reasoning effort; k8s chart. \\
+GPT-5.5 high effort & \path{2026-06-15T06-09-42-00-00_botsv_VYcxyGse2gyga8MGcsWNYg.eval} & Cost limit \$2.10; high reasoning effort; k8s chart. \\
+GPT-5.5 & \path{2026-06-14T21-12-20-00-00_botsv_6cHBshKy4Xxt82no2geqK3.eval} & Cost limit \$2.10; medium/default reasoning effort; k8s chart. \\
+DeepSeek v4 Pro & \path{2026-06-14T23-14-52-00-00_botsv_nKdSUbcTJe6XrzyRvsmgvV.eval} & Cost limit \$2.10; k8s chart. \\
+DeepSeek v4 Flash (\$4.20 cap) & \path{2026-06-15T04-59-44-00-00_botsv_9LMvv2EkysNTH3VtjK2mxm.eval} & Higher per-sample cap; k8s chart-bots-data-2. \\
+DeepSeek v4 Flash & \path{2026-06-14T23-07-00-00-00_botsv_kndnbzEAcciuAjoNMDxPaj.eval} & Cost limit \$2.10; k8s chart-bots-data-2. \\
+GPT-5.4 Mini & \path{2026-06-14T21-12-18-00-00_botsv_fa7uxP9AX2ndw96Zreuguf.eval} & Cost limit \$2.10; k8s chart. \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
