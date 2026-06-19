@@ -10,7 +10,14 @@ make paper
 
 This writes `paper.pdf` locally. Generated PDFs and LaTeX build artifacts are ignored by git.
 
-An anonymous build target (`make paper-anonymous`) is available for future use, but the current submission plan is non-anonymous.
+Optional targets:
+
+```bash
+make paper-anonymous
+make supplement
+```
+
+`make paper-anonymous` is available for future double-blind venues, but the current submission plan is non-anonymous. `make supplement` writes `paper-supplement.pdf`, a sanitized appendix with aggregate provenance and uncertainty checks for venues that allow supplemental material.
 
 ## Clean
 
@@ -21,7 +28,7 @@ make clean
 ## Source provenance
 
 - Quantitative results are sourced from the source evaluation repository's `charts/` artifacts and raw Inspect `.eval` logs.
-- Detailed paper-to-source mapping lives in `tables/provenance.md`.
+- Detailed paper-to-source mapping lives in `tables/provenance.md`; aggregate reviewer-facing robustness checks live in `supplement.tex`.
 - The figures in `figures/` are copied chart artifacts from the source project, not regenerated in this repo.
 - Raw `.eval` logs and secrets should not be copied into this paper repo.
 
