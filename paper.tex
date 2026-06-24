@@ -17,36 +17,18 @@
 \usepackage{natbib}
 \usepackage{array}
 \setlength{\bibsep}{0pt}
+\setlength{\emergencystretch}{3em}
 
 \graphicspath{{figures/}}
-
-% Pass \def\anonymous{1} before \input{paper.tex} to build a double-blind
-% submission copy, e.g. via `make paper-anonymous`.
-\newif\ifanonymousreview
-\ifdefined\anonymous
-  \anonymousreviewtrue
-\else
-  \anonymousreviewfalse
-\fi
-
-\ifanonymousreview
-  \newcommand{\paperauthor}{Anonymous Author(s)}
-  \newcommand{\paperaffiliation}{Affiliation(s) withheld for review}
-  \newcommand{\paperdate}{Short Paper Submission}
-\else
-  \newcommand{\paperauthor}{Paul Kassianik}
-  \newcommand{\paperaffiliation}{Stealth Company}
-  \newcommand{\paperdate}{Short Paper Submission\\\today}
-\fi
 
 \title{Offensive CTFs and SOC Investigations Stress Different Agent Behaviors}
 
 \author{
-  \paperauthor\\
-  \paperaffiliation
+  Paul Kassianik\\
+  Stealth Company
 }
 
-\date{\paperdate}
+\date{Short Paper Submission\\\today}
 
 \renewcommand{\headeright}{Short Paper Submission}
 \renewcommand{\undertitle}{Short Paper Submission}
@@ -55,7 +37,7 @@
 \hypersetup{
   pdftitle={Offensive CTFs and SOC Investigations Stress Different Agent Behaviors},
   pdfsubject={Cybersecurity benchmark evaluation},
-  pdfauthor={\paperauthor},
+  pdfauthor={Paul Kassianik},
   pdfkeywords={cybersecurity benchmarks, AI agents, Cybench, BOTS, Inspect, SOC}
 }
 
@@ -175,20 +157,123 @@ Because BOTSv1 is public and old, I ran a single-epoch no-tools probe using a me
 
 \section{Ethics, Artifacts, and Conclusion}
 
-The experiments use public cybersecurity benchmarks and sandboxed environments.  The paper does not publish raw transcripts, secrets, API keys, or exploit instructions beyond high-level benchmark descriptions.  A sanitized supplement can provide aggregate provenance, uncertainty calculations, exact commands, commit hashes, model/provider identifiers, and cost-accounting details without releasing private logs or credentials.
+The experiments use public cybersecurity benchmarks and sandboxed environments.  The paper does not publish raw transcripts, secrets, API keys, or exploit instructions beyond high-level benchmark descriptions.  The appendix provides aggregate provenance, uncertainty calculations, model/provider identifiers, and cost-accounting details without releasing private logs or credentials.
 
 The central finding is simple: security tasks should not be collapsed into one scalar capability.  Offensive CTF benchmarks and defensive SOC investigations stress different agent behaviors and show different scaling patterns, but public SOC benchmarks also need decontamination controls.  Evaluation programs should therefore report task-family-specific results, use scoring that matches the real workflow, account for model and external-tool costs, and test whether agents can answer without evidence tools.  For SOC adoption in particular, the right benchmark is not only ``can the model solve CTFs?'' but ``can the model investigate incidents like an analyst?''
 
-\ifanonymousreview
-\else
 \section*{Acknowledgments}
 
 Thanks to the maintainers of Inspect, Inspect Evals, Cybench, and Splunk's public BOTS datasets.
-\fi
 
 {\small
 \bibliographystyle{plainnat}
 \bibliography{references}
 }
+
+\clearpage
+\appendix
+
+\section{Appendix Scope}
+
+This appendix records aggregate provenance and robustness checks for the paper.  It does not include raw Inspect transcripts, private logs, credentials, source code, or benchmark artifacts.  Logical source paths below refer to \path{source-eval-repo/...}; local machine paths are intentionally omitted.
+
+No additional benchmark, Docker, Kubernetes, or Inspect workload was launched for this appendix.  The analyses below reuse existing successful Cybench and BOTSv1 Inspect logs and generated chart artifacts, including the Claude Opus 4.8 Cybench run completed before this revision.
+
+\section{Source Provenance}
+
+The quantitative tables in the paper are derived from these sanitized logical sources:
+\begin{itemize}
+  \item \path{source-eval-repo/charts/cybench_cost_table.csv}
+  \item \path{source-eval-repo/charts/cybench_report.html}
+  \item \path{source-eval-repo/charts/botsv1_report.html}
+  \item \path{source-eval-repo/charts/botsv1_decontamination.csv}
+  \item raw \path{source-eval-repo/logs/*.eval} files listed in \path{tables/provenance.md}
+\end{itemize}
+At audit time the source evaluation repository HEAD was \texttt{b731f1b}; generated chart/report artifacts used here were committed in that source repository revision.
+
+\section{Uncertainty Method}
+
+The paper reports descriptive robustness intervals rather than formal population-level significance tests.  For Cybench, each bootstrap replicate resamples challenge IDs with replacement and retains the three epochs for each selected challenge.  For BOTSv1, each replicate resamples question IDs with replacement and retains the three epochs and official point weights for each selected question.  Paired contrasts resample only task IDs common to both compared logs.
+
+\section{Cybench Robustness}
+
+\begin{table}[h]
+\centering
+\caption{Cybench challenge-level bootstrap intervals.}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrr}
+\toprule
+Model & pass@1 & 95\% bootstrap interval \\
+\midrule
+GPT-5.5 + autocompact & 94.0\% & 87.2--99.2\% \\
+DeepSeek v4 Flash + autocompact (\$2.10 cap) & 86.3\% & 76.9--94.9\% \\
+Claude Opus 4.8 + autocompact & 74.4\% & 61.5--86.3\% \\
+Claude Opus 4.7 + autocompact & 70.9\% & 59.0--82.9\% \\
+DeepSeek v4 Flash + autocompact (\$0.80 cap) & 64.1\% & 50.4--76.9\% \\
+Kimi K2.6 + autocompact & 55.6\% & 41.0--70.1\% \\
+DeepSeek v4 Pro + autocompact & 43.9\% & 29.8--57.9\% \\
+GPT-5.4 Mini + autocompact & 29.1\% & 16.2--42.7\% \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The most defensible Cybench scaling claim is the paired DeepSeek v4 Flash budget comparison: the \$2.10-cap run exceeds the \$0.80-cap run by 22.2 percentage points, with a challenge-level paired bootstrap interval of +12.8 to +32.5 percentage points.  GPT-5.5 exceeds the higher-budget DeepSeek v4 Flash row by 7.7 percentage points, with interval +1.7 to +15.4 percentage points.  The Claude Opus 4.8 Cybench row does not close the gap to those leaders: paired challenge-level contrasts are GPT-5.5 minus Claude Opus 4.8 = +19.7 percentage points [+9.4, +30.8] and higher-budget DeepSeek v4 Flash minus Claude Opus 4.8 = +12.0 percentage points [+1.7, +23.1].
+
+\section{BOTSv1 Robustness}
+
+\begin{table}[h]
+\centering
+\caption{BOTSv1 question-level bootstrap intervals.}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrr}
+\toprule
+Model & BOTS points & 95\% bootstrap interval \\
+\midrule
+Claude Opus 4.8 & 93.9\% & 82.7--99.5\% \\
+GPT-5.5 high effort & 81.4\% & 67.4--94.1\% \\
+GPT-5.5 & 81.0\% & 64.1--96.4\% \\
+DeepSeek v4 Pro & 77.8\% & 61.0--93.1\% \\
+DeepSeek v4 Flash (\$4.20 cap) & 73.9\% & 53.2--91.9\% \\
+DeepSeek v4 Flash & 73.0\% & 52.7--91.1\% \\
+GPT-5.4 Mini & 27.5\% & 14.9--42.3\% \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Claude Opus 4.8's paired margin over the standard GPT-5.5 row is 12.8 percentage points, with a question-level paired bootstrap interval of +0.9 to +27.4 percentage points.  Its paired margin over GPT-5.5 high effort is 12.5 percentage points, with interval +2.4 to +23.7 percentage points.  The DeepSeek v4 Flash \$4.20-cap row exceeds the \$2.10-cap row by only 0.9 percentage points, with interval -4.9 to +6.9 percentage points, so the budget change should be described as inconclusive.
+
+\section{BOTSv1 No-Tools Decontamination Probe}
+
+The no-tools contamination probe uses \path{agents/bots_memory_only.py@bots_memory_only}.  It registers no Splunk, web, bash, Python, or other tools; the successful probe logs contain zero tool events.  The probe rows are single-epoch controls, while the full-agent baselines are the charted three-epoch mean runs.
+
+\begin{table}[h]
+\centering
+\caption{BOTSv1 no-tools contamination-control results.}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llrrr}
+\toprule
+Model & Condition & Points & Binary acc. & Tool events \\
+\midrule
+Claude Opus 4.8 & full agent + tools & 93.9\% & 96.8\% & 603 \\
+Claude Opus 4.8 & no tools, prereq context & 74.8\% & 77.4\% & 0 \\
+Claude Opus 4.8 & no tools, question only & 50.0\% & 58.1\% & 0 \\
+GPT-5.5 & full agent + tools & 81.0\% & 90.3\% & 1,481 \\
+GPT-5.5 & no tools, prereq context & 62.1\% & 74.2\% & 0 \\
+GPT-5.5 & no tools, question only & 54.9\% & 71.0\% & 0 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+DeepSeek v4 Flash no-tools attempts did not produce scored samples because OpenRouter returned \texttt{401 User not found}.  The high no-tools scores above indicate substantial public-benchmark memorization or answer leakage, so BOTSv1 absolute scores should be interpreted as contaminated unless a private, perturbed, or answer-before-query control is used.
+
+\section{BOTSv1 Sequential-Context Check}
+
+The BOTSv1 task excludes the official warm-up question and evaluates 31 scored questions.  Twenty-three of those questions have explicit dependencies on earlier case facts and receive prerequisite context in the prompt.  This matches the benchmark's sequential investigation structure, but it should be interpreted as follow-up investigation with known case state rather than cold-start reconstruction.
+
+For Claude Opus 4.8, independent questions score 1,445/1,500 points (96.3\%) and dependent questions score 8,221.7/8,800 points (93.4\%).  The standard GPT-5.5 row scores 1,345/1,500 points (89.7\%) on independent questions and 7,000/8,800 points (79.5\%) on dependent questions.  Claude's mean-reduced point loss decomposes into 133.3 points from hint penalties and 500 points from misses; GPT-5.5 loses 205 points to hint penalties and 1,750 points to misses.  These aggregates support the paper's claim that SOC benchmark outcomes depend on evidence use and answer correctness, not simply on raw tool-call volume.
+
+\section{Experiment-Budget Decision}
+
+The no-cost robustness checks above should be preferred before spending the \$500 experiment budget.  The Claude version-mismatch check has now been run on Cybench.  If a venue reviewer specifically challenges prerequisite context, the highest-value follow-up would be a BOTSv1 \texttt{prereq\_context=false} ablation for the top model, run through Inspect under the approved non-prod Kubernetes namespace.  If a reviewer challenges BOTSv1 contamination, prefer a transcript-level answer-before-query audit or a small perturbed-question probe over broader benchmark reruns.  Neither follow-up is necessary for the current paper claim, which is intentionally framed as an observational evaluation audit rather than a controlled model-only leaderboard.
 
 \end{document}

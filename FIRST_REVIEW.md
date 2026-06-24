@@ -9,17 +9,17 @@ materially improve rigor; P2 items are polish.
 ## P0 — Fixes the central thesis depends on
 
 ### 1. Run Opus 4.8 on Cybench (single highest-leverage fix) — addressed
-- **Status:** Opus 4.8 has now been run on Cybench: 74.4% / 29.0 solved-equivalent challenges, below GPT-5.5 and the higher-budget DeepSeek v4 Flash row. Paper text, supplement, provenance, and figures were updated accordingly.
+- **Status:** Opus 4.8 has now been run on Cybench: 74.4% / 29.0 solved-equivalent challenges, below GPT-5.5 and the higher-budget DeepSeek v4 Flash row. Paper text, appendix, provenance, and figures were updated accordingly.
 - **Residual:** A Claude 4.7-on-BOTSv1 run would further isolate version effects, but the high-leverage version-mismatch concern is no longer blocking the short-paper claim.
 
 ### 2. Add a contamination control for BOTSv1 — addressed, with bad news
-- **Status:** Added no-tools memory-only probes for Claude Opus 4.8 and GPT-5.5, with and without prerequisite context, and included the results in the paper/supplement/provenance. Both models score very high without tools, confirming substantial public-benchmark contamination.
+- **Status:** Added no-tools memory-only probes for Claude Opus 4.8 and GPT-5.5, with and without prerequisite context, and included the results in the paper, appendix, and provenance. Both models score very high without tools, confirming substantial public-benchmark contamination.
 - **Residual:** DeepSeek v4 Flash no-tools attempts were blocked by OpenRouter `401 User not found`; a perturbed-question probe would be the next stronger control if more experiment budget is approved.
 - **Original problem:** BOTSv1 is a 2017 dataset, public on GitHub for ~9 years. The 93.9% headline + low tool use (603 calls) is exactly the signature of memorized answers and memorized SPL. *(SPL = Splunk Processing Language, the query language for Splunk searches.)*
 
 ### 3. Strengthen (or hedge) the one inferential test — mostly addressed
-- **Status:** Paper now says the BOTSv1 paired bootstrap is over 31 scored questions; supplement/provenance now include the Opus 4.8 Cybench interval and paired Cybench contrasts against GPT-5.5 and higher-budget DeepSeek Flash.
-- **Residual:** Main paper still keeps most cross-model Cybench uncertainty in the supplement to save space.
+- **Status:** Paper now says the BOTSv1 paired bootstrap is over 31 scored questions; the appendix/provenance now include the Opus 4.8 Cybench interval and paired Cybench contrasts against GPT-5.5 and higher-budget DeepSeek Flash.
+- **Residual:** Main text still keeps most cross-model Cybench uncertainty in the appendix to save space.
 - **Problem:** The reordering's only uncertainty estimate is the BOTSv1 paired bootstrap:
   Claude over GPT-5.5 = **+12.8 pp, 95% CI [+0.9, +27.4]**, n=31. The lower bound nearly
   touches zero. *(Paired bootstrap = resampling the same question set many times to estimate a
@@ -29,7 +29,7 @@ materially improve rigor; P2 items are polish.
   soften any language implying the reorder is firmly established.
 
 ### 4. Resolve the prerequisite-injection tension — mostly addressed
-- **Status:** Paper methodology now frames BOTSv1 as follow-up investigation with known case state, and Results mention the supplement's independent/dependent split (Claude 96.3% independent, 93.4% dependent).
+- **Status:** Paper methodology now frames BOTSv1 as follow-up investigation with known case state, and Results mention the appendix's independent/dependent split (Claude 96.3% independent, 93.4% dependent).
 - **Residual:** A `prereq_context=false` ablation would be stronger if a reviewer challenges this directly.
 - **Problem:** The paper sells SOC work as pivoting/correlation, but injects prerequisite answers
   for **23 of 31 questions** ("incident follow-up with known case state"). For 74% of questions the

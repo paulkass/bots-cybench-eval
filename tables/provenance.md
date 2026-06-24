@@ -1,6 +1,6 @@
 # Paper provenance notes
 
-Companion provenance for `paper.tex`. This file keeps detailed evidence out of the 5-page short-paper budget while preserving source mapping for quantitative claims. Source-of-truth artifacts live in a separate source evaluation repository, referenced below as `source-eval-repo/`. Raw `.eval` logs should not be copied into this paper repository or submitted as artifacts without a separate sanitization pass.
+Companion provenance for `paper.tex`. This file preserves source mapping for quantitative claims without copying raw logs into the paper. Source-of-truth artifacts live in a separate source evaluation repository, referenced below as `source-eval-repo/`. Raw `.eval` logs should not be copied into this paper repository or submitted as artifacts without a separate sanitization pass.
 
 Audit state when this note was updated: paper repository base commit `572b687` plus paper edits; source repository commit `b731f1b` (`charts: add Opus 4.8 and decontamination controls`). Record final commit hashes and chart/report checksums again before any public release.
 
@@ -90,4 +90,4 @@ The no-tools solver registers no Splunk, web, bash, Python, or other tools. `pre
 
 ## Additional experiment recommendation
 
-No additional experiments are planned for this submission. Existing Cybench and BOTSv1 logs now support the uncertainty, paired-contrast, prerequisite-context, hint/miss-loss, and Claude Opus 4.8 Cybench checks summarized in `supplement.tex`. If future experiments are explicitly approved, keep them to Cybench or BOTSv1 and run them through Inspect under the applicable operational constraints. The highest-value conditional follow-ups are a BOTSv1 contamination probe (answer-before-query audit or perturbed questions) or a `prereq_context=false` ablation for the top model. Do not run BOTS v2/v3 for this submission cycle.
+No additional experiments are planned for this submission. Existing Cybench and BOTSv1 logs now support the uncertainty, paired-contrast, prerequisite-context, hint/miss-loss, and Claude Opus 4.8 Cybench checks summarized in the `paper.tex` appendix. If future experiments are explicitly approved, keep them to Cybench or BOTSv1 and run them through Inspect under the applicable operational constraints. The highest-value conditional follow-ups are a BOTSv1 contamination probe (answer-before-query audit or perturbed questions) or a `prereq_context=false` ablation for the top model. Do not run BOTS v2/v3 for this submission cycle.
