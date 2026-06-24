@@ -38,4 +38,4 @@ Use `supplement.tex` / `paper-supplement.pdf` for reviewer-facing aggregate prov
 
 ## Additional experiment policy
 
-No additional experiments are planned for this submission; existing logs now support uncertainty and robustness checks. If an extra run is explicitly approved later, prioritize a BOTSv1 prerequisite-context ablation or a Claude Opus 4.8 Cybench sanity run, run it through Inspect, and stay within the `$500` budget. Do not run BOTS v2/v3 for this submission cycle; only Cybench or BOTSv1 follow-up runs are in scope, and BOTS runs must use the approved non-prod Kubernetes `pk-bots-eval` setup.
+No additional experiments are planned for this submission; existing logs now support uncertainty, robustness, the Claude Opus 4.8 Cybench sanity check, and BOTSv1 no-tools contamination probes. If an extra run is explicitly approved later, prioritize perturbed BOTSv1 questions or a prerequisite-context ablation, run it through Inspect, and stay within the `$500` budget. Do not run BOTS v2/v3 for this submission cycle; only Cybench or BOTSv1 follow-up runs are in scope, and BOTS runs must use the approved non-prod Kubernetes `pk-bots-eval` setup.
