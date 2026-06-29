@@ -25,7 +25,7 @@
 
 \author{
   Paul Kassianik\\
-  Stealth Company
+  Frontier Security
 }
 
 \date{Short Paper Submission\\\today}
@@ -45,13 +45,15 @@
 \maketitle
 
 \begin{abstract}
-AI security evaluations often emphasize exploit-finding, application-security, or capture-the-flag tasks, while security operations center (SOC) work asks whether an agent can navigate telemetry, pivot through evidence, and spend enrichment calls with analyst discipline.
-I report Inspect-based experiments on two public benchmark families: Cybench hard-variant CTF challenges and Splunk Boss of the SOC (BOTS) v1 investigations.
-The results do not support a single universal model ranking.
-On Cybench, GPT-5.5 reached 94.1\% pass@1; DeepSeek v4 Flash improved from 64.1\% to 86.4\% when its per-sample budget was raised; and Claude Opus 4.8 reached 74.4\%, below those two rows despite leading BOTSv1.
-On BOTSv1, Claude Opus 4.8 earned 9,666.7/10,300 competition points (93.9\%) with 603 tool calls and \$13.24 in model-plus-priced-tool spend, while GPT-5.5 earned about 81\% of points with more than twice the tool calls and over three times the cost.
-However, no-tools BOTSv1 probes still scored 74.8\% for Claude and 62.1\% for GPT-5.5 with prerequisite context, confirming substantial public-benchmark contamination.
-These findings argue for SOC-native agent benchmarks with workflow-appropriate scoring, cost accounting, and decontamination controls.
+The security field has been heavily disrupted by large language models in the past six months.
+Frontier LLMs are now actively used and benchmarked for offensive security tasks such as vulnerability scanning, exploit development, and penetration testing.
+While best-case numbers at high test-time compute budgets and with ideal harnesses are impressive, they do not reflect the cost conditions of the attacker-defender arms race.
+Both attackers have a limited budget that they have to spend wisely to maximize their success rates.
+In this study, we aim to outline the cost scaling differences between models for attacking and defending purposes.
+We show that while scaling up compute can increase success on offensive CTF tasks, tool-calling capabilities are much more important for effective blue-team analysis.
+We also show that Chinese open-source models can be scaled up to match and be cost-competitive with frontier American models on red-team tasks.
+Finally, we hope to set a standard for security evaluations by evaluating both on success rate and cost.
+We hope our work will highlight the capabilities of open-source models for security tasks and shine a light on paths to improve model capabilities in defensive tasks.
 \end{abstract}
 
 \keywords{cybersecurity benchmarks \and AI agents \and SOC \and Cybench \and BOTS \and Inspect}
