@@ -45,15 +45,14 @@
 \maketitle
 
 \begin{abstract}
-The security field has been heavily disrupted by large language models in the past six months.
-Frontier LLMs are now actively used and benchmarked for offensive security tasks such as vulnerability scanning, exploit development, and penetration testing.
-While best-case numbers at high test-time compute budgets and with ideal harnesses are impressive, they do not reflect the cost conditions of the attacker-defender arms race.
-Both attackers have a limited budget that they have to spend wisely to maximize their success rates.
-In this study, we aim to outline the cost scaling differences between models for attacking and defending purposes.
-We show that while scaling up compute can increase success on offensive CTF tasks, tool-calling capabilities are much more important for effective blue-team analysis.
-We also show that Chinese open-source models can be scaled up to match and be cost-competitive with frontier American models on red-team tasks.
-Finally, we hope to set a standard for security evaluations by evaluating both on success rate and cost.
-We hope our work will highlight the capabilities of open-source models for security tasks and shine a light on paths to improve model capabilities in defensive tasks.
+Large language models are rapidly changing security work, but today's evaluations still lean toward offensive demonstrations: vulnerability scanning, exploit development, penetration testing, and CTFs.
+Those tasks matter, yet best-case success rates at high test-time compute and in ideal harnesses miss the economic constraint shared by attackers and defenders: every reasoning step, tool call, and enrichment request spends budget.
+We use Inspect to compare this cost-success tradeoff across offensive Cybench challenges and defensive Splunk BOTS v1 investigations.
+The results show different scaling behavior for red- and blue-team tasks.
+More compute can buy higher success on offensive CTFs, and scaled Chinese open-weight models can close much of the gap with frontier U.S. systems while remaining cost-competitive on red-team workloads.
+SOC investigation, however, is less a pure reasoning race: effective defensive performance depends on disciplined tool use, telemetry navigation, and external-enrichment decisions.
+We argue that security-agent evaluations should report not only success rate, but also cost, tool spend, and workflow fit.
+Cost-aware, SOC-native benchmarks can better show where open models are already competitive and where defensive agents still need to improve.
 \end{abstract}
 
 \keywords{cybersecurity benchmarks \and AI agents \and SOC \and Cybench \and BOTS \and Inspect}
