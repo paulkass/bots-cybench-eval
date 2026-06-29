@@ -2,7 +2,7 @@
 
 Companion provenance for `paper.tex`. This file preserves source mapping for quantitative claims without copying raw logs into the paper. Source-of-truth artifacts live in a separate source evaluation repository, referenced below as `source-eval-repo/`. Raw `.eval` logs should not be copied into this paper repository or submitted as artifacts without a separate sanitization pass.
 
-Audit state when this note was updated: paper repository base commit `572b687` plus paper edits; source repository commit `b731f1b` (`charts: add Opus 4.8 and decontamination controls`). Record final commit hashes and chart/report checksums again before any public release.
+Audit state when this note was updated: paper worktree branch `worktree-paper-rewrite`; source repository HEAD `26b5a39` (`docs: preserve VirusTotal plans`). Numeric chart/report artifacts used by the paper were last changed in source commit `b731f1b` (`charts: add Opus 4.8 and decontamination controls`). Record final commit hashes and chart/report checksums again before any public release.
 
 ## Source artifacts inspected
 
@@ -11,11 +11,15 @@ Audit state when this note was updated: paper repository base commit `572b687` p
 - `source-eval-repo/bots/README.md`
 - `source-eval-repo/bots/bots.py`
 - `source-eval-repo/agents/bots_scoring.py`
+- `source-eval-repo/docs/actual-deck.odp` (messaging/framing only)
 - `source-eval-repo/charts/README.md`
 - `source-eval-repo/charts/cybench_cost_table.csv`
 - `source-eval-repo/charts/cybench_cost_table.md`
 - `source-eval-repo/charts/cybench_report.html`
+- `source-eval-repo/charts/cybench_tool_calls.png`
 - `source-eval-repo/charts/botsv1_report.html`
+- `source-eval-repo/charts/botsv1_cost_with_tools.png`
+- `source-eval-repo/charts/botsv1_tool_calls.png`
 - `source-eval-repo/charts/botsv1_decontamination.csv`
 - `source-eval-repo/charts/botsv1_decontamination.md`
 - `source-eval-repo/charts/make_report.py`
