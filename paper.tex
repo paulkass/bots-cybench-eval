@@ -102,27 +102,27 @@ It keeps BOTS competition points, but adds priced-tool accounting, tool-call eff
 \section{Evaluation Design}
 \label{sec:evaluation-design}
 
-All reported numbers come from pre-existing Inspect logs and generated chart artifacts in the source evaluation repository.
-The paper uses logical artifact paths such as \path{source-eval-repo/charts/cybench_cost_table.csv} to preserve provenance without exposing local paths or copying raw logs into the manuscript repository.
+All experiments use Inspect, but the unit of comparison is the benchmark operating point: model, task family, cost limit, tools, and scoring rule.
+We report aggregate success, cost, and tool-use metrics.
+% Internal provenance for quantitative claims is tracked in tables/provenance.md.
 
 \subsection{Offensive benchmark: Cybench}
 \label{sec:cybench-method}
 
 The Cybench runs use the hard variant of \texttt{inspect\_evals/cybench}.
-The charted rows use the source repository's autocompacting ReAct solver \citep{yao2023react}; expose only \texttt{bash(timeout=180)} and \texttt{python(timeout=180)}; run three epochs with a mean reducer; and score with the upstream \texttt{includes} accuracy metric.
-Most rows use Docker sandboxes.
-The Claude Opus 4.8 row uses a Kubernetes sandbox to avoid local Docker subnet exhaustion.
+The evaluated rows use an autocompacting ReAct solver \citep{yao2023react}; expose only \texttt{bash(timeout=180)} and \texttt{python(timeout=180)}; run three epochs with a mean reducer; and score with the upstream \texttt{includes} accuracy metric.
 The reported solved count is fractional pass@1: mean correctness over three epochs multiplied by the 39-challenge denominator.
+% Internal caveat: most rows used Docker; Claude Opus 4.8 used Kubernetes after local Docker subnet exhaustion.
 
 The Cybench rows are not a fully controlled model-only experiment.
-Per-sample cost limits, OpenRouter provider routing, concurrency, sandbox backend, and some retry-cost ledgers differ across rows.
-DeepSeek v4 Pro uses 38 challenges because one challenge was excluded after a deterministic sandbox-initialization failure; the generated chart normalizes its solved-equivalent value to the 39-challenge denominator.
+Per-sample cost limits, provider routing, concurrency, sandbox backend, and retry accounting differ across rows.
+DeepSeek v4 Pro uses 38 challenges because one challenge was excluded after a deterministic sandbox-initialization failure; its solved-equivalent value is reported on the 39-challenge denominator.
 
 \subsection{Defensive benchmark: BOTS v1}
 \label{sec:bots-method}
 
 BOTS v1 is a public Splunk incident-investigation benchmark.
-The source harness excludes the official warm-up question, leaving 31 scored questions worth 10,300 official competition points.
+The evaluation excludes the official warm-up question, leaving 31 scored questions worth 10,300 official competition points.
 Agents receive Splunk discovery, search, and event-inspection tools plus limited VirusTotal, WHOIS, DNS, Brave Search, bash, and Python tools.
 The prompt makes Splunk telemetry the primary evidence source and asks agents to use external enrichment selectively.
 
@@ -131,19 +131,19 @@ Binary \texttt{includes} accuracy is reported as a secondary view.
 Rows use three epochs and mean reduction, so point totals are reduced back to the single-epoch 10,300-point scale.
 Twenty-three of the 31 scored questions receive prerequisite case context from earlier official questions, matching the sequential investigation structure but making the task closer to follow-up analysis than cold-start incident reconstruction.
 
-The source package also supports BOTS v2 and v3.
-Comparable multi-model reports currently exist only for v1, so v2/v3 are treated as harness coverage rather than evidence for model comparison.
+BOTS v2 and v3 also exist, but comparable multi-model results are available only for v1.
+We therefore treat v2/v3 as future evaluation coverage rather than evidence for model comparison.
 
 \subsection{Cost accounting}
 \label{sec:cost-accounting}
 
-Cybench costs are model-token costs from Inspect's usage ledger or reconstructed from token counts and registered rates where needed.
-BOTS costs start with Inspect model cost and add priced external enrichment calls visible in transcript tool events.
-The source reports charge Brave Search at \$0.005 per request and non-cache WhoisXMLAPI WHOIS History credits at a user-provided paid-plan conversion of \$129 per 5,000 credits.
+Cybench costs are model-token costs recorded by the evaluation harness or reconstructed from token counts and registered rates where needed.
+BOTS costs start with model-token cost and add priced external enrichment calls recorded during the run.
+We charge Brave Search at \$0.005 per request and non-cache WhoisXMLAPI WHOIS History credits at a paid-plan conversion of \$129 per 5,000 credits.
 VirusTotal public API, DNS, and live WHOIS/RDAP are treated as zero marginal cost.
 Infrastructure costs for Kubernetes, Splunk, storage, and analyst review time are excluded.
 
-Because these are descriptive artifacts, the analysis avoids universal model rankings.
+Because these are descriptive runs, the analysis avoids universal model rankings.
 We emphasize operating points and paired within-model comparisons where the evidence supports them.
 
 \section{Results}
@@ -152,14 +152,15 @@ We emphasize operating points and paired within-model comparisons where the evid
 \subsection{Offensive CTFs: budget can buy progress}
 \label{sec:cybench-results}
 
-Table~\ref{tab:cybench} reports the current Cybench hard-variant cost-success table.
+Table~\ref{tab:cybench} reports the Cybench hard-variant cost-success table.
 GPT-5.5 is the top observed row at 94.1\% pass@1 and \$1.16 per solved-equivalent challenge.
 The cleanest scaling signal is within a single model family: DeepSeek v4 Flash rises from 64.1\% pass@1 at a \$0.80 cap to 86.4\% at a \$2.10 cap.
 That higher-budget run solves 33.7 of 39 challenge-equivalents at \$1.45 per solve, close to GPT-5.5's 36.7 solved at \$1.16 per solve and above the Claude Opus rows on both success and cost per solve.
 
 \begin{table}[t]
 \centering
-\caption{Cybench hard-variant cost-success operating points from \protect\path{source-eval-repo/charts/cybench_cost_table.csv} and companion raw-log tool-event counts.}
+% Internal source: source-eval-repo/charts/cybench_cost_table.csv plus raw-log tool-event counts.
+\caption{Cybench hard-variant cost-success operating points. Mean tool calls count non-submit tool events.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lrrrrr}
@@ -181,12 +182,13 @@ GPT-5.4 Mini + autocompact & 29.0\% & 11.3 & \$13.77 & \$1.22 & 20.9 \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{cybench_comparison.png}
-\caption{Cybench hard-variant comparison generated from the source chart pipeline.}
+% Internal source: source chart pipeline output copied as figures/cybench_comparison.png.
+\caption{Cybench hard-variant cost-success comparison.}
 \label{fig:cybench-comparison}
 \end{figure}
 
 The paired DeepSeek v4 Flash budget contrast is +22.2 percentage points by challenge-level bootstrap, with a 95\% interval of +12.8 to +32.5 percentage points.
-This is the strongest supported offensive scaling claim in the artifacts.
+This is the strongest supported offensive scaling claim in these runs.
 The tool-call data also argue against reducing agent effort to a single call count: GPT-5.5 averages 20.6 non-submit tool events per sample epoch, while the higher-budget DeepSeek v4 Flash row averages 144.7.
 The Cybench result is therefore a model-and-budget operating point in a permissive CTF sandbox, not evidence that more calls alone cause success.
 
@@ -195,13 +197,14 @@ The Cybench result is therefore a model-and-budget operating point in a permissi
 
 BOTSv1 changes the optimization problem.
 The agent must search Splunk telemetry, use prerequisite case context, decide when to enrich externally, and submit precise answers under an official point-and-hint scheme.
-Table~\ref{tab:bots} reports the current full-agent results.
+Table~\ref{tab:bots} reports the full-agent results.
 Claude Opus 4.8 leads with 9,666.7 of 10,300 points (93.9\%) and 96.8\% binary accuracy.
 It also has the best observed cost-success profile: \$13.24 in model-plus-priced-tool spend and 603 total non-submit tool calls across the 31 questions and three epochs.
 
 \begin{table}[t]
 \centering
-\caption{BOTSv1 full-run results from \protect\path{source-eval-repo/charts/botsv1_report.html}. BOTS points are the primary \texttt{bots\_points} metric with hint penalties; binary accuracy is secondary.}
+% Internal source: source-eval-repo/charts/botsv1_report.html.
+\caption{BOTSv1 full-run results. BOTS points are the primary \texttt{bots\_points} metric with hint penalties; binary accuracy is secondary.}
 \label{tab:bots}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lrrrrrr}
@@ -222,7 +225,7 @@ GPT-5.4 Mini & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \$19.79 & \$7.00 & 1{,}6
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{botsv1_cost_with_tools.png}
-\caption{BOTSv1 cost budget with model-token and priced external-tool spend. The source report charges Brave Search and non-cache WhoisXMLAPI calls when transcript events show a charged provider call.}
+\caption{BOTSv1 cost budget with model-token and priced external-tool spend. Priced external tools include Brave Search and charged WhoisXMLAPI calls.}
 \label{fig:bots-cost}
 \end{figure}
 
@@ -242,7 +245,7 @@ For this defensive workload, additional budget and more tool volume do not subst
 \label{sec:contamination}
 
 BOTSv1 is valuable because it supplies real Splunk data and official scoring, but it is also public and old.
-The source repository therefore includes a no-tools probe.
+We therefore include a no-tools probe.
 The probe solver registers no Splunk, web, bash, Python, or other tools; it asks the model to answer from the question text, optional prerequisite context, and prior knowledge only.
 
 The results are too high to treat absolute BOTSv1 scores as clean evidence of live investigation skill.
@@ -253,9 +256,10 @@ These controls do not make BOTS useless; they make decontamination controls mand
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{botsv1_decontamination.png}
-\caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are charted three-epoch mean runs. 
+% Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
+\caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are three-epoch mean runs.
 \PK{Need to run DeepSeek decontamination}
-DeepSeek v4 Flash is omitted because OpenRouter authentication failed before any scored samples completed.}
+Only completed no-tools probes are shown.}
 \label{fig:bots-decontamination}
 \end{figure}
 
@@ -271,7 +275,7 @@ Because public-answer leakage is substantial, the defensive interpretation shoul
 Cost should be a first-class benchmark output.
 For CTFs, token spend and per-sample budget explain much of the practical tradeoff.
 For SOC workflows, paid enrichment calls become part of the marginal cost of analysis.
-The BOTS reports therefore add external-tool spend to model-token spend and report dollars per 1,000 BOTS points.
+The BOTS analysis therefore adds external-tool spend to model-token spend and reports dollars per 1,000 BOTS points.
 Those numbers still omit infrastructure and human review, but they are closer to the economic choice a security team faces than success rate alone.
 
 Tool-call count is not tool competence.
@@ -297,15 +301,14 @@ Security-agent reports should include at least five items:
 \section{Limitations}
 \label{sec:limitations}
 
-The experiments are observational.
-They reuse existing Inspect logs rather than a newly randomized run matrix.
+The experiments are observational rather than a prospectively randomized run matrix.
 Cybench rows differ in cost limits, provider routing, concurrency, sandbox backend, and cost-accounting mechanics.
 The DeepSeek v4 Pro Cybench row uses 38 challenges, not the usual 39.
 BOTSv1 rows are more uniform at the task level, but provider defaults and reasoning settings still differ.
 Bootstrap intervals in Appendix~\ref{app:uncertainty} are descriptive robustness checks, not formal population-level claims.
 
 The defensive analysis is BOTSv1-only.
-The source repository packages BOTS v2 and v3, but comparable multi-model reports are not yet available.
+BOTS v2 and v3 exist, but comparable multi-model results are not yet available.
 BOTSv1 is public, answerable above chance without tools, and dependent on prerequisite context for many questions.
 External-enrichment prices also drift across providers and enterprise contracts.
 The SOC conclusion should therefore be read as an evaluation-design result, not as a final claim about production SOC readiness.
@@ -315,8 +318,8 @@ The SOC conclusion should therefore be read as an evaluation-design result, not 
 
 The experiments use public cybersecurity benchmarks and sandboxed environments.
 This paper reports aggregate metrics and methodology only.
-It does not publish raw private transcripts, secrets, API keys, or operational exploit instructions.
-The manuscript repository keeps only figures, tables, and provenance notes needed to audit aggregate claims; raw \texttt{.eval} logs remain in the separate source evaluation repository and should undergo a sanitization pass before any public artifact release.
+It does not publish secrets, API keys, or operational exploit instructions.
+Any public release should include only sanitized materials.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -331,22 +334,7 @@ Public SOC benchmarks remain valuable, but no-tools BOTSv1 controls show that th
 
 \appendix
 
-\section{Provenance}
-\label{app:provenance}
-
-This appendix records aggregate provenance and robustness checks.
-It does not include raw Inspect transcripts, credentials, source code, or benchmark artifacts.
-Logical source paths refer to the source evaluation repository as \path{source-eval-repo/...}.
-
-At audit time the source evaluation repository HEAD was \texttt{26b5a39}; the chart and report artifacts used for numeric claims were last changed in \texttt{b731f1b}.
-The main inspected artifacts were:
-\begin{itemize}
-  \item repository docs: \path{CLAUDE.md}, \path{README.md}, and \path{bots/README.md};
-  \item chart methodology: \path{charts/README.md};
-  \item Cybench tables/reports: \path{charts/cybench_cost_table.csv} and \path{charts/cybench_report.html};
-  \item BOTSv1 reports: \path{charts/botsv1_report.html}, \path{charts/botsv1_decontamination.csv}, and \path{charts/botsv1_decontamination.md};
-  \item raw \path{logs/*.eval} files listed by the chart methodology notes and companion provenance file.
-\end{itemize}
+% Internal provenance was removed from the visible appendix; see tables/provenance.md.
 
 \section{Uncertainty Method}
 \label{app:uncertainty}
@@ -354,7 +342,7 @@ The main inspected artifacts were:
 The paper reports descriptive bootstrap intervals.
 For Cybench, each replicate resamples challenge IDs with replacement and retains the three epochs for each selected challenge.
 For BOTSv1, each replicate resamples question IDs with replacement and retains the three epochs and official point weights for each selected question.
-Paired contrasts resample only task IDs common to both compared logs.
+Paired contrasts resample only task IDs common to both compared runs.
 
 \section{Cybench Robustness}
 \label{app:cybench-robustness}
@@ -434,8 +422,9 @@ GPT-5.5 & no tools, question only & 54.9\% & 71.0\% & 0 \\
 \end{table}
 
 The no-tools solver registers no Splunk, web, bash, Python, or other tools.
-The successful probe logs contain zero tool events.
-DeepSeek v4 Flash no-tools attempts did not produce scored samples because OpenRouter returned \texttt{401 User not found}.
+The successful probes contain zero tool events.
+Table~\ref{tab:bots-no-tools} includes only completed no-tools probes.
+% Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
 
 \section{BOTSv1 Sequential-Context Check}
 \label{app:bots-context}

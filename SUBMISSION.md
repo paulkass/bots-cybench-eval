@@ -39,7 +39,7 @@ Expected state for CAMLIS review: `paper.pdf` builds successfully, uses the PMLR
 - Style: PMLR via the `jmlr` class with local support files for reproducible builds on the current TeX install.
 - Draft author list: Paul Kassianik and Yaron Singer. Remove author identifiers before double-blind review submission; restore only if camera-ready instructions allow/require it.
 - Artifact policy: submit `paper.pdf` only. Do not submit source, code, raw logs, or provenance files unless a later venue requires them.
-- Provenance: keep `tables/provenance.md` as an internal audit aid, with local machine paths sanitized to logical source paths; the reviewer-facing aggregate version is the appendix in `paper.tex`.
+- Provenance: keep `tables/provenance.md` as an internal audit aid, with local machine paths sanitized to logical source paths; the paper appendix contains robustness checks only.
 
 ## Additional experiment policy
 
