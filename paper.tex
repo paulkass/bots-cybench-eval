@@ -17,17 +17,24 @@
 
 \title[Cost-Aware Security Agent Evaluation]{Cost-Aware Evaluation of Offensive and Defensive Security Agents}
 
-\author{\Name{Anonymous Authors}\\
-\addr Anonymous Institution}
+\author{\Name{Paul Kassianik}
+\AND
+\Name{Yaron Singer}}
 
 \editor{CAMLIS Reviewers}
 
 \hypersetup{
   pdftitle={Cost-Aware Evaluation of Offensive and Defensive Security Agents},
   pdfsubject={Cybersecurity benchmark evaluation},
-  pdfauthor={Anonymous Authors},
+  pdfauthor={Paul Kassianik and Yaron Singer},
   pdfkeywords={cybersecurity benchmarks, AI agents, Cybench, BOTS, Inspect, SOC, cost accounting}
 }
+
+\newif\ifshowcomments
+\showcommentstrue
+\newcommand{\inlinecomment}[3]{\ifshowcomments\textcolor{#1}{\textbf{[#2:} #3\textbf{]}}\fi}
+\newcommand{\PK}[1]{\inlinecomment{blue}{Paul}{#1}}
+\newcommand{\YS}[1]{\inlinecomment{magenta}{Yaron}{#1}}
 
 \begin{document}
 \maketitle
