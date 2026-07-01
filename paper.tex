@@ -33,7 +33,7 @@
 \newif\ifshowcomments
 \showcommentstrue
 \newcommand{\inlinecomment}[3]{\ifshowcomments\textcolor{#1}{\textbf{[#2:} #3\textbf{]}}\fi}
-\newcommand{\PK}[1]{\inlinecomment{blue}{Paul}{#1}}
+\newcommand{\PK}[1]{\inlinecomment{teal}{Paul}{#1}}
 \newcommand{\YS}[1]{\inlinecomment{magenta}{Yaron}{#1}}
 
 \begin{document}
@@ -71,16 +71,15 @@ In SOC investigation, tool volume alone is a poor proxy for competence; success 
 We compare offensive Cybench challenges \citep{zhang2024cybench,inspect_evals_cybench} and defensive Splunk Boss of the SOC (BOTS) v1 investigations \citep{splunk_botsv1} using Inspect \citep{inspect_ai_2024}.
 Cybench provides sandboxed CTF-style tasks with shell and Python access.
 BOTS v1 provides public Splunk telemetry and official competition questions with point values and hint penalties.
-The goal is not to produce a procurement leaderboard.
 The available runs differ in cost limits, provider routing, concurrency, sandbox backend, and cost-accounting details.
-The goal is narrower: characterize cost-success operating points, identify which comparisons are supported by paired evidence, and derive requirements for SOC-native security-agent benchmarks.
+We characterize cost-success operating points, identify which comparisons are supported by paired evidence, and derive requirements for SOC-native security-agent benchmarks.
 
-The contributions are:
+Our contributions are as follows:
 \begin{itemize}
-  \item a cost-aware comparison of offensive Cybench and defensive BOTSv1 operating points using the same evaluation framework;
-  \item evidence that additional per-sample budget can materially improve an offensive Cybench row, while a comparable BOTSv1 budget increase produces little defensive gain;
-  \item model-token plus priced-tool cost accounting for SOC investigation, including cost per 1,000 BOTS points;
-  \item no-tools BOTSv1 controls showing that public SOC benchmarks require decontamination checks before absolute scores are interpreted as live investigation skill.
+  \item A cost-aware comparison of offensive Cybench and defensive BOTSv1 operating points using the same evaluation framework;
+  \item Evidence that additional per-sample budget can materially improve an offensive Cybench row, while a comparable BOTSv1 budget increase produces little defensive gain;
+  \item Model-token plus priced-tool cost accounting for SOC investigation, including cost per 1,000 BOTS points;
+  \item No-tools BOTSv1 controls showing that public SOC benchmarks require decontamination checks before absolute scores are interpreted as live investigation skill.
 \end{itemize}
 
 \section{Related Work}
@@ -104,7 +103,6 @@ It keeps BOTS competition points, but adds priced-tool accounting, tool-call eff
 \label{sec:evaluation-design}
 
 All reported numbers come from pre-existing Inspect logs and generated chart artifacts in the source evaluation repository.
-No benchmark workload, Docker sandbox, Kubernetes sandbox, or Inspect evaluation was rerun for this submission rewrite.
 The paper uses logical artifact paths such as \path{source-eval-repo/charts/cybench_cost_table.csv} to preserve provenance without exposing local paths or copying raw logs into the manuscript repository.
 
 \subsection{Offensive benchmark: Cybench}
@@ -255,7 +253,9 @@ These controls do not make BOTS useless; they make decontamination controls mand
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{botsv1_decontamination.png}
-\caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are charted three-epoch mean runs. DeepSeek v4 Flash is omitted because OpenRouter authentication failed before any scored samples completed.}
+\caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are charted three-epoch mean runs. 
+\PK{Need to run DeepSeek decontamination}
+DeepSeek v4 Flash is omitted because OpenRouter authentication failed before any scored samples completed.}
 \label{fig:bots-decontamination}
 \end{figure}
 
