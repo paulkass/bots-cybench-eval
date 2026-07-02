@@ -15,13 +15,16 @@
 \jmlryear{2026}
 \jmlrworkshop{CAMLIS 2026 Submission}
 
-\title[Cost-Aware Security Agent Evaluation]{Cost-Aware Evaluation of Offensive and Defensive Security Agents}
+\title[Cost-Aware Security Agent Evaluation]{Beyond Success Rate: Cost-Aware Evaluation of Offensive and Defensive Security Agents}
 
 \author{\Name{Paul Kassianik}
 \AND
-\Name{Yaron Singer}}
+\Name{Blaine Nelson}
+\AND
+\Name{Yaron Singer}
+}
 
-\editor{CAMLIS Reviewers}
+\editor{TBD}
 
 \hypersetup{
   pdftitle={Cost-Aware Evaluation of Offensive and Defensive Security Agents},
@@ -40,14 +43,20 @@
 \maketitle
 
 \begin{abstract}
-Large language models are rapidly changing security work, but today's evaluations still lean toward offensive demonstrations: vulnerability scanning, exploit development, penetration testing, and CTFs.
-Those tasks matter, yet best-case success rates at high test-time compute and in ideal harnesses miss the economic constraint shared by attackers and defenders: every reasoning step, tool call, and enrichment request spends budget.
-We compare this cost-success tradeoff across offensive Cybench challenges and defensive Splunk BOTS v1 investigations.
-We find different scaling behavior for red- and blue-team tasks.
-More compute can buy higher success on offensive CTFs, and scaled Chinese open-weight models can close much of the gap with frontier U.S. systems while remaining cost-competitive on red-team workloads.
-SOC investigation, however, is less a pure reasoning race: effective defensive performance depends on disciplined tool use, telemetry navigation, and external-enrichment decisions.
-We argue that security-agent evaluations should report not only success rate, but also cost, tool spend, and workflow fit.
-Cost-aware, SOC-native benchmarks can better show where open models are already competitive and where defensive agents still need to improve.
+% Problem 1 -- Current security evaluations strictly measure top capabilities
+% Problem 2 -- Equating offensive security capabilities with defensive capabilities
+% Solution -- Measure benchmark success at fixed cost levels
+% Finding -- Observe that Offensive tasks can scale with compute while Defensive tasks scale with effective tool use
+% Conclusion 
+Security-agent evaluations commonly measure peak offensive capability under generous inference budgets, emphasizing vulnerability discovery, exploit development, penetration testing, and CTF completion. 
+Such measurements are useful but incomplete: in operational security, every reasoning step, tool call, telemetry query, and enrichment request consumes budget.
+We evaluate language-model security agents through this cost-success lens on offensive Cybench challenges and defensive Splunk BOTS v1 investigation challenges. 
+Instead of reporting only best-case success, we compare models at fixed cost levels and decompose performance by inference spend and tool spend.
+Our results show distinct scaling regimes for red- and blue-team tasks. 
+Offensive CTF performance improves with additional test-time compute, and scaled open-weight models can approach frontier proprietary systems while remaining cost-competitive. 
+Defensive SOC investigation does not scale in the same way: success depends more heavily on disciplined tool use, telemetry navigation, and selective enrichment than on raw reasoning budget alone.
+We argue that security-agent benchmarks should measure economic efficiency and operational fit alongside task success. 
+Cost-aware, SOC-native evaluations provide a clearer picture of which models are practically useful today and where defensive agents still need to improve.
 \end{abstract}
 
 \begin{keywords}
@@ -57,13 +66,19 @@ cybersecurity benchmarks, AI agents, security operations centers, Cybench, BOTS,
 \section{Introduction}
 \label{sec:introduction}
 
-Security-agent evaluations increasingly report impressive offensive demonstrations: agents solve capture-the-flag (CTF) tasks, find vulnerabilities, write exploits, and automate pieces of penetration testing.
-These tasks matter because they measure capabilities adversaries can also use.
-They are not enough for applied security operations.
-A security operations center (SOC) asks whether an agent can navigate telemetry, preserve evidentiary context, decide when enrichment is worth buying, and return an analyst-grade answer under a budget.
+\PK{TODO: Rewrite the introduction more as a setup + results}
 
-We treat cost as part of the task rather than an afterthought.
+Security-agent evaluations increasingly report impressive offensive demonstrations: agents solve capture-the-flag (CTF) tasks, find vulnerabilities, write exploits, and automate pieces of penetration testing.
+\PK{say something about Mythos} 
+These tasks matter because they measure capabilities adversaries can use to scale up their nefarious operations.
+But how can we scale defensive operations with AI?
+\PK{need more here}
+%A security operations center (SOC) asks whether an agent can navigate telemetry, preserve evidentiary context, decide when enrichment is worth buying, and return an analyst-grade answer under a budget.
+
+We use \textit{cost} as a common axis to compare model performance for offensive and defensive tasks.
+In order to unify model performance across tasks, we consider success rate at a fixed cost as a shared metric.
 Both attackers and defenders operate under a resource economy: each reasoning step, shell command, Splunk search, and paid enrichment call consumes time or money.
+
 We claim that offensive and defensive security tasks reward different scaling behavior.
 In CTF-style tasks, extra per-sample budget can buy more exploration and higher success.
 In SOC investigation, tool volume alone is a poor proxy for competence; success depends on using the right telemetry and enrichment at the right time.
