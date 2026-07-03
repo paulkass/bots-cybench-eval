@@ -131,21 +131,24 @@ Because BOTSv1 is public and old, Appendix~\ref{app:bots-no-tools} treats no-too
 \section{Evaluation Design}
 \label{sec:evaluation-design}
 
-We implement the runs in Inspect \citep{inspect_ai_2024}, but the unit of comparison is the benchmark operating point: model, task family, cost limit, tools, and scoring rule.
-We report aggregate success, cost, and tool-use metrics.
+We use the Inspect evaluation framework \citep{inspect_ai_2024} to organize the experiments. 
+We use a ReAct \cite{yao2023react} style agent with auto-compaction for all benchmark runs.
 % Internal provenance for quantitative claims is tracked in tables/provenance.md.
 
 \subsection{Offensive benchmark: Cybench}
 \label{sec:cybench-method}
 
-We run the hard Cybench variant.
-We evaluate rows that use an autocompacting ReAct solver \citep{yao2023react}; expose only \texttt{bash(timeout=180)} and \texttt{python(timeout=180)}; run three epochs with a mean reducer; and score with the upstream \texttt{includes} accuracy metric.
-We report solved count as fractional pass@1: mean correctness over three epochs multiplied by the 39-challenge denominator.
+We use the Cybench-hard benchmark from Inspect \PK{todo: cite} to perform the evaluations.
+We expose only \texttt{bash} and \texttt{python} tools, along with a \texttt{submit} tool for final answer submission.
+%run three epochs with a mean reducer; and score with the upstream \texttt{includes} accuracy metric.
+%We report solved count as fractional pass@1: mean correctness over three epochs multiplied by the 39-challenge denominator.
 % Internal caveat: most rows used Docker; Claude Opus 4.8 used Kubernetes after local Docker subnet exhaustion.
 
 We do not present the Cybench rows as a fully controlled model-only experiment.
 Per-sample cost limits, provider routing, concurrency, sandbox backend, and retry accounting differ across rows.
-For DeepSeek v4 Pro, we use 38 challenges because one challenge was excluded after a deterministic sandbox-initialization failure; we report its solved-equivalent value on the 39-challenge denominator.
+%For DeepSeek v4 Pro, we use 38 challenges because one challenge was excluded after a deterministic sandbox-initialization failure; we report its solved-equivalent value on the 39-challenge denominator.
+
+
 
 \subsection{Defensive benchmark: BOTS v1}
 \label{sec:bots-method}
