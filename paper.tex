@@ -258,7 +258,7 @@ It also has the best observed cost-success profile: \$13.24 in model-plus-priced
 \begin{table}[t]
 \centering
 % Internal source: source-eval-repo/charts/botsv1_report.html.
-\caption{BOTSv1 full-run results grouped by designated per-sample cost cap. BOTS points are the primary \texttt{bots\_points} metric with hint penalties; binary accuracy is secondary. Bold marks the best value and underline the second-best distinct value in each metric column; lower is better for model+tools cost, \$/1k points, and tool calls.}
+\caption{BOTSv1 full-run results grouped by designated per-sample cost cap. BOTS points are the primary \texttt{bots\_points} metric with hint penalties. Bold marks the best value and underline the second-best distinct value in each metric column; lower is better for model+tools cost, \$/1k points, and tool calls.}
 \label{tab:bots}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrr}
@@ -333,7 +333,7 @@ Security-agent reports should therefore include at least five items:
 
 Our experiments are observational rather than a prospectively randomized run matrix.
 Cybench rows differ in cost limits, provider routing, concurrency, sandbox backend, and cost-accounting mechanics, so we emphasize fixed-budget operating points rather than universal model rankings.
-The DeepSeek v4 Pro Cybench row uses 38 challenges, not the usual 39.
+% The DeepSeek v4 Pro Cybench row uses 38 challenges, not the usual 39.
 BOTSv1 rows are more uniform at the task level, but provider defaults and reasoning settings still differ.
 Bootstrap intervals in Appendix~\ref{app:uncertainty} are descriptive robustness checks, not formal population-level claims.
 
