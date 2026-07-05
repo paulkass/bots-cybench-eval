@@ -82,14 +82,14 @@ BOTS v1 provides public Splunk telemetry and official competition questions with
 Rather than presenting a single leaderboard, we characterize operating points: model, task family, cost limit, tools, and scoring rule.
 
 We find distinct scaling regimes.
-On Cybench, additional per-sample budget materially improves DeepSeek v4 Flash, and the higher-budget DeepSeek v4 Flash row approaches the frontier proprietary row while remaining cost-competitive.
-On BOTSv1, raising the same model family's budget produces little gain, while high tool volume often accompanies lower scores.
+On Cybench, retrospective budget caps show clear headroom for Claude Opus 4.8 and DeepSeek v4 Flash, while GPT-5.5 already solves most successful challenges below the lower cap.
+On BOTSv1, extra budget is less predictive: the direct DeepSeek v4 Flash cap increase produces little gain, and high tool volume often accompanies lower scores.
 The defensive signal is therefore not raw reasoning budget alone; it is disciplined tool use, telemetry navigation, and selective enrichment.
 
 Our contributions are as follows:
 \begin{itemize}
-  \item A cost-success comparison of offensive Cybench and defensive BOTSv1 operating points using a shared harness;
-  \item Evidence that additional test-time compute can improve offensive CTF performance, while a comparable BOTSv1 budget increase produces little defensive gain;
+  \item A cost-success comparison of shared Cybench and BOTSv1 model operating points using a common harness;
+  \item A paired budget-headroom analysis showing where additional per-sample spend changes observed scores;
   \item Model-token plus priced-tool cost accounting for SOC investigation, including cost per 1,000 BOTS points;
   \item BOTSv1 no-tools controls showing that public SOC benchmarks require decontamination checks before absolute scores are interpreted as live investigation skill.
 \end{itemize}
@@ -143,7 +143,7 @@ The agents are unaware of cost or token budgets but are aware of limits on certa
 
 This design allows us to ascertain the model's success rate at various cost and token consumption caps.
 We can derive valuable practical metrics such as "price per question solved".
-By varying the cost between 0 and the run limit, we can track how success rate scales with the cost and token budget increases. \PK{reference charts showing this when available}.
+By varying the cost between 0 and the run limit, we can track how success rate scales with the cost and token budget increases.
 
 For models provided by OpenAI and Anthropic, we use their respective APIs.
 \Inspect{} also relies on frontier providers for autocompaction, prompt caching, and cost tracking metrics.
@@ -236,136 +236,115 @@ We treat VirusTotal public API, DNS, and live WHOIS/RDAP as zero marginal cost.
 We exclude costs for \texttt{bash}, \texttt{python}, and Splunk calls.
 We use a host-side cache for WhoisXMLAPI history responses to avoid repeated provider requests during evaluation; cached WhoisXMLAPI calls are still assigned their corresponding DRS-credit value in reported tool-cost metrics so costs reflect expected tool use rather than cache state.
 
+
 \section{Evaluation Results}
 \label{sec:results}
 
-\subsection{Offensive CTFs: inference budget can buy progress}
+This section reports the shared model set used in both benchmark families: GPT-5.5, Claude Opus 4.8, DeepSeek v4 Flash, DeepSeek v4 Pro, and GPT-5.4 Mini.
+For BOTSv1, we also retain GPT-5.5 high effort as the closest reasoning-effort comparison to Claude Opus 4.8, whose default setting is high effort.
+
+\subsection{Offensive CTFs}
 \label{sec:cybench-results}
 
-In Table~\ref{tab:cybench}, we report the Cybench hard-variant cost-success table.
-% GPT-5.5 is the top observed row at a 94.1\% single-run success rate and \$1.16 per solved-equivalent challenge.
-GPT-5.5 tops the chart with a 94.1\% success rate at \$1.16 per-challenge solve cost.
-The clearest fixed-cost comparison is within a single model family: under a retrospective cap applied to the same DeepSeek v4 Flash trace, sample-epochs above \$0.80 count as failures and the row reaches 76.1\% success, compared with 86.4\% when the full \$2.10 cap is allowed.
-That higher-budget run solves 33.7 of 39 challenge-equivalents at \$1.45 per solve, close to GPT-5.5's 36.7 solved at \$1.16 per solve and above the Claude Opus rows on both success and cost per solve.
+Table~\ref{tab:cybench} summarizes Cybench hard-variant results for the shared model set.
+GPT-5.5 is the strongest observed Cybench row at 94.1\% success and \$1.16 per solved-equivalent challenge.
+DeepSeek v4 Flash is the strongest cost-scaling example: the same trace reaches 76.1\% under a retrospective \$0.80 cap and 86.4\% when allowed the full \$2.10 cap.
 
 \begin{table}[t]
 \centering
 % Internal source: source-eval-repo/charts/cybench_report.html and cybench_cost_table.csv plus raw-log tool-event counts.
 % GPT-5.5 is grouped under the designated $2.10 cap here; its successful Inspect log header records cost_limit=None.
 % DeepSeek v4 Flash $0.80 row is a retrospective cap applied to logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval.
-\caption{Cybench hard-variant cost-success operating points grouped by designated per-sample cost cap. The DeepSeek v4 Flash \$0.80 row is a retrospective event-level cap on the \$2.10 trace: sample-epochs above \$0.80 count as failures, with spend and tool calls accumulated through the crossing model call. Mean tool calls count non-submit tool events. Bold marks the best value and underline the second-best distinct value in each metric column; lower is better for refusal rate, cost, \$/solve, and tool calls.}
+\caption{Cybench hard-variant operating points for models also evaluated on BOTSv1. The DeepSeek v4 Flash \$0.80 row is a retrospective event-level cap on the \$2.10 trace. Mean tool calls count non-submit tool events.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrr}
 \toprule
 Model & cost cap & success rate & solved & refusal rate & run cost & \$/solve & mean tool calls \\
 \midrule
-GPT-5.5 & \$2.10 & \textbf{94.1\%} & \textbf{36.7} & \textbf{0.0\%} & \$42.47 & \underline{\$1.16} & \underline{20.6} \\
-DeepSeek v4 Flash & \$2.10 & \underline{86.4\%} & \underline{33.7} & \textbf{0.0\%} & \$48.88 & \$1.45 & 144.7 \\
-Claude Opus 4.8 & \$2.10 & 74.4\% & 29.0 & \textbf{0.0\%} & \$108.21 & \$3.73 & 26.7 \\
-Claude Opus 4.7 & \$2.10 & 71.0\% & 27.7 & \textbf{0.0\%} & \$92.75 & \$3.35 & \textbf{19.7} \\
-Kimi K2.6 & \$0.85 & 55.6\% & 21.7 & \textbf{0.0\%} & \$58.55 & \$2.70 & 38.1 \\
-DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & \textbf{0.0\%} & \underline{\$30.43} & \textbf{\$1.03} & 95.9 \\
-GPT-5.4 Mini & \$0.80 & 29.0\% & 11.3 & \underline{60.7\%} & \textbf{\$13.77} & \$1.22 & 20.9 \\
-DeepSeek v4 Pro & \$0.75 & 43.8\% & 17.1 & \textbf{0.0\%} & \$64.58 & \$3.78 & 21.3 \\
+GPT-5.5 & \$2.10 & 94.1\% & 36.7 & 0.0\% & \$42.47 & \$1.16 & 20.6 \\
+DeepSeek v4 Flash & \$2.10 & 86.4\% & 33.7 & 0.0\% & \$48.88 & \$1.45 & 144.7 \\
+Claude Opus 4.8 & \$2.10 & 74.4\% & 29.0 & 0.0\% & \$108.21 & \$3.73 & 26.7 \\
+DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & 0.0\% & \$30.43 & \$1.03 & 95.9 \\
+DeepSeek v4 Pro & \$0.75 & 43.8\% & 17.1 & 0.0\% & \$64.58 & \$3.78 & 21.3 \\
+GPT-5.4 Mini & \$0.80 & 29.0\% & 11.3 & 60.7\% & \$13.77 & \$1.22 & 20.9 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.95\linewidth]{figures/cybench_comparison}
-% Internal source: regenerated from source-eval rows; DeepSeek v4 Flash $0.80 row uses the retrospective cap described in Table~\ref{tab:cybench}.
-\caption{Cybench hard-variant cost-success comparison. The DeepSeek v4 Flash \$0.80 bar uses the retrospective cap described in Table~\ref{tab:cybench}. \PK{add information about the reasoning efforts used for frontier models}}
-\label{fig:cybench-comparison}
-\end{figure}
-
-We estimate the paired DeepSeek v4 Flash budget contrast at +10.3 percentage points by challenge-level bootstrap, with a 95\% interval of +4.3 to +17.1 percentage points.
-We treat this retrospective cap comparison as the strongest supported offensive scaling claim in these runs.
-The tool-call data show why cost and success should be reported together: GPT-5.5 averages 20.6 non-submit tool events per sample epoch, while the higher-budget DeepSeek v4 Flash row averages 144.7.
-We therefore present the Cybench result as a model-and-budget operating point in a permissive CTF sandbox, not evidence that more calls alone cause success.
-
-\subsection{SOC investigations: disciplined tool use matters more than raw budget}
+\subsection{SOC investigations}
 \label{sec:bots-results}
 
-BOTSv1 changes the optimization problem.
-The agent must search Splunk telemetry, use prerequisite case context, decide when to enrich externally, and submit precise answers under an official point-and-hint scheme.
-In Table~\ref{tab:bots}, we report the full-agent results with model-token and priced-tool spend combined.
-Claude Opus 4.8 leads with 9,666.7 of 10,300 points (93.9\%) and 96.8\% binary accuracy.
-It also has the best observed points-per-dollar profile: \$28.80 in model-plus-priced-tool spend, \$2.98 per 1k points, and 603 total non-submit tool calls across the 31 questions and three epochs.
+Table~\ref{tab:bots} reports BOTSv1 full-agent results for the shared model set, with priced external-tool spend added to model-token spend.
+Claude Opus 4.8 leads the defensive workload with 9,666.7 of 10,300 points (93.9\%), the best cost efficiency at \$2.98 per 1,000 points, and the fewest non-submit tool calls.
+The high-effort GPT-5.5 comparison reaches 81.4\%, essentially tied with standard GPT-5.5 and still well behind Claude Opus 4.8.
+DeepSeek v4 Flash shows the clearest negative budget result: raising the cap from \$2.10 to \$4.20 changes BOTSv1 points from 73.0\% to 73.9\% while tool calls rise from 4,450 to 4,938.
 
 \begin{table}[t]
 \centering
 % Internal source: source-eval-repo/charts/botsv1_report.html.
-\caption{BOTSv1 full-run results grouped by designated per-sample cost cap. BOTS points are the primary \texttt{bots\_points} metric with hint penalties. Bold marks the best value and underline the second-best distinct value in each metric column; lower is better for model+tools cost, \$/1k points, and tool calls.}
+\caption{BOTSv1 full-run results for models also evaluated on Cybench, plus GPT-5.5 high effort for comparison with Claude Opus 4.8. BOTS points are the primary \texttt{bots\_points} metric with hint penalties. Model+tools includes model-token spend plus priced Brave Search and WhoisXMLAPI calls.}
 \label{tab:bots}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrr}
 \toprule
 Model & cost cap & BOTS points & points & binary acc. & model+tools & \$/1k pts & tool calls \\
 \midrule
-DeepSeek v4 Flash & \$4.20 & 7{,}610.0 / 10{,}300 & 73.9\% & 81.7\% & \$39.29 & \underline{\$5.16} & 4{,}938 \\
-Claude Opus 4.8 & \$2.10 & \textbf{9{,}666.7 / 10{,}300} & \textbf{93.9\%} & \textbf{96.8\%} & \underline{\$28.80} & \textbf{\$2.98} & \textbf{603} \\
-GPT-5.5 (high effort) & \$2.10 & \underline{8{,}383.3 / 10{,}300} & \underline{81.4\%} & \underline{91.4\%} & \$64.57 & \$7.70 & 1{,}580 \\
-GPT-5.5 & \$2.10 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & \$56.42 & \$6.76 & \underline{1{,}481} \\
+Claude Opus 4.8 & \$2.10 & 9{,}666.7 / 10{,}300 & 93.9\% & 96.8\% & \$28.80 & \$2.98 & 603 \\
+GPT-5.5 (high effort) & \$2.10 & 8{,}383.3 / 10{,}300 & 81.4\% & 91.4\% & \$64.57 & \$7.70 & 1{,}580 \\
+GPT-5.5 & \$2.10 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & \$56.42 & \$6.76 & 1{,}481 \\
 DeepSeek v4 Pro & \$2.10 & 8{,}013.3 / 10{,}300 & 77.8\% & 84.9\% & \$71.82 & \$8.96 & 3{,}363 \\
+DeepSeek v4 Flash & \$4.20 & 7{,}610.0 / 10{,}300 & 73.9\% & 81.7\% & \$39.29 & \$5.16 & 4{,}938 \\
 DeepSeek v4 Flash & \$2.10 & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & \$43.50 & \$5.79 & 4{,}450 \\
-GPT-5.4 Mini & \$2.10 & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \textbf{\$25.06} & \$8.86 & 1{,}693 \\
+GPT-5.4 Mini & \$2.10 & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \$25.06 & \$8.86 & 1{,}693 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.95\linewidth]{figures/botsv1_cost_with_tools}
-\caption{BOTSv1 cost budget with model-token and priced external-tool spend. Priced external tools include Brave Search and WhoisXMLAPI calls, including cached WhoisXMLAPI responses assigned the same DRS-credit value as fresh responses.}
-\label{fig:bots-cost}
-\end{figure}
-
-GPT-5.5 reaches about 81\% of points, but spends \$56--65 and uses roughly 1,500 calls.
-We see the contrast with Cybench in DeepSeek v4 Flash: raising its cap from \$2.10 to \$4.20 changes BOTSv1 points from 73.0\% to 73.9\%, a small and statistically inconclusive gain, while tool calls rise from 4,450 to 4,938.
-We estimate a paired question-level bootstrap interval of -4.9 to +6.9 percentage points for that change.
-For this defensive workload, additional raw budget and more tool volume do not substitute for disciplined evidence gathering.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.95\linewidth]{figures/botsv1_tool_calls}
-\caption{BOTSv1 binary accuracy under a non-submit tool-call cap. Samples above a cap are counted as unsolved, so the curve rewards correct answers reached with fewer tools.}
-\label{fig:bots-tools}
-\end{figure}
-
 We report no-tools controls for interpreting public BOTSv1 scores in Appendix~\ref{app:bots-no-tools}.
 
-\section{Discussion: What Cost-Aware Security Evaluation Should Measure}
-\label{sec:discussion}
+\section{Scaling Findings}
+\label{sec:scaling-findings}
 
-A single ``cyber score'' hides the useful signal.
-The same model family can occupy different parts of the cost-success frontier depending on whether the task is an offensive CTF or a SOC investigation.
-Cybench rewards sustained sandbox reasoning and, for DeepSeek v4 Flash, additional per-sample budget.
-BOTSv1 rewards a different workflow: finding the relevant telemetry, validating answers, and avoiding unproductive tool churn.
-We therefore frame the defensive interpretation as an evaluation-design finding rather than a final production-readiness ranking.
+The scaling claim is strongest when it is paired: same model, same benchmark, same completed trace, and a lower budget imposed retrospectively.
+For Cybench, the retrospective cap follows model-call ledger events and marks a sample-epoch failed once the trace crosses \$0.80.
+For BOTSv1, the analogous cap uses model-token plus priced-tool spend and marks a sample-epoch as earning zero points once total sample cost exceeds \$0.80.
+These are descriptive replay analyses rather than new benchmark runs, but they avoid comparing unrelated models or unrelated traces.
 
-Cost should be a first-class benchmark output.
-For CTFs, token spend and per-sample budget explain much of the practical tradeoff.
-For SOC workflows, paid enrichment calls become part of the marginal cost of analysis.
-We therefore add external-tool spend to model-token spend in the BOTS analysis and report dollars per 1,000 BOTS points.
-Those numbers still omit infrastructure and human review, but they are closer to the economic choice a security team faces than success rate alone.
+\begin{table}[t]
+\centering
+\caption{Retrospective budget headroom above \$0.80 per sample for the shared model set. Deltas are full-trace score minus the same trace capped at \$0.80; intervals are descriptive paired bootstraps over challenge IDs for Cybench and question IDs for BOTSv1.}
+\label{tab:scaling-headroom}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrrrr}
+\toprule
+Model & Cybench \$0.80$\rightarrow$full & Cybench $\Delta$ pp & BOTSv1 \$0.80$\rightarrow$full & BOTSv1 $\Delta$ pp \\
+\midrule
+GPT-5.5 & 91.5\%$\rightarrow$94.0\% & +2.6 [0.0, 6.0] & 74.1\%$\rightarrow$81.0\% & +6.9 [1.6, 13.5] \\
+Claude Opus 4.8 & 55.6\%$\rightarrow$74.4\% & +18.8 [10.3, 29.1] & 91.3\%$\rightarrow$93.9\% & +2.6 [0.0, 7.3] \\
+DeepSeek v4 Flash & 76.1\%$\rightarrow$86.3\% & +10.3 [4.3, 17.1] & 73.0\%$\rightarrow$73.0\% & +0.0 [0.0, 0.0] \\
+DeepSeek v4 Pro & 43.9\%$\rightarrow$43.9\% & +0.0 [0.0, 0.0] & 73.8\%$\rightarrow$77.8\% & +4.0 [0.0, 9.5] \\
+GPT-5.4 Mini & 26.5\%$\rightarrow$29.1\% & +2.6 [0.0, 6.0] & 27.5\%$\rightarrow$27.5\% & +0.0 [0.0, 0.0] \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
-Operational fit should also be a first-class output.
-Tool-call count is not tool competence: the best BOTSv1 row uses far fewer calls than lower-scoring rows, but fewer calls are not inherently better.
-A SOC-native benchmark should ask whether the agent discovers the right fields, writes complete SPL, drills into representative events, validates the answer, and spends paid enrichment only when it changes the case.
+The Cybench replay shows genuine budget sensitivity, but not uniformly across models.
+Claude Opus 4.8 gains 18.8 percentage points above the \$0.80 cap and DeepSeek v4 Flash gains 10.3 percentage points; both intervals are clearly positive.
+GPT-5.5 gains only 2.6 points because most of its solved samples already complete below \$0.80.
+The low-cap DeepSeek v4 Pro and GPT-5.4 Mini rows should not be read as proving that those models cannot scale; their observed traces provide little high-budget headroom to replay.
 
-\section{Reporting Recommendations}
-\label{sec:recommendations}
+BOTSv1 has a different shape.
+Claude Opus 4.8 already captures most of its points below \$0.80 while using only 603 non-submit tool calls in the full run.
+GPT-5.5 has some retrospective headroom above \$0.80, but still trails Claude while spending almost twice as much and using more than twice as many tools; the high-effort GPT-5.5 BOTSv1 row is not materially better.
+DeepSeek v4 Flash is the cleanest direct budget check: the prospective \$4.20-cap row exceeds the \$2.10-cap row by only 0.9 percentage points, with a paired bootstrap interval of -4.9 to +6.9 percentage points.
+More budget and more tool volume therefore did not buy a meaningful defensive improvement in this run.
 
-Security-agent reports should therefore include at least five items:
-\begin{enumerate}
-  \item \textbf{Task-family labels.} Separate offensive exploitation, CTFs, alert triage, incident investigation, malware analysis, and enrichment-heavy workflows.
-  \item \textbf{Workflow-native scoring.} Use single-run success rate for CTF flags, competition points or analyst-grade rubrics for SOC questions, and report binary accuracy only when it does not hide point weight or hint penalties.
-  \item \textbf{Cost accounting.} Report model-token spend, priced external-tool spend, cost per solve or per 1,000 points, and pricing assumptions.
-  \item \textbf{Tool-use evidence.} Report tool-call totals, cap curves, and representative redacted traces that show whether calls advanced the investigation.
-  \item \textbf{Decontamination controls.} For public benchmarks, include no-tools, no-context, perturbed-question, answer-before-query, or private-holdout checks.
-\end{enumerate}
+The practical finding is not that cost never helps SOC agents.
+It is that the marginal unit of spend buys different things in the two workloads.
+In Cybench, extra budget often buys longer sandbox exploration, more command execution, and more chances to recover from false starts.
+In BOTSv1, extra budget often buys additional Splunk or enrichment calls after the agent has already missed the key field, prerequisite, or validation step.
+For defensive evaluation, the scaling object should therefore be not only dollars or tokens, but also evidence quality: whether the agent finds the right telemetry, validates the answer, and spends paid enrichment only when it changes the investigation.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -395,7 +374,7 @@ Any public release should include only sanitized materials.
 
 Security-agent evaluation should be cost-aware and workflow-specific.
 Offensive CTFs and defensive SOC investigations stress different behaviors and show different scaling patterns.
-We find that more test-time compute can improve CTF success and that the DeepSeek v4 Flash Cybench row demonstrates a competitive red-team cost-success operating point under the tested harness.
+We find that more test-time compute can improve CTF success for some frontier/shared models, especially Claude Opus 4.8 and DeepSeek v4 Flash under retrospective caps.
 We also find that SOC work does not scale with raw budget in the same way; it depends on disciplined tool use, telemetry navigation, and selective enrichment.
 Public SOC benchmarks remain valuable, but our no-tools BOTSv1 controls show that their absolute scores require decontamination checks before they are used as capability claims.
 
@@ -411,6 +390,7 @@ Public SOC benchmarks remain valuable, but our no-tools BOTSv1 controls show tha
 We report descriptive bootstrap intervals.
 For Cybench, each replicate resamples challenge IDs with replacement and retains the three epochs for each selected challenge.
 For BOTSv1, each replicate resamples question IDs with replacement and retains the three epochs and official point weights for each selected question.
+For retrospective cap contrasts, each replicate compares the capped and uncapped values for the same sampled task IDs.
 Paired contrasts resample only task IDs common to both compared runs.
 
 \section{Cybench Robustness}
@@ -429,16 +409,14 @@ GPT-5.5 & \$2.10 & 94.0\% & 87.2--99.2\% \\
 DeepSeek v4 Flash & \$2.10 & 86.3\% & 76.9--94.9\% \\
 DeepSeek v4 Flash & \$0.80 & 76.1\% & 63.2--87.2\% \\
 Claude Opus 4.8 & \$2.10 & 74.4\% & 61.5--86.3\% \\
-Claude Opus 4.7 & \$2.10 & 70.9\% & 59.0--82.9\% \\
-Kimi K2.6 & \$0.85 & 55.6\% & 41.0--70.1\% \\
 DeepSeek v4 Pro & \$0.75 & 43.9\% & 29.8--57.9\% \\
 GPT-5.4 Mini & \$0.80 & 29.1\% & 16.2--42.7\% \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-We treat the paired DeepSeek v4 Flash budget comparison as the strongest Cybench scaling claim: the \$2.10-cap run exceeds the retrospective \$0.80 cap by 10.3 percentage points, with a challenge-level paired bootstrap interval of +4.3 to +17.1 percentage points.
-GPT-5.5 exceeds the higher-budget DeepSeek v4 Flash row by 7.7 percentage points, with interval +1.7 to +15.4 percentage points.
+The main scaling contrasts are reported in Table~\ref{tab:scaling-headroom}.
+For model-ranking context, GPT-5.5 exceeds the higher-budget DeepSeek v4 Flash row by 7.7 percentage points, with interval +1.7 to +15.4 percentage points.
 Claude Opus 4.8 does not close the gap to those leaders: paired contrasts are GPT-5.5 minus Claude Opus 4.8 = +19.7 percentage points [+9.4, +30.8] and higher-budget DeepSeek v4 Flash minus Claude Opus 4.8 = +12.0 percentage points [+1.7, +23.1].
 
 \section{BOTSv1 Robustness}
@@ -465,7 +443,7 @@ GPT-5.4 Mini & \$2.10 & 27.5\% & 14.9--42.3\% \\
 \end{table}
 
 Claude Opus 4.8's paired margin over the standard GPT-5.5 row is 12.8 percentage points, with a question-level paired bootstrap interval of +0.9 to +27.4 percentage points.
-Its paired margin over GPT-5.5 high effort is 12.5 percentage points, with interval +2.4 to +23.7 percentage points.
+Its margin over GPT-5.5 high effort is 12.5 percentage points, with interval +2.4 to +23.7 percentage points.
 The DeepSeek v4 Flash \$4.20-cap row exceeds the \$2.10-cap row by only 0.9 percentage points, with interval -4.9 to +6.9 percentage points, so that budget change is inconclusive.
 
 \section{BOTSv1 No-Tools Probe}
