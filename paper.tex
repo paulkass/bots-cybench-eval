@@ -130,7 +130,7 @@ Because BOTSv1 is public and old, Appendix~\ref{app:bots-no-tools} treats no-too
 We use the Inspect evaluation framework \citep{inspect_ai_2024} to organize the experiments.
 We use a ReAct-style agent with auto-compaction \citep{yao2023react} for all benchmark runs.
 We auto-compacted when the agent context reached \texttt{90\%} of the model context window.
-Auto-compaction defaulted to the provider-native version and fell back to summary-based compaction \PK{TODO: cite the code for this} in case of failure.
+Auto-compaction used Inspect AI's automatic compaction strategy, which attempts provider-native compaction and falls back to summary-based compaction \citep{inspect_ai_compaction_source}.
 Between offensive and defensive tasks, we only change the suite of available tools. 
 % The unit of comparison is the benchmark operating point: model, task family, cost limit, tools, and scoring rule.
 % For each operating point, we report aggregate success, inference cost, priced-tool cost where applicable, and tool-use volume.
@@ -142,7 +142,7 @@ Between offensive and defensive tasks, we only change the suite of available too
 \subsection{Offensive benchmark: Cybench}
 \label{sec:cybench-method}
 
-We use the Cybench-hard benchmark from Inspect \PK{todo: cite} to perform the evaluations.
+We use the Cybench hard variant from Inspect Evals \citep{inspect_evals_cybench} to perform the evaluations.
 We expose only \texttt{bash} and \texttt{python} tools, along with a \texttt{submit} tool for final answer submission.
 We limited the number of submission attempts to 3. 
 %run three epochs with a mean reducer; and score with the upstream \texttt{includes} accuracy metric.
@@ -158,11 +158,11 @@ Per-sample cost limits, provider routing, concurrency, sandbox backend, and retr
 \subsection{Defensive benchmark: BOTS v1}
 \label{sec:bots-method}
 
-\BOTSvOne{} is a public Splunk incident-investigation benchmark developed for \texttt{.conf} conference. \PK{TODO: cite}
+\BOTSvOne{} is a public Splunk incident-investigation dataset and CTF platform for information security professionals, researchers, students, and enthusiasts \citep{splunk_botsv1}.
 There were no public implementations of \BOTSvOne{} available so we implemented the benchmark in \Inspect{}.
 
 We exclude the official warm-up question, leaving 31 scored questions worth 10,300 official competition points.
-Agents receive Splunk discovery, search, and event-inspection tools plus limited VirusTotal, WHOIS, DNS, Brave Search, bash, and Python tools. \PK{todo: cite the tools that are not bash or python}
+Agents receive Splunk discovery, search, and event-inspection tools over Splunk Search Processing Language \citep{splunk_search_reference}, plus limited VirusTotal, WHOIS, DNS, Brave Search, bash, and Python tools \citep{virustotal_api,whoisxmlapi_whois_history,brave_search_api,rfc3912,rfc1035}.
 We make Splunk telemetry the primary evidence source in the prompt and ask agents to use external enrichment selectively.
 To preserve cost efficiency, we limit the calls to VirusTotal and WhoISXML APIs to 3 calls while limiting web search to 5 calls. 
 We implement strict keyword filtering to prevent competition writeups and solution leakage.
