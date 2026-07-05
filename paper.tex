@@ -150,7 +150,7 @@ For models provided by OpenAI and Anthropic, we use their respective APIs.
 For other models, we use OpenRouter to select one primary provider and two fallback providers.
 We use average pricing across the three providers to calculate the cost of runs.
 Since OpenRouter delegates prompt caching to providers, having one primary provider enables a maximally efficient caching scheme without sacrificing operational stability.
-Operationally, we only see that $<$ 5\% of prompts missed the cache. \PK{verify}
+Operationally, most OpenRouter model calls record some prompt-cache reads, though cache-miss rates vary by run.
 
 
 \subsection{Offensive benchmark: Cybench}
