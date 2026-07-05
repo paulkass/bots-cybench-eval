@@ -136,7 +136,16 @@ Between offensive and defensive tasks, we only change the suite of available too
 % For each operating point, we report aggregate success, inference cost, priced-tool cost where applicable, and tool-use volume.
 % Internal provenance for quantitative claims is tracked in tables/provenance.md.
 
-\PK{add more details about how we aggregate metrics and which metrics we tracked}
+We rely on \Inspect{} to keep track of auxiliary metrics like cost, token consumption, and tool calling statistics.
+We set budgets on the cost as the main resource control on agent runs.
+The agents are unaware of cost or token budgets but are aware of limits on certain expensive tool calls.
+
+This design allows us to ascertain the model's success rate at various cost and token-budget caps.
+We can therefore derive valuable practical metrics such as "price per question solved". 
+By varying the cost between 0 and the run limit, we can track how success rate scales with the cost and token budget increases. \PK{reference charts showing this when available}.
+
+
+\PK{add details about model providers}
 
 
 \subsection{Offensive benchmark: Cybench}
@@ -198,7 +207,7 @@ We exclude costs for \texttt{bash}, \texttt{python}, and Splunk calls.
 Because these are descriptive runs, we avoid universal model rankings.
 We emphasize fixed-budget operating points and paired within-model comparisons where the evidence supports them.
 
-\section{Results}
+\section{Evaluation Results}
 \label{sec:results}
 
 \subsection{Offensive CTFs: inference budget can buy progress}
@@ -237,7 +246,7 @@ DeepSeek v4 Pro + autocompact & \$0.75 & 43.8\% & 17.1 & \textbf{0.0\%} & \$64.5
 \centering
 \includegraphics[width=0.95\linewidth]{cybench_comparison.png}
 % Internal source: source chart pipeline output copied as figures/cybench_comparison.png.
-\caption{Cybench hard-variant cost-success comparison.}
+\caption{Cybench hard-variant cost-success comparison. \PK{add information about the reasoning efforts used for frontier models}}
 \label{fig:cybench-comparison}
 \end{figure}
 
