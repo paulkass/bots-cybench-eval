@@ -37,6 +37,7 @@
 \showcommentstrue
 \newcommand{\inlinecomment}[3]{\ifshowcomments\textcolor{#1}{\textbf{[#2:} #3\textbf{]}}\fi}
 \newcommand{\PK}[1]{\inlinecomment{teal}{Paul}{#1}}
+\newcommand{\BN}[1]{\inlinecomment{brown}{Blaine}{#1}}
 \newcommand{\YS}[1]{\inlinecomment{magenta}{Yaron}{#1}}
 
 \newcommand{\BOTSvOne}{BOTS~v1}
@@ -204,21 +205,30 @@ Table~\ref{tab:cost-pricing} summarizes the pricing assumptions used in the repo
 
 \begin{table}[t]
 \centering
-\caption{Cost-accounting assumptions for model and external-tool spend.}
+\caption{Cost-accounting assumptions for model and tool spend.}
 \label{tab:cost-pricing}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lll}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.14\linewidth}>
+                  {\raggedright\arraybackslash}p{0.30\linewidth}>
+                  {\raggedright\arraybackslash}p{0.34\linewidth}>
+                  {\raggedright\arraybackslash}p{0.14\linewidth}@{}}
 \toprule
-Cost item & Unit price in reports & Charged when \\
+Availability & Cost item & Unit price in reports & Per-question limit \\
 \midrule
-Model inference & Provider ledger or registered per-token rate sheet & Every model call \\
-Brave Search & \$0.005 per request & Successful API request \\
-WhoisXMLAPI WHOIS History preview & 1 DRS credit = \$0.0258 & Successful non-cache preview \\
-WhoisXMLAPI WHOIS History purchase & 50 DRS credits = \$1.29 & Successful non-cache purchase \\
-VirusTotal public API & \$0 marginal cost & Not added to dollar totals \\
-Splunk, \texttt{bash}, \texttt{python}, DNS, live WHOIS/RDAP & \$0 marginal cost & Not added to dollar totals \\
+Shared & Model inference & Provider ledger or registered per-token rate sheet & Cost cap only \\
+ & \texttt{bash}, \texttt{python} & \$0 marginal cost & None \\
+\midrule
+BOTSv1 only & Splunk discovery & \$0 marginal cost & None \\
+ & Splunk search  & \$0 marginal cost & None \\
+ & Splunk event drill-down & \$0 marginal cost & None \\
+\cmidrule(l){2-4}
+ & Brave Search & \$0.005 per request & 5 calls \\
+ & WhoisXMLAPI history preview & \$0.0258 per request & 3 total calls \\
+ & WhoisXMLAPI history purchase & \$1.29 per request & 3 total calls \\
+ & VirusTotal public API & \$0 marginal cost & 3 calls \\
+ & DNS, live WHOIS/RDAP & \$0 marginal cost & None \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 In order to manage overall costs, we cap the cost for each sample run.
@@ -229,18 +239,17 @@ Most successful models finish way below the cost budget cap.
 We decompose cost into inference spend and priced-tool spend.
 For Cybench, reported cost is model-token cost recorded by the evaluation harness or reconstructed from token counts and registered rates where needed.
 For BOTS, we start with model-token cost and add priced external enrichment calls recorded during the run.
-We charge Brave Search at \$0.005 per request and non-cache WhoisXMLAPI WHOIS History credits at a paid-plan conversion of \$129 per 5,000 credits.
+We charge Brave Search at \$0.005 per request, WhoisXMLAPI WHOIS History preview at \$0.0258 per request, and WhoisXMLAPI WHOIS History purchase at \$1.29 per request.
 We treat VirusTotal public API, DNS, and live WHOIS/RDAP as zero marginal cost.
-\PK{potentially worth repricing these based on "live estimates"}
 % We exclude infrastructure costs for Kubernetes, Splunk, storage, and analyst review time.
-We exclude costs for \texttt{bash}, \texttt{python}, and Splunk calls.
-We use a host-side cache for WhoisXMLAPI history responses to avoid repeated provider requests during evaluation; cached WhoisXMLAPI calls are still assigned their corresponding DRS-credit value in reported tool-cost metrics so costs reflect expected tool use rather than cache state.
+We exclude costs for \texttt{bash}, \texttt{python}, and the three Splunk tool types.
+We use a host-side cache for WhoisXMLAPI history responses to avoid repeated provider requests during evaluation; cached WhoisXMLAPI calls are still assigned their corresponding dollar value in reported tool-cost metrics so costs reflect expected tool use rather than cache state.
 
 
 \section{Evaluation Results}
 \label{sec:results}
 
-We report results for the model set evaluated on both benchmark families: GPT-5.5, Claude Opus 4.8, DeepSeek v4 Flash, DeepSeek v4 Pro, and GPT-5.4 Mini.
+We report results for the model set evaluated on both benchmark families: GPT-5.5, Claude Opus 4.8, DeepSeek v4 Flash, and DeepSeek v4 Pro.
 For BOTSv1 we additionally include GPT-5.5 at high reasoning effort, the closest available comparison to Claude Opus 4.8, whose default setting is high effort.
 
 \subsection{Offensive CTFs}
@@ -268,7 +277,6 @@ DeepSeek v4 Flash & \$2.10 & 86.4\% & 33.7 & \textbf{0.0\%} & \$48.88 & \$1.45 &
 Claude Opus 4.8 & \$2.10 & 74.4\% & 29.0 & \textbf{0.0\%} & \$108.21 & \$3.73 & 26.7 \\
 DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & \textbf{0.0\%} & \$30.43 & \textbf{\$1.03} & 95.9 \\
 DeepSeek v4 Pro & \$0.75 & 43.8\% & 17.1 & \textbf{0.0\%} & \$64.58 & \$3.78 & 21.3 \\
-GPT-5.4 Mini & \$0.80 & 29.0\% & 11.3 & 60.7\% & \textbf{\$13.77} & \$1.22 & 20.9 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -297,7 +305,6 @@ GPT-5.5 & \$2.10 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & \$56.42 & \$6.76 & 1
 DeepSeek v4 Pro & \$2.10 & 8{,}013.3 / 10{,}300 & 77.8\% & 84.9\% & \$71.82 & \$8.96 & 3{,}363 \\
 DeepSeek v4 Flash & \$4.20 & 7{,}610.0 / 10{,}300 & 73.9\% & 81.7\% & \$39.29 & \$5.16 & 4{,}938 \\
 DeepSeek v4 Flash & \$2.10 & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & \$43.50 & \$5.79 & 4{,}450 \\
-GPT-5.4 Mini & \$2.10 & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \textbf{\$25.06} & \$8.86 & 1{,}693 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -351,7 +358,6 @@ GPT-5.5 & 91.5\%$\rightarrow$94.0\% & +2.6 [0.0, 6.0] & 74.1\%$\rightarrow$81.0\
 Claude Opus 4.8 & 55.6\%$\rightarrow$74.4\% & +18.8 [10.3, 29.1] & 91.3\%$\rightarrow$93.9\% & +2.6 [0.0, 7.3] \\
 DeepSeek v4 Flash & 76.1\%$\rightarrow$86.3\% & +10.3 [4.3, 17.1] & 73.0\%$\rightarrow$73.0\% & +0.0 [0.0, 0.0] \\
 DeepSeek v4 Pro & 43.9\%$\rightarrow$43.9\% & +0.0 [0.0, 0.0] & 73.8\%$\rightarrow$77.8\% & +4.0 [0.0, 9.5] \\
-GPT-5.4 Mini & 26.5\%$\rightarrow$29.1\% & +2.6 [0.0, 6.0] & 27.5\%$\rightarrow$27.5\% & +0.0 [0.0, 0.0] \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -359,7 +365,7 @@ GPT-5.4 Mini & 26.5\%$\rightarrow$29.1\% & +2.6 [0.0, 6.0] & 27.5\%$\rightarrow$
 On Cybench, budget sensitivity is real but far from uniform.
 Claude Opus 4.8 gains 18.8 percentage points when allowed to run past the \$0.80 cap, and DeepSeek v4 Flash gains 10.3 points; both bootstrap intervals are clearly positive.
 GPT-5.5 gains only 2.6 points, because most of the challenges it solves already complete below \$0.80.
-The near-zero deltas for DeepSeek v4 Pro and GPT-5.4 Mini should not be read as evidence that those models cannot scale: their runs were capped at low prospective limits, so their observed traces offer little high-budget headroom to replay.
+The near-zero Cybench delta for DeepSeek v4 Pro should not be read as evidence that the model cannot scale: the run was capped at a low prospective limit, so its observed trace offers little high-budget headroom to replay.
 
 BOTSv1 shows a different shape.
 Claude Opus 4.8 captures most of its points below \$0.80, and does so with only 603 non-submit tool calls over the full run.
@@ -436,7 +442,6 @@ DeepSeek v4 Flash & \$2.10 & 86.3\% & 76.9--94.9\% \\
 DeepSeek v4 Flash & \$0.80 & 76.1\% & 63.2--87.2\% \\
 Claude Opus 4.8 & \$2.10 & 74.4\% & 61.5--86.3\% \\
 DeepSeek v4 Pro & \$0.75 & 43.9\% & 29.8--57.9\% \\
-GPT-5.4 Mini & \$0.80 & 29.1\% & 16.2--42.7\% \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -463,7 +468,6 @@ GPT-5.5 & \$2.10 & 81.0\% & 64.1--96.4\% \\
 DeepSeek v4 Pro & \$2.10 & 77.8\% & 61.0--93.1\% \\
 DeepSeek v4 Flash & \$4.20 & 73.9\% & 53.2--91.9\% \\
 DeepSeek v4 Flash & \$2.10 & 73.0\% & 52.7--91.1\% \\
-GPT-5.4 Mini & \$2.10 & 27.5\% & 14.9--42.3\% \\
 \bottomrule
 \end{tabular}}
 \end{table}
