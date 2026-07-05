@@ -46,14 +46,14 @@
 \maketitle
 
 \begin{abstract}
-Security-agent evaluations commonly measure peak offensive capability under generous inference budgets, emphasizing vulnerability discovery, exploit development, penetration testing, and CTF completion. 
+Security-agent evaluations commonly measure peak offensive capability under generous inference budgets, emphasizing vulnerability discovery, exploit development, penetration testing, and CTF completion.
 Such measurements are useful but incomplete: in operational security, every reasoning step, tool call, telemetry query, and enrichment request consumes budget.
-We evaluate language-model security agents through this cost-success lens on offensive Cybench challenges and defensive Splunk BOTS v1 investigation challenges. 
+We evaluate language-model security agents through this cost-success lens on offensive Cybench challenges and defensive Splunk BOTS v1 investigation challenges.
 Instead of reporting only best-case success, we compare models at fixed cost levels and decompose performance by inference spend and tool spend.
-Our results show distinct scaling regimes for red- and blue-team tasks. 
-Offensive CTF performance improves with additional test-time compute, and scaled open-weight models can approach frontier proprietary systems while remaining cost-competitive. 
+Our results show distinct scaling regimes for red- and blue-team tasks.
+Offensive CTF performance improves with additional test-time compute, and scaled open-weight models can approach frontier proprietary systems while remaining cost-competitive.
 Defensive SOC investigation does not scale in the same way: success depends more heavily on disciplined tool use, telemetry navigation, and selective enrichment than on raw reasoning budget alone.
-We argue that security-agent benchmarks should measure economic efficiency and operational fit alongside task success. 
+We argue that security-agent benchmarks should measure economic efficiency and operational fit alongside task success.
 Cost-aware, SOC-native evaluations provide a clearer picture of which models are practically useful today and where defensive agents still need to improve.
 \end{abstract}
 
@@ -129,9 +129,9 @@ Because BOTSv1 is public and old, Appendix~\ref{app:bots-no-tools} treats no-too
 
 We use the Inspect evaluation framework \citep{inspect_ai_2024} to organize the experiments.
 We use a ReAct-style agent with auto-compaction \citep{yao2023react} for all benchmark runs.
-We auto-compacted when the agent context reached \texttt{90\%} of the model context window.
+We auto-compacted when the agent context reached 90\% of the model context window.
 Auto-compaction used Inspect AI's automatic compaction strategy, which attempts provider-native compaction and falls back to summary-based compaction \citep{inspect_ai_compaction_source}.
-Between offensive and defensive tasks, we only change the suite of available tools. 
+Between offensive and defensive tasks, we only change the suite of available tools.
 % The unit of comparison is the benchmark operating point: model, task family, cost limit, tools, and scoring rule.
 % For each operating point, we report aggregate success, inference cost, priced-tool cost where applicable, and tool-use volume.
 % Internal provenance for quantitative claims is tracked in tables/provenance.md.
@@ -155,12 +155,14 @@ Operationally, we only see that $<$ 5\% of prompts missed the cache. \PK{verify}
 \subsection{Offensive benchmark: Cybench}
 \label{sec:cybench-method}
 
-Cybench is a CTF-style benchmark in which an agent interacts with a sandbox and submits a challenge flag.
-We score a sample as correct when the submitted flag includes the expected answer, and aggregate pass@1 as mean correctness across three epochs.
+Cybench is an offensive CTF benchmark with 39 challenges in the full set, drawn from four cybersecurity competitions (including HackTheBox, Glacier, SEKAI, and HKCert) and spanning domains such as cryptography, web exploitation, reverse engineering, forensics, and exploitation \citep{inspect_evals_cybench}.
+Each sample requires an agent to solve a sandboxed offensive security challenge (web/app exploitation, binary/pwn, reversing, crypto, web/forensic workflows, and other hands-on tasks) and submit a hidden challenge flag token (typically brace-delimited strings such as \texttt{HTB\{\dots\}}, \texttt{gctf\{\dots\}}, or \texttt{SEKAI\{\dots\}}).
+Submitted answers are judged with a case-insensitive substring match against the reference flag; each challenge allows up to 3 submission attempts and we score by averaging binary correctness across three independent epochs (per-sample mean correctness, then averaged across all challenges).
 
 We use the Cybench hard variant from Inspect Evals \citep{inspect_evals_cybench} to perform the evaluations.
 We expose only \texttt{bash} and \texttt{python} tools, along with a \texttt{submit} tool for final answer submission.
-We limited the number of submission attempts to 3. 
+All tools are considered to be zero-cost.
+We limited the number of submission attempts to 3.
 %run three epochs with a mean reducer; and score with the upstream \texttt{includes} accuracy metric.
 %We report solved count as solved-equivalent challenges: mean correctness over three epochs multiplied by the 39-challenge denominator.
 % Internal caveat: most rows used Docker; Claude Opus 4.8 used Kubernetes after local Docker subnet exhaustion.
@@ -169,14 +171,12 @@ We limited the number of submission attempts to 3.
 % Per-sample cost limits, provider routing, concurrency, sandbox backend, and retry accounting differ across rows.
 %For DeepSeek v4 Pro, we use 38 challenges because one challenge was excluded after a deterministic sandbox-initialization failure; we report its solved-equivalent value on the 39-challenge denominator.
 
-\PK{add more details about metrics}
-
 \subsection{Defensive benchmark: BOTS v1}
 \label{sec:bots-method}
 
 \BOTSvOne{} is a public Splunk incident-investigation dataset and CTF platform for information security professionals, researchers, students, and enthusiasts \citep{splunk_botsv1}.
 There were no public implementations of \BOTSvOne{} available so we implemented the benchmark in \Inspect{}.
-The official BOTS format is a points game over sequential forensic questions, not a flat binary questionnaire.
+Unlike a flat set of independent binary questions, the official BOTS format is a sequential, point-based investigation in which later questions can depend on earlier findings.
 \BOTSvOne{} contains a warm-up plus 31 scored questions covering the Po1s0n1vy web-defacement investigation and Cerber ransomware at Wayne Enterprises.
 Each scored question has official base points and, where applicable, ordered hints with point costs.
 After an incorrect submission the next hint is revealed; a later correct answer earns base points minus consumed hint costs, while an unanswered or still-incorrect question earns zero.
@@ -184,7 +184,7 @@ After an incorrect submission the next hint is revealed; a later correct answer 
 We exclude the official warm-up question, leaving 31 scored questions worth 10,300 official competition points.
 Agents receive Splunk discovery, search, and event-inspection tools over Splunk Search Processing Language \citep{splunk_search_reference}, plus limited VirusTotal, WHOIS, DNS, Brave Search, bash, and Python tools \citep{virustotal_api,whoisxmlapi_whois_history,brave_search_api,rfc3912,rfc1035}.
 We make Splunk telemetry the primary evidence source in the prompt and ask agents to use external enrichment selectively.
-To preserve cost efficiency, we limit the calls to VirusTotal and WhoISXML APIs to 3 calls while limiting web search to 5 calls. 
+To preserve cost efficiency, we limit the calls to VirusTotal and WhoISXML APIs to 3 calls while limiting web search to 5 calls.
 We implement strict keyword filtering to prevent competition writeups and solution leakage.
 
 We use \texttt{bots\_points} as the primary metric: a correct answer earns official points minus hint penalties; an incorrect answer earns zero.
@@ -233,9 +233,7 @@ We treat VirusTotal public API, DNS, and live WHOIS/RDAP as zero marginal cost.
 \PK{potentially worth repricing these based on "live estimates"}
 % We exclude infrastructure costs for Kubernetes, Splunk, storage, and analyst review time.
 We exclude costs for \texttt{bash}, \texttt{python}, and Splunk calls.
-
-Because these are descriptive runs, we avoid universal model rankings.
-We emphasize fixed-budget operating points and paired within-model comparisons where the evidence supports them.
+We use a host-side cache for WhoisXMLAPI history responses to avoid repeated provider requests during evaluation; cached WhoisXMLAPI calls are still assigned their corresponding DRS-credit value in reported tool-cost metrics so costs reflect expected tool use rather than cache state.
 
 \section{Evaluation Results}
 \label{sec:results}
@@ -293,7 +291,7 @@ BOTSv1 changes the optimization problem.
 The agent must search Splunk telemetry, use prerequisite case context, decide when to enrich externally, and submit precise answers under an official point-and-hint scheme.
 In Table~\ref{tab:bots}, we report the full-agent results with model-token and priced-tool spend combined.
 Claude Opus 4.8 leads with 9,666.7 of 10,300 points (93.9\%) and 96.8\% binary accuracy.
-It also has the best observed cost-success profile: \$13.24 in model-plus-priced-tool spend and 603 total non-submit tool calls across the 31 questions and three epochs.
+It also has the best observed points-per-dollar profile: \$28.80 in model-plus-priced-tool spend, \$2.98 per 1k points, and 603 total non-submit tool calls across the 31 questions and three epochs.
 
 \begin{table}[t]
 \centering
@@ -305,13 +303,13 @@ It also has the best observed cost-success profile: \$13.24 in model-plus-priced
 \toprule
 Model & cost cap & BOTS points & points & binary acc. & model+tools & \$/1k pts & tool calls \\
 \midrule
-DeepSeek v4 Flash & \$4.20 & 7{,}610.0 / 10{,}300 & 73.9\% & 81.7\% & \$23.29 & \$3.06 & 4{,}938 \\
-Claude Opus 4.8 & \$2.10 & \textbf{9{,}666.7 / 10{,}300} & \textbf{93.9\%} & \textbf{96.8\%} & \textbf{\$13.24} & \textbf{\$1.37} & \textbf{603} \\
-GPT-5.5 (high effort) & \$2.10 & \underline{8{,}383.3 / 10{,}300} & \underline{81.4\%} & \underline{91.4\%} & \$48.98 & \$5.84 & 1{,}580 \\
-GPT-5.5 & \$2.10 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & \$47.28 & \$5.67 & \underline{1{,}481} \\
-DeepSeek v4 Pro & \$2.10 & 8{,}013.3 / 10{,}300 & 77.8\% & 84.9\% & \$46.92 & \$5.86 & 3{,}363 \\
-DeepSeek v4 Flash & \$2.10 & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & \$22.53 & \underline{\$3.00} & 4{,}450 \\
-GPT-5.4 Mini & \$2.10 & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \underline{\$19.79} & \$7.00 & 1{,}693 \\
+DeepSeek v4 Flash & \$4.20 & 7{,}610.0 / 10{,}300 & 73.9\% & 81.7\% & \$39.29 & \underline{\$5.16} & 4{,}938 \\
+Claude Opus 4.8 & \$2.10 & \textbf{9{,}666.7 / 10{,}300} & \textbf{93.9\%} & \textbf{96.8\%} & \underline{\$28.80} & \textbf{\$2.98} & \textbf{603} \\
+GPT-5.5 (high effort) & \$2.10 & \underline{8{,}383.3 / 10{,}300} & \underline{81.4\%} & \underline{91.4\%} & \$64.57 & \$7.70 & 1{,}580 \\
+GPT-5.5 & \$2.10 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & \$56.42 & \$6.76 & \underline{1{,}481} \\
+DeepSeek v4 Pro & \$2.10 & 8{,}013.3 / 10{,}300 & 77.8\% & 84.9\% & \$71.82 & \$8.96 & 3{,}363 \\
+DeepSeek v4 Flash & \$2.10 & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & \$43.50 & \$5.79 & 4{,}450 \\
+GPT-5.4 Mini & \$2.10 & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \textbf{\$25.06} & \$8.86 & 1{,}693 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -319,11 +317,11 @@ GPT-5.4 Mini & \$2.10 & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \underline{\$19
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{botsv1_cost_with_tools.png}
-\caption{BOTSv1 cost budget with model-token and priced external-tool spend. Priced external tools include Brave Search and charged WhoisXMLAPI calls.}
+\caption{BOTSv1 cost budget with model-token and priced external-tool spend. Priced external tools include Brave Search and WhoisXMLAPI calls, including cached WhoisXMLAPI responses assigned the same DRS-credit value as fresh responses.}
 \label{fig:bots-cost}
 \end{figure}
 
-GPT-5.5 reaches about 81\% of points, but spends \$47--49 and uses roughly 1,500 calls.
+GPT-5.5 reaches about 81\% of points, but spends \$56--65 and uses roughly 1,500 calls.
 We see the contrast with Cybench in DeepSeek v4 Flash: raising its cap from \$2.10 to \$4.20 changes BOTSv1 points from 73.0\% to 73.9\%, a small and statistically inconclusive gain, while tool calls rise from 4,450 to 4,938.
 We estimate a paired question-level bootstrap interval of -4.9 to +6.9 percentage points for that change.
 For this defensive workload, additional raw budget and more tool volume do not substitute for disciplined evidence gathering.
