@@ -245,28 +245,29 @@ We emphasize fixed-budget operating points and paired within-model comparisons w
 
 In Table~\ref{tab:cybench}, we report the Cybench hard-variant cost-success table.
 % GPT-5.5 is the top observed row at a 94.1\% single-run success rate and \$1.16 per solved-equivalent challenge.
-GPT-5.5 tops the chart with 94.1\% success rate at only \$1.16 per-challenge solve cost.
-The clearest fixed-cost comparison is within a single model family: DeepSeek v4 Flash rises from a 64.1\% single-run success rate at a \$0.80 cap to 86.4\% at a \$2.10 cap.
+GPT-5.5 tops the chart with a 94.1\% success rate at \$1.16 per-challenge solve cost.
+The clearest fixed-cost comparison is within a single model family: under a retrospective cap applied to the same DeepSeek v4 Flash trace, sample-epochs above \$0.80 count as failures and the row reaches 76.1\% success, compared with 86.4\% when the full \$2.10 cap is allowed.
 That higher-budget run solves 33.7 of 39 challenge-equivalents at \$1.45 per solve, close to GPT-5.5's 36.7 solved at \$1.16 per solve and above the Claude Opus rows on both success and cost per solve.
 
 \begin{table}[t]
 \centering
 % Internal source: source-eval-repo/charts/cybench_report.html and cybench_cost_table.csv plus raw-log tool-event counts.
 % GPT-5.5 is grouped under the designated $2.10 cap here; its successful Inspect log header records cost_limit=None.
-\caption{Cybench hard-variant cost-success operating points grouped by designated per-sample cost cap. Mean tool calls count non-submit tool events. Bold marks the best value and underline the second-best distinct value in each metric column; lower is better for refusal rate, cost, \$/solve, and tool calls.}
+% DeepSeek v4 Flash $0.80 row is a retrospective cap applied to logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval.
+\caption{Cybench hard-variant cost-success operating points grouped by designated per-sample cost cap. The DeepSeek v4 Flash \$0.80 row is a retrospective event-level cap on the \$2.10 trace: sample-epochs above \$0.80 count as failures, with spend and tool calls accumulated through the crossing model call. Mean tool calls count non-submit tool events. Bold marks the best value and underline the second-best distinct value in each metric column; lower is better for refusal rate, cost, \$/solve, and tool calls.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrr}
 \toprule
 Model & cost cap & success rate & solved & refusal rate & run cost & \$/solve & mean tool calls \\
 \midrule
-GPT-5.5 & \$2.10 & \textbf{94.1\%} & \textbf{36.7} & \textbf{0.0\%} & \underline{\$42.47} & \textbf{\$1.16} & \underline{20.6} \\
+GPT-5.5 & \$2.10 & \textbf{94.1\%} & \textbf{36.7} & \textbf{0.0\%} & \$42.47 & \underline{\$1.16} & \underline{20.6} \\
 DeepSeek v4 Flash & \$2.10 & \underline{86.4\%} & \underline{33.7} & \textbf{0.0\%} & \$48.88 & \$1.45 & 144.7 \\
 Claude Opus 4.8 & \$2.10 & 74.4\% & 29.0 & \textbf{0.0\%} & \$108.21 & \$3.73 & 26.7 \\
 Claude Opus 4.7 & \$2.10 & 71.0\% & 27.7 & \textbf{0.0\%} & \$92.75 & \$3.35 & \textbf{19.7} \\
 Kimi K2.6 & \$0.85 & 55.6\% & 21.7 & \textbf{0.0\%} & \$58.55 & \$2.70 & 38.1 \\
-DeepSeek v4 Flash & \$0.80 & 64.1\% & 25.0 & \textbf{0.0\%} & \$43.09 & \$1.72 & 65.4 \\
-GPT-5.4 Mini & \$0.80 & 29.0\% & 11.3 & \underline{60.7\%} & \textbf{\$13.77} & \underline{\$1.22} & 20.9 \\
+DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & \textbf{0.0\%} & \underline{\$30.43} & \textbf{\$1.03} & 95.9 \\
+GPT-5.4 Mini & \$0.80 & 29.0\% & 11.3 & \underline{60.7\%} & \textbf{\$13.77} & \$1.22 & 20.9 \\
 DeepSeek v4 Pro & \$0.75 & 43.8\% & 17.1 & \textbf{0.0\%} & \$64.58 & \$3.78 & 21.3 \\
 \bottomrule
 \end{tabular}}
@@ -275,13 +276,13 @@ DeepSeek v4 Pro & \$0.75 & 43.8\% & 17.1 & \textbf{0.0\%} & \$64.58 & \$3.78 & 2
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{cybench_comparison.png}
-% Internal source: source chart pipeline output copied as figures/cybench_comparison.png.
-\caption{Cybench hard-variant cost-success comparison. \PK{add information about the reasoning efforts used for frontier models}}
+% Internal source: regenerated from source-eval rows; DeepSeek v4 Flash $0.80 row uses the retrospective cap described in Table~\ref{tab:cybench}.
+\caption{Cybench hard-variant cost-success comparison. The DeepSeek v4 Flash \$0.80 bar uses the retrospective cap described in Table~\ref{tab:cybench}. \PK{add information about the reasoning efforts used for frontier models}}
 \label{fig:cybench-comparison}
 \end{figure}
 
-We estimate the paired DeepSeek v4 Flash budget contrast at +22.2 percentage points by challenge-level bootstrap, with a 95\% interval of +12.8 to +32.5 percentage points.
-We treat this as the strongest supported offensive scaling claim in these runs.
+We estimate the paired DeepSeek v4 Flash budget contrast at +10.3 percentage points by challenge-level bootstrap, with a 95\% interval of +4.3 to +17.1 percentage points.
+We treat this retrospective cap comparison as the strongest supported offensive scaling claim in these runs.
 The tool-call data show why cost and success should be reported together: GPT-5.5 averages 20.6 non-submit tool events per sample epoch, while the higher-budget DeepSeek v4 Flash row averages 144.7.
 We therefore present the Cybench result as a model-and-budget operating point in a permissive CTF sandbox, not evidence that more calls alone cause success.
 
@@ -418,7 +419,7 @@ Paired contrasts resample only task IDs common to both compared runs.
 
 \begin{table}[h]
 \centering
-\caption{Cybench challenge-level bootstrap intervals.}
+\caption{Cybench challenge-level bootstrap intervals. The DeepSeek v4 Flash \$0.80 row uses the same retrospective cap as Table~\ref{tab:cybench}.}
 \label{tab:cybench-bootstrap}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrr}
@@ -427,9 +428,9 @@ Model & cost cap & success rate & 95\% bootstrap interval \\
 \midrule
 GPT-5.5 & \$2.10 & 94.0\% & 87.2--99.2\% \\
 DeepSeek v4 Flash & \$2.10 & 86.3\% & 76.9--94.9\% \\
+DeepSeek v4 Flash & \$0.80 & 76.1\% & 63.2--87.2\% \\
 Claude Opus 4.8 & \$2.10 & 74.4\% & 61.5--86.3\% \\
 Claude Opus 4.7 & \$2.10 & 70.9\% & 59.0--82.9\% \\
-DeepSeek v4 Flash & \$0.80 & 64.1\% & 50.4--76.9\% \\
 Kimi K2.6 & \$0.85 & 55.6\% & 41.0--70.1\% \\
 DeepSeek v4 Pro & \$0.75 & 43.9\% & 29.8--57.9\% \\
 GPT-5.4 Mini & \$0.80 & 29.1\% & 16.2--42.7\% \\
@@ -437,7 +438,7 @@ GPT-5.4 Mini & \$0.80 & 29.1\% & 16.2--42.7\% \\
 \end{tabular}}
 \end{table}
 
-We treat the paired DeepSeek v4 Flash budget comparison as the strongest Cybench scaling claim: the \$2.10-cap run exceeds the \$0.80-cap run by 22.2 percentage points, with a challenge-level paired bootstrap interval of +12.8 to +32.5 percentage points.
+We treat the paired DeepSeek v4 Flash budget comparison as the strongest Cybench scaling claim: the \$2.10-cap run exceeds the retrospective \$0.80 cap by 10.3 percentage points, with a challenge-level paired bootstrap interval of +4.3 to +17.1 percentage points.
 GPT-5.5 exceeds the higher-budget DeepSeek v4 Flash row by 7.7 percentage points, with interval +1.7 to +15.4 percentage points.
 Claude Opus 4.8 does not close the gap to those leaders: paired contrasts are GPT-5.5 minus Claude Opus 4.8 = +19.7 percentage points [+9.4, +30.8] and higher-budget DeepSeek v4 Flash minus Claude Opus 4.8 = +12.0 percentage points [+1.7, +23.1].
 
