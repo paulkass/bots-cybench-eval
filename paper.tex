@@ -39,6 +39,9 @@
 \newcommand{\PK}[1]{\inlinecomment{teal}{Paul}{#1}}
 \newcommand{\YS}[1]{\inlinecomment{magenta}{Yaron}{#1}}
 
+\newcommand{\BOTSvOne}{BOTS~v1}
+\newcommand{\Inspect}{Inspect}
+
 \begin{document}
 \maketitle
 
@@ -126,15 +129,22 @@ Because BOTSv1 is public and old, Appendix~\ref{app:bots-no-tools} treats no-too
 
 We use the Inspect evaluation framework \citep{inspect_ai_2024} to organize the experiments.
 We use a ReAct-style agent with auto-compaction \citep{yao2023react} for all benchmark runs.
-The unit of comparison is the benchmark operating point: model, task family, cost limit, tools, and scoring rule.
-For each operating point, we report aggregate success, inference cost, priced-tool cost where applicable, and tool-use volume.
+We auto-compacted when the agent context reached \texttt{90\%} of the model context window.
+Auto-compaction defaulted to the provider-native version and fell back to summary-based compaction \PK{TODO: cite the code for this} in case of failure.
+Between offensive and defensive tasks, we only change the suite of available tools. 
+% The unit of comparison is the benchmark operating point: model, task family, cost limit, tools, and scoring rule.
+% For each operating point, we report aggregate success, inference cost, priced-tool cost where applicable, and tool-use volume.
 % Internal provenance for quantitative claims is tracked in tables/provenance.md.
+
+\PK{add more details about how we aggregate metrics and which metrics we tracked}
+
 
 \subsection{Offensive benchmark: Cybench}
 \label{sec:cybench-method}
 
 We use the Cybench-hard benchmark from Inspect \PK{todo: cite} to perform the evaluations.
 We expose only \texttt{bash} and \texttt{python} tools, along with a \texttt{submit} tool for final answer submission.
+We limited the number of submission attempts to 3. 
 %run three epochs with a mean reducer; and score with the upstream \texttt{includes} accuracy metric.
 %We report solved count as fractional pass@1: mean correctness over three epochs multiplied by the 39-challenge denominator.
 % Internal caveat: most rows used Docker; Claude Opus 4.8 used Kubernetes after local Docker subnet exhaustion.
@@ -143,33 +153,42 @@ We do not present the Cybench rows as a fully controlled model-only experiment.
 Per-sample cost limits, provider routing, concurrency, sandbox backend, and retry accounting differ across rows.
 %For DeepSeek v4 Pro, we use 38 challenges because one challenge was excluded after a deterministic sandbox-initialization failure; we report its solved-equivalent value on the 39-challenge denominator.
 
-
+\PK{add more details about metrics}
 
 \subsection{Defensive benchmark: BOTS v1}
 \label{sec:bots-method}
 
-BOTS v1 is a public Splunk incident-investigation benchmark.
+\BOTSvOne{} is a public Splunk incident-investigation benchmark developed for \texttt{.conf} conference. \PK{TODO: cite}
+There were no public implementations of \BOTSvOne{} available so we implemented the benchmark in \Inspect{}.
+
 We exclude the official warm-up question, leaving 31 scored questions worth 10,300 official competition points.
-Agents receive Splunk discovery, search, and event-inspection tools plus limited VirusTotal, WHOIS, DNS, Brave Search, bash, and Python tools.
+Agents receive Splunk discovery, search, and event-inspection tools plus limited VirusTotal, WHOIS, DNS, Brave Search, bash, and Python tools. \PK{todo: cite the tools that are not bash or python}
 We make Splunk telemetry the primary evidence source in the prompt and ask agents to use external enrichment selectively.
+To preserve cost efficiency, we limit the calls to VirusTotal and WhoISXML APIs to 3 calls while limiting web search to 5 calls. 
+We implement strict keyword filtering to prevent competition writeups and solution leakage.
 
 We use \texttt{bots\_points} as the primary metric: a correct answer earns official points minus hint penalties; an incorrect answer earns zero.
+Hints are revealed with every unsuccessful answer.
 We report binary \texttt{includes} accuracy as a secondary view.
 We use three epochs and mean reduction, so point totals are reduced back to the single-epoch 10,300-point scale.
 We provide prerequisite case context from earlier official questions for 23 of the 31 scored questions, matching the sequential investigation structure but making the task closer to follow-up analysis than cold-start incident reconstruction.
 
-BOTS v2 and v3 also exist, but comparable multi-model results are available only for v1.
-We therefore treat v2/v3 as future evaluation coverage rather than evidence for model comparison.
+%BOTS v2 and v3 also exist, but comparable multi-model results are available only for v1.
+%We therefore treat v2/v3 as future evaluation coverage rather than evidence for model comparison.
 
 \subsection{Cost accounting}
 \label{sec:cost-accounting}
+
+\PK{TODO: make table detailing cost pricing}
 
 We decompose cost into inference spend and priced-tool spend.
 For Cybench, reported cost is model-token cost recorded by the evaluation harness or reconstructed from token counts and registered rates where needed.
 For BOTS, we start with model-token cost and add priced external enrichment calls recorded during the run.
 We charge Brave Search at \$0.005 per request and non-cache WhoisXMLAPI WHOIS History credits at a paid-plan conversion of \$129 per 5,000 credits.
 We treat VirusTotal public API, DNS, and live WHOIS/RDAP as zero marginal cost.
-We exclude infrastructure costs for Kubernetes, Splunk, storage, and analyst review time.
+\PK{potentially worth repricing these based on "live estimates"}
+% We exclude infrastructure costs for Kubernetes, Splunk, storage, and analyst review time.
+We exclude costs for \texttt{bash}, \texttt{python}, and Splunk calls.
 
 Because these are descriptive runs, we avoid universal model rankings.
 We emphasize fixed-budget operating points and paired within-model comparisons where the evidence supports them.
