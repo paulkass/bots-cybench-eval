@@ -312,6 +312,23 @@ We construct such comparisons by replaying each completed trace under a \$0.80 p
 For Cybench, the cap follows model-call ledger events and marks a sample-epoch as failed once cumulative spend crosses \$0.80.
 For BOTSv1, the cap applies to model-token plus priced-tool spend and zeroes a sample-epoch's points once total sample cost exceeds \$0.80.
 These are descriptive replay analyses rather than new benchmark runs, but they avoid the confound of comparing unrelated models or unrelated traces.
+Figures~\ref{fig:cybench-scaling-panels} and~\ref{fig:botsv1-scaling-panels} show the corresponding resource curves.
+Cybench success rises with both per-sample dollar budget and cumulative token spend.
+BOTSv1 has a different scaling shape: Claude Opus 4.8 reaches the highest score at lower cost and with fewer tool calls, while higher-spend and higher-tool-volume runs do not necessarily win.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/cybench_scaling_panels}
+\caption{Cybench scaling curves. Left: success under retrospective per-sample cost budgets. Right: success as cumulative token budget increases. Extra compute buys additional solves for some traces, especially DeepSeek v4 Flash, while GPT-5.5 solves most successful challenges below lower budgets.}
+\label{fig:cybench-scaling-panels}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/botsv1_scaling_panels}
+\caption{BOTSv1 scaling curves. Left: official BOTS points under per-sample model-plus-priced-tool cost budgets. Right: binary answer accuracy under non-submit tool-call caps. More budget and more tool volume do not by themselves identify the best defensive agent.}
+\label{fig:botsv1-scaling-panels}
+\end{figure}
 
 \begin{table}[t]
 \centering
@@ -327,6 +344,27 @@ Claude Opus 4.8 & 55.6\%$\rightarrow$74.4\% & +18.8 [10.3, 29.1] & 91.3\%$\right
 DeepSeek v4 Flash & 76.1\%$\rightarrow$86.3\% & +10.3 [4.3, 17.1] & 73.0\%$\rightarrow$73.0\% & +0.0 [0.0, 0.0] \\
 DeepSeek v4 Pro & 43.9\%$\rightarrow$43.9\% & +0.0 [0.0, 0.0] & 73.8\%$\rightarrow$77.8\% & +4.0 [0.0, 9.5] \\
 GPT-5.4 Mini & 26.5\%$\rightarrow$29.1\% & +2.6 [0.0, 6.0] & 27.5\%$\rightarrow$27.5\% & +0.0 [0.0, 0.0] \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Table~\ref{tab:tool-call-headroom} repeats the paired replay with a lower operating point of 20 non-submit tool calls per sample.
+This cap is near the typical Cybench tool volume for the lower-tool models but is restrictive for tool-heavy BOTSv1 agents.
+
+\begin{table}[t]
+\centering
+\caption{Retrospective tool-call headroom above 20 non-submit tool calls per sample for the shared model set. Cybench reports success rate; BOTSv1 reports official \texttt{bots\_points}. Deltas are full-trace score minus the same trace capped at 20 tool calls; intervals are descriptive paired bootstraps over challenge IDs for Cybench and question IDs for BOTSv1.}
+\label{tab:tool-call-headroom}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrrrr}
+\toprule
+Model & Cybench 20 tools$\rightarrow$full & Cybench $\Delta$ pp & BOTSv1 20 tools$\rightarrow$full & BOTSv1 $\Delta$ pp \\
+\midrule
+GPT-5.5 & 64.1\%$\rightarrow$94.0\% & +29.9 [17.9, 42.7] & 70.8\%$\rightarrow$81.0\% & +10.2 [3.1, 17.6] \\
+Claude Opus 4.8 & 45.3\%$\rightarrow$74.4\% & +29.1 [17.9, 41.0] & 92.3\%$\rightarrow$93.9\% & +1.6 [0.0, 5.6] \\
+DeepSeek v4 Flash & 39.3\%$\rightarrow$86.3\% & +47.0 [33.3, 60.7] & 15.5\%$\rightarrow$73.0\% & +57.5 [38.4, 75.0] \\
+DeepSeek v4 Pro & 38.6\%$\rightarrow$43.9\% & +5.3 [0.9, 10.5] & 24.3\%$\rightarrow$77.8\% & +53.5 [36.1, 70.1] \\
+GPT-5.4 Mini & 28.2\%$\rightarrow$29.1\% & +0.9 [0.0, 2.6] & 18.3\%$\rightarrow$27.5\% & +9.1 [3.8, 15.2] \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -356,7 +394,9 @@ Cybench rows differ in cost limits, provider routing, concurrency, sandbox backe
 BOTSv1 rows are more uniform at the task level, though provider defaults and reasoning settings still vary across models.
 The bootstrap intervals in Appendix~\ref{app:uncertainty} are descriptive robustness checks, not formal population-level inferences.
 
-Our defensive analysis covers only BOTSv1; BOTS v2 and v3 exist, but comparable multi-model results are not yet available for them.
+Our defensive analysis covers only BOTSv1, the 32-question Po1s0n1vy/Cerber scenario built around a public Splunk dataset.
+BOTS v2 and v3 are not simple repeats of v1: v2 expands to a 51-question Frothly enterprise intrusion with a much larger endpoint, network, email, and web dataset, while v3 uses a 58-question cloud-heavy Frothly scenario spanning AWS CloudTrail, osquery, Windows, and network telemetry.
+Comparable multi-model results for these later versions are not yet available, so extending the same cost-aware analysis to BOTS v2 and v3 is future work.
 BOTSv1 is also public, answerable above chance without tools, and dependent on prerequisite context for many questions, and external-enrichment prices drift across providers and enterprise contracts.
 We therefore present the SOC conclusion as an evaluation-design result rather than a final claim about production SOC readiness.
 
