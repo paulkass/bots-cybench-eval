@@ -58,10 +58,7 @@ Source logs are the same shared-model rows listed in the Cybench and BOTSv1 prov
 - BOTSv1 cap rule: use per-sample model-token cost plus priced-tool cost; if total sample cost exceeds `$0.80`, score that sample epoch as zero BOTS points. Bootstrap resamples question IDs and retains epochs/official point weights.
 - Cybench full minus `$0.80` retrospective cap, percentage-point deltas: GPT-5.5 +2.6 [0.0, 6.0], Claude Opus 4.8 +18.8 [10.3, 29.1], DeepSeek v4 Flash +10.3 [4.3, 17.1], DeepSeek v4 Pro +0.0 [0.0, 0.0], GPT-5.4 Mini +2.6 [0.0, 6.0].
 - BOTSv1 full minus `$0.80` retrospective model+tool cap, percentage-point deltas: GPT-5.5 +6.9 [1.6, 13.5], Claude Opus 4.8 +2.6 [0.0, 7.3], DeepSeek v4 Flash +0.0 [0.0, 0.0], DeepSeek v4 Pro +4.0 [0.0, 9.5], GPT-5.4 Mini +0.0 [0.0, 0.0].
-- Section 5 scaling figures are two-panel composites generated read-only from the source chart loaders and logs: Cybench uses `source-eval-repo/charts/make_report.py` cost/token series; BOTSv1 uses `source-eval-repo/charts/make_botsv1_report.py` model-plus-priced-tool cost and non-submit tool-call cap series. Source HEAD was `508ef47` when copied.
-- Tool-call headroom table rule: cap each sample epoch at 20 non-submit tool calls; if a successful/correct epoch used more than 20 calls, count it as unsolved/zero points. This is a retrospective threshold analysis, not a prospective truncated rerun.
-- Cybench full minus 20-tool retrospective cap, percentage-point deltas: GPT-5.5 +29.9 [17.9, 42.7], Claude Opus 4.8 +29.1 [17.9, 41.0], DeepSeek v4 Flash +47.0 [33.3, 60.7], DeepSeek v4 Pro +5.3 [0.9, 10.5], GPT-5.4 Mini +0.9 [0.0, 2.6].
-- BOTSv1 full minus 20-tool retrospective cap, percentage-point deltas: GPT-5.5 +10.2 [3.1, 17.6], Claude Opus 4.8 +1.6 [0.0, 5.6], DeepSeek v4 Flash +57.5 [38.4, 75.0], DeepSeek v4 Pro +53.5 [36.1, 70.1], GPT-5.4 Mini +9.1 [3.8, 15.2].
+- Section 5 scaling figures are two-panel composites generated read-only from the source chart loaders and logs: Cybench uses `source-eval-repo/charts/make_report.py` cost/token series; BOTSv1 uses `source-eval-repo/charts/make_botsv1_report.py` model-plus-priced-tool cost/token series; the cross-benchmark tool-call figure combines `source-eval-repo/charts/cybench_tool_calls.png` and `source-eval-repo/charts/botsv1_tool_calls.png`. Source HEAD was `508ef47` when copied.
 
 ## BOTSv1 table provenance
 
