@@ -1,5 +1,6 @@
-\documentclass[pmlr]{jmlr}
+\documentclass[pmlr]{jmlr}% PMLR/CAMLIS proceedings template
 
+% The jmlr class loads amsmath, amssymb, natbib, graphicx, url, and algorithm2e.
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -7,13 +8,12 @@
 \usepackage{array}
 \usepackage{microtype}
 
-\graphicspath{{figures/}}
 \setlength{\bibsep}{0pt}
 \setlength{\emergencystretch}{3em}
 
-\jmlrvolume{0}
-\jmlryear{2026}
-\jmlrworkshop{CAMLIS 2026 Submission}
+\jmlrvolume{299}
+\jmlryear{2025}
+\jmlrworkshop{Conference on Applied Machine Learning for Information Security}
 
 \title[Cost-Aware Security Agent Evaluation]{Beyond Success Rate: Cost-Aware Evaluation of Offensive and Defensive Security Agents}
 
@@ -24,12 +24,12 @@
 \Name{Yaron Singer}
 }
 
-\editor{TBD}
+\editor{Edward Raff and Ethan M. Rudd}
 
 \hypersetup{
   pdftitle={Cost-Aware Evaluation of Offensive and Defensive Security Agents},
   pdfsubject={Cybersecurity benchmark evaluation},
-  pdfauthor={Paul Kassianik and Yaron Singer},
+  pdfauthor={Paul Kassianik, Blaine Nelson, and Yaron Singer},
   pdfkeywords={cybersecurity benchmarks, AI agents, Cybench, BOTS, SOC, cost accounting}
 }
 
@@ -273,7 +273,7 @@ DeepSeek v4 Pro & \$0.75 & 43.8\% & 17.1 & \textbf{0.0\%} & \$64.58 & \$3.78 & 2
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.95\linewidth]{cybench_comparison.png}
+\includegraphics[width=0.95\linewidth]{figures/cybench_comparison}
 % Internal source: regenerated from source-eval rows; DeepSeek v4 Flash $0.80 row uses the retrospective cap described in Table~\ref{tab:cybench}.
 \caption{Cybench hard-variant cost-success comparison. The DeepSeek v4 Flash \$0.80 bar uses the retrospective cap described in Table~\ref{tab:cybench}. \PK{add information about the reasoning efforts used for frontier models}}
 \label{fig:cybench-comparison}
@@ -316,7 +316,7 @@ GPT-5.4 Mini & \$2.10 & 2{,}828.3 / 10{,}300 & 27.5\% & 41.9\% & \textbf{\$25.06
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.95\linewidth]{botsv1_cost_with_tools.png}
+\includegraphics[width=0.95\linewidth]{figures/botsv1_cost_with_tools}
 \caption{BOTSv1 cost budget with model-token and priced external-tool spend. Priced external tools include Brave Search and WhoisXMLAPI calls, including cached WhoisXMLAPI responses assigned the same DRS-credit value as fresh responses.}
 \label{fig:bots-cost}
 \end{figure}
@@ -328,7 +328,7 @@ For this defensive workload, additional raw budget and more tool volume do not s
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.95\linewidth]{botsv1_tool_calls.png}
+\includegraphics[width=0.95\linewidth]{figures/botsv1_tool_calls}
 \caption{BOTSv1 binary accuracy under a non-submit tool-call cap. Samples above a cap are counted as unsolved, so the curve rewards correct answers reached with fewer tools.}
 \label{fig:bots-tools}
 \end{figure}
@@ -415,7 +415,7 @@ Paired contrasts resample only task IDs common to both compared runs.
 \section{Cybench Robustness}
 \label{app:cybench-robustness}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Cybench challenge-level bootstrap intervals. The DeepSeek v4 Flash \$0.80 row uses the same retrospective cap as Table~\ref{tab:cybench}.}
 \label{tab:cybench-bootstrap}
@@ -443,7 +443,7 @@ Claude Opus 4.8 does not close the gap to those leaders: paired contrasts are GP
 \section{BOTSv1 Robustness}
 \label{app:bots-robustness}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{BOTSv1 question-level bootstrap intervals.}
 \label{tab:bots-bootstrap}
@@ -481,15 +481,15 @@ These controls do not make BOTS useless; they make decontamination controls mand
 No-tools, no-context, perturbed-question, answer-before-query, private-holdout, or fresh-incident checks should accompany any public SOC benchmark before absolute scores are interpreted as capability evidence.
 BOTS remains useful as a reproducible harness and cost-accounting testbed; it should not be used as a clean leaderboard by itself.
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.95\linewidth]{botsv1_decontamination.png}
+\includegraphics[width=0.95\linewidth]{figures/botsv1_decontamination}
 % Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
 \caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are three-epoch mean runs. Only completed no-tools probes are shown.}
 \label{fig:bots-decontamination}
 \end{figure}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{BOTSv1 no-tools contamination-control results.}
 \label{tab:bots-no-tools}
