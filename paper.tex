@@ -146,7 +146,7 @@ We use the Cybench-hard benchmark from Inspect \PK{todo: cite} to perform the ev
 We expose only \texttt{bash} and \texttt{python} tools, along with a \texttt{submit} tool for final answer submission.
 We limited the number of submission attempts to 3. 
 %run three epochs with a mean reducer; and score with the upstream \texttt{includes} accuracy metric.
-%We report solved count as fractional pass@1: mean correctness over three epochs multiplied by the 39-challenge denominator.
+%We report solved count as solved-equivalent challenges: mean correctness over three epochs multiplied by the 39-challenge denominator.
 % Internal caveat: most rows used Docker; Claude Opus 4.8 used Kubernetes after local Docker subnet exhaustion.
 
 We do not present the Cybench rows as a fully controlled model-only experiment.
@@ -200,8 +200,8 @@ We emphasize fixed-budget operating points and paired within-model comparisons w
 \label{sec:cybench-results}
 
 In Table~\ref{tab:cybench}, we report the Cybench hard-variant cost-success table.
-GPT-5.5 is the top observed row at 94.1\% pass@1 and \$1.16 per solved-equivalent challenge.
-The clearest fixed-cost comparison is within a single model family: DeepSeek v4 Flash rises from 64.1\% pass@1 at a \$0.80 cap to 86.4\% at a \$2.10 cap.
+GPT-5.5 is the top observed row at a 94.1\% single-run success rate and \$1.16 per solved-equivalent challenge.
+The clearest fixed-cost comparison is within a single model family: DeepSeek v4 Flash rises from a 64.1\% single-run success rate at a \$0.80 cap to 86.4\% at a \$2.10 cap.
 That higher-budget run solves 33.7 of 39 challenge-equivalents at \$1.45 per solve, close to GPT-5.5's 36.7 solved at \$1.16 per solve and above the Claude Opus rows on both success and cost per solve.
 
 \begin{table}[t]
@@ -212,7 +212,7 @@ That higher-budget run solves 33.7 of 39 challenge-equivalents at \$1.45 per sol
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lrrrrr}
 \toprule
-Model & pass@1 & solved & run cost & \$/solve & mean tool calls \\
+Model & success rate & solved & run cost & \$/solve & mean tool calls \\
 \midrule
 GPT-5.5 + autocompact & 94.1\% & 36.7 & \$42.47 & \$1.16 & 20.6 \\
 DeepSeek v4 Flash + autocompact (\$2.10 cap) & 86.4\% & 33.7 & \$48.88 & \$1.45 & 144.7 \\
@@ -315,7 +315,7 @@ A SOC-native benchmark should ask whether the agent discovers the right fields, 
 Security-agent reports should therefore include at least five items:
 \begin{enumerate}
   \item \textbf{Task-family labels.} Separate offensive exploitation, CTFs, alert triage, incident investigation, malware analysis, and enrichment-heavy workflows.
-  \item \textbf{Workflow-native scoring.} Use pass@1 for CTF flags, competition points or analyst-grade rubrics for SOC questions, and report binary accuracy only when it does not hide point weight or hint penalties.
+  \item \textbf{Workflow-native scoring.} Use single-run success rate for CTF flags, competition points or analyst-grade rubrics for SOC questions, and report binary accuracy only when it does not hide point weight or hint penalties.
   \item \textbf{Cost accounting.} Report model-token spend, priced external-tool spend, cost per solve or per 1,000 points, and pricing assumptions.
   \item \textbf{Tool-use evidence.} Report tool-call totals, cap curves, and representative redacted traces that show whether calls advanced the investigation.
   \item \textbf{Decontamination controls.} For public benchmarks, include no-tools, no-context, perturbed-question, answer-before-query, or private-holdout checks.
@@ -377,7 +377,7 @@ Paired contrasts resample only task IDs common to both compared runs.
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lrr}
 \toprule
-Model & pass@1 & 95\% bootstrap interval \\
+Model & success rate & 95\% bootstrap interval \\
 \midrule
 GPT-5.5 + autocompact & 94.0\% & 87.2--99.2\% \\
 DeepSeek v4 Flash + autocompact (\$2.10 cap) & 86.3\% & 76.9--94.9\% \\
