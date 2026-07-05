@@ -181,6 +181,11 @@ We provide prerequisite case context from earlier official questions for 23 of t
 
 \PK{TODO: make table detailing cost pricing}
 
+In order to manage overall costs, we cap the cost for each sample run.
+We set the cap via \Inspect\'s budget option -- this limits the runtime of a benchmark sample evaluation to a certain cost and aborts the agent if it overruns the budget.
+We treat such examples as failed.
+Most successful models finish way below the cost budget cap.
+
 We decompose cost into inference spend and priced-tool spend.
 For Cybench, reported cost is model-token cost recorded by the evaluation harness or reconstructed from token counts and registered rates where needed.
 For BOTS, we start with model-token cost and add priced external enrichment calls recorded during the run.
