@@ -2,7 +2,7 @@
 
 Companion provenance for `paper.tex`. This file preserves source mapping for quantitative claims without copying raw logs into the paper. Source-of-truth artifacts live in a separate source evaluation repository, referenced below as `source-eval-repo/`. Raw `.eval` logs should not be copied into this paper repository or submitted as artifacts without a separate sanitization pass.
 
-Audit state when this note was updated: paper worktree branch `worktree-paper-rewrite`; source repository HEAD `26b5a39` (`docs: preserve VirusTotal plans`). Numeric chart/report artifacts used by the paper were last changed in source commit `b731f1b` (`charts: add Opus 4.8 and decontamination controls`). Record final commit hashes and chart/report checksums again before any public release.
+Audit state when this note was updated: paper repository branch `main`; source repository HEAD `b73f0ea` (`Charge cached WhoisXMLAPI tool use`). Numeric BOTSv1 chart/report artifacts used by the paper were last changed in source commit `b73f0ea`; Cybench chart/table artifacts used by the paper were last changed in source commit `508ef47` (`charts: use posthoc DeepSeek Flash cap`).
 
 ## Source artifacts inspected
 
@@ -67,7 +67,7 @@ Source table: `source-eval-repo/charts/cybench_cost_table.csv`.
 - Cost limits, OpenRouter routing, concurrency, and one challenge denominator varied.
 - GPT-5.5 and DeepSeek v4 Pro cost rows include same-day failed-retry overhead in the charted cost totals.
 - Reported `solved` is fractional pass@1 (mean correctness over three epochs), not an integer challenge count.
-- Challenge-level bootstrap intervals from existing logs used in the visible appendix: GPT-5.5 94.0% [87.2, 99.2], DeepSeek Flash $2.10 cap 86.3% [76.9, 94.9], DeepSeek Flash $0.80 retrospective cap 76.1% [63.2, 87.2], Claude Opus 4.8 74.4% [61.5, 86.3], DeepSeek Pro 43.9% [29.8, 57.9]. Intervals resample challenge IDs and retain three epochs per challenge.
+- Challenge-level bootstrap intervals from existing logs used in the visible appendix: GPT-5.5 94.0% [87.2, 99.2], DeepSeek Flash $2.10 cap 86.3% [76.9, 94.9], DeepSeek Flash $0.80 retrospective cap 76.1% [63.2, 87.2], Claude Opus 4.8 74.4% [61.5, 86.3], DeepSeek Pro 43.9% [29.8, 57.9]. Intervals resample challenge IDs and retain three epochs per challenge. Main-table and appendix percentages are independently rounded from logs; DeepSeek Pro's 43.85% is shown as 43.9% in the paper even though the source markdown table may display 43.8% under its formatter.
 - Paired challenge-level bootstrap contrasts retained for model-ranking context: GPT-5.5 minus DeepSeek Flash $2.10 = +7.7 percentage points [1.7, 15.4]; GPT-5.5 minus Claude Opus 4.8 = +19.7 percentage points [9.4, 30.8]; DeepSeek Flash $2.10 minus Claude Opus 4.8 = +12.0 percentage points [1.7, 23.1].
 
 ## Scaling-headroom provenance
@@ -77,8 +77,8 @@ Source logs are the same shared-model rows listed in the Cybench and BOTSv1 prov
 - Cybench cap rule: replay model-call ledger events for each sample epoch; if cumulative model cost crosses `$0.80`, score that sample epoch as unsolved. Bootstrap resamples challenge IDs and retains epochs.
 - BOTSv1 cap rule: use per-sample model-token cost plus priced-tool cost; if total sample cost exceeds `$0.80`, score that sample epoch as zero BOTS points. Bootstrap resamples question IDs and retains epochs/official point weights.
 - Cybench full minus `$0.80` retrospective cap, percentage-point deltas: GPT-5.5 +2.6 [0.0, 6.0], Claude Opus 4.8 +18.8 [10.3, 29.1], DeepSeek v4 Flash +10.3 [4.3, 17.1], DeepSeek v4 Pro +0.0 [0.0, 0.0].
-- BOTSv1 full minus `$0.80` retrospective model+tool cap, percentage-point deltas: GPT-5.5 +6.9 [1.6, 13.5], Claude Opus 4.8 +2.6 [0.0, 7.3], DeepSeek v4 Flash +0.0 [0.0, 0.0], DeepSeek v4 Pro +4.0 [0.0, 9.5].
-- Section 5 scaling figures are two-panel composites generated read-only from the source chart loaders and logs after removing the dropped row: Cybench uses `source-eval-repo/charts/make_report.py` cost/token series; BOTSv1 uses `source-eval-repo/charts/make_botsv1_report.py` model-plus-priced-tool cost/token series; the cross-benchmark tool-call figure combines the corresponding filtered tool-call charts. Source HEAD was `508ef47` when copied.
+- BOTSv1 full minus `$0.80` retrospective model+tool cap, percentage-point deltas after cached WhoisXMLAPI repricing: GPT-5.5 +6.9 [1.6, 13.6], Claude Opus 4.8 +2.6 [0.0, 7.1], DeepSeek v4 Flash +0.0 [0.0, 0.0], DeepSeek v4 Pro +4.0 [0.0, 9.6].
+- Section 5 scaling figures are two-panel composites generated read-only from the source chart loaders and logs after removing the dropped row: Cybench uses `source-eval-repo/charts/make_report.py` cost/token series; BOTSv1 uses `source-eval-repo/charts/make_botsv1_report.py` model-plus-priced-tool cost/token series after cached WhoisXMLAPI repricing; the cross-benchmark tool-call figure combines the corresponding filtered tool-call charts. BOTSv1 scaling was regenerated from source HEAD `b73f0ea`.
 
 ## BOTSv1 table provenance
 
@@ -96,10 +96,10 @@ Source report: `source-eval-repo/charts/botsv1_report.html`.
 ### BOTSv1 robustness and caveats
 
 - Official warm-up q1 is excluded by task default; full runs contain 31 scored questions.
-- Twenty-three of 31 scored questions have explicit prerequisite dependencies and receive prerequisite context in the prompt; this measures follow-up investigation with known case state, not cold-start reconstruction. Appendix D's dependency chart is copied from `~/projects/inspect-cyber-eval/bots/v1/eval.yaml` `metadata.depends_on` entries.
+- Twenty-three of 31 scored questions have explicit prerequisite dependencies and receive prerequisite context in the prompt; this measures follow-up investigation with known case state, not cold-start reconstruction. Appendix D's dependency chart is copied from benchmark metadata `depends_on` entries.
 - Rows use three epochs and mean reduction, so points are reduced back to the single-epoch point scale (10,300 possible).
 - Primary metric is `bots_points`; binary `includes` is secondary.
-- Tool costs include Brave Search and non-cache WhoisXMLAPI DRS credits where transcript events show a charged provider call. VirusTotal public API, DNS, and live WHOIS/RDAP are treated as zero marginal cost.
+- Tool costs include Brave Search and WhoisXMLAPI DRS credits, including host-cache hits priced at the same DRS-credit value as fresh provider responses. VirusTotal public API, DNS, and live WHOIS/RDAP are treated as zero marginal cost.
 - Tool-adjusted cost excludes Kubernetes/Splunk infrastructure, free-tier effects, and enterprise pricing variation.
 - Question-level bootstrap intervals from existing logs used in the visible appendix: Claude Opus 4.8 93.9% [82.7, 99.5], GPT-5.5 high effort 81.4% [67.4, 94.1], GPT-5.5 81.0% [64.1, 96.4], DeepSeek v4 Pro 77.8% [61.0, 93.1], DeepSeek Flash $4.20 cap 73.9% [53.2, 91.9], DeepSeek Flash $2.10 cap 73.0% [52.7, 91.1]. Intervals resample question IDs and retain three epochs and official point weights per question.
 - Paired question-level bootstrap contrasts retained for model-ranking/scaling context: Claude Opus 4.8 minus GPT-5.5 = +12.8 percentage points [0.9, 27.4]; Claude Opus 4.8 minus GPT-5.5 high effort = +12.5 percentage points [2.4, 23.7]; DeepSeek Flash $4.20 minus $2.10 = +0.9 percentage points [-4.9, 6.9].

@@ -34,7 +34,7 @@
   \FloatBarrier
   \phantomsection
   \protected@edef\@currentlabelname{end of \@shorttitle}%
-  \label{jmlrend}%
+  \label{jmlrend}\null
   \global\let\@reprint\@empty}
 \makeatother
 
@@ -264,7 +264,7 @@ For Cybench, reported cost is model-token cost recorded by the evaluation harnes
 For BOTS, we start with model-token cost and add priced external enrichment calls recorded during the run.
 We charge Brave Search at \$0.005 per request, WhoisXMLAPI WHOIS History preview at \$0.0258 per request, and WhoisXMLAPI WHOIS History purchase at \$1.29 per request.
 We treat VirusTotal public API, DNS, and live WHOIS/RDAP as zero marginal cost.
-% We exclude infrastructure costs for Kubernetes, Splunk, storage, and analyst review time.
+Reported dollars are therefore model plus priced-enrichment costs only; they exclude Kubernetes, Splunk infrastructure, storage, and analyst review time.
 We exclude costs for \texttt{bash}, \texttt{python}, and the three Splunk tool types.
 We use a host-side cache for WhoisXMLAPI history responses to avoid repeated provider requests during evaluation; cached WhoisXMLAPI calls are still assigned their corresponding dollar value in reported tool-cost metrics so costs reflect expected tool use rather than cache state.
 
@@ -288,7 +288,7 @@ Claude Opus 4.8 solves 74.4\% of challenges but does so at \$3.73 per solve, mor
 % Internal source: source-eval-repo/charts/cybench_report.html and cybench_cost_table.csv plus raw-log tool-event counts.
 % GPT-5.5 is grouped under the designated $2.10 cap here; its successful Inspect log header records cost_limit=None.
 % DeepSeek v4 Flash $0.80 row is a retrospective cap applied to logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval.
-\caption{Cybench hard-variant operating points for the shared BOTSv1 model set. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits.}
+\caption{Cybench hard-variant operating points for the shared BOTSv1 model set. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits. GPT-5.5's successful log had no prospective cost cap and is grouped under the common \$2.10 analysis row; DeepSeek v4 Pro completed 38 of 39 challenges after one sandbox-initialization failure and is normalized to the 39-challenge denominator.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrr}
@@ -402,7 +402,7 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/botsv1_scaling_panels}
-\caption{BOTSv1 scaling curves for the full-agent runs in Table~\ref{tab:bots}. Left: official BOTS points (\% of 10,300) versus a retrospective per-sample budget covering model-token plus priced-tool spend; dotted companions show the model-token-only budget, and the small gap indicates priced tools contribute little cost. Right: points versus cumulative tokens. Unlike Cybench, higher spend does not identify the best agent: Claude Opus 4.8 scores highest with roughly an order of magnitude fewer tokens than the DeepSeek runs.}
+\caption{BOTSv1 scaling curves for the full-agent runs in Table~\ref{tab:bots}. Left: official BOTS points (\% of 10,300) versus a retrospective per-sample budget covering model-token plus priced-tool spend; dotted companions show the model-token-only budget, while solid curves include priced Brave Search and WhoisXMLAPI calls. Right: points versus cumulative tokens. Unlike Cybench, higher spend does not identify the best agent: Claude Opus 4.8 scores highest with roughly an order of magnitude fewer tokens than the DeepSeek runs, even though priced tools contribute materially to several runs' total cost.}
 \label{fig:botsv1-scaling-panels}
 \end{figure}
 
@@ -422,10 +422,10 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 \toprule
 Model & Cybench \$0.80$\rightarrow$full & Cybench $\Delta$ pp & BOTSv1 \$0.80$\rightarrow$full & BOTSv1 $\Delta$ pp \\
 \midrule
-GPT-5.5 & 91.5\%$\rightarrow$94.0\% & +2.6 [0.0, 6.0] & 74.1\%$\rightarrow$81.0\% & +6.9 [1.6, 13.5] \\
-Claude Opus 4.8 & 55.6\%$\rightarrow$74.4\% & +18.8 [10.3, 29.1] & 91.3\%$\rightarrow$93.9\% & +2.6 [0.0, 7.3] \\
+GPT-5.5 & 91.5\%$\rightarrow$94.0\% & +2.6 [0.0, 6.0] & 74.1\%$\rightarrow$81.0\% & +6.9 [1.6, 13.6] \\
+Claude Opus 4.8 & 55.6\%$\rightarrow$74.4\% & +18.8 [10.3, 29.1] & 91.3\%$\rightarrow$93.9\% & +2.6 [0.0, 7.1] \\
 DeepSeek v4 Flash & 76.1\%$\rightarrow$86.3\% & +10.3 [4.3, 17.1] & 73.0\%$\rightarrow$73.0\% & +0.0 [0.0, 0.0] \\
-DeepSeek v4 Pro & 43.9\%$\rightarrow$43.9\% & +0.0 [0.0, 0.0] & 73.8\%$\rightarrow$77.8\% & +4.0 [0.0, 9.5] \\
+DeepSeek v4 Pro & 43.9\%$\rightarrow$43.9\% & +0.0 [0.0, 0.0] & 73.8\%$\rightarrow$77.8\% & +4.0 [0.0, 9.6] \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -452,11 +452,11 @@ Defensive evaluation should therefore scale not only dollars or tokens but also 
 Our experiments are observational rather than a prospectively randomized run matrix.
 Evaluations are done at fixed cost-caps and retroactively cost-capped.
 We therefore emphasize fixed-budget operating points over universal model rankings.
-% The DeepSeek v4 Pro Cybench row uses 38 challenges, not the usual 39.
 BOTSv1 rows are more uniform at the task level, though provider defaults and reasoning settings still vary across models.
+BOTSv1 runs used a 250-message limit; this limit was hit by 8/93 DeepSeek v4 Flash sample-epochs at the \$2.10 cap, 14/93 at the \$4.20 cap, and 5/93 DeepSeek v4 Pro sample-epochs, so truncation may depress high-volume models.
 The bootstrap intervals in Appendix~\ref{app:uncertainty} are descriptive robustness checks, not formal population-level inferences.
 
-Our defensive analysis covers only BOTSv1, the 32-question Po1s0n1vy/Cerber scenario built around a public Splunk dataset.
+Our defensive analysis covers only the 31 scored BOTSv1 Po1s0n1vy/Cerber questions after excluding the official warm-up, built around a public Splunk dataset.
 BOTS v2 and v3 expand on top of v1: v2 expands to a 51-question Frothly enterprise intrusion with a much larger endpoint, network, email, and web dataset, while v3 uses a 58-question cloud-heavy Frothly scenario spanning AWS CloudTrail, osquery, Windows, and network telemetry.
 Comparable multi-model results for these later versions are not yet available, so extending the same cost-aware analysis to BOTS v2 and v3 is future work.
 We therefore present the SOC conclusion as an evaluation-design result rather than a final claim about production SOC readiness.
@@ -494,7 +494,7 @@ The retrospective cap rows are derived from the listed source trace and were not
 
 \begin{table}[htbp]
 \centering
-\caption{Cybench evaluation dates for tabled rows. Source timestamps are the Inspect log \texttt{created} headers for the logs listed in \texttt{tables/provenance.md}.}
+\caption{Cybench evaluation dates for tabled rows. Source timestamps are the Inspect log \texttt{created} headers listed in internal provenance records.}
 \label{tab:cybench-eval-dates}
 \small
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.38\linewidth}@{}}
@@ -511,7 +511,7 @@ DeepSeek v4 Pro, \$0.75 & 2026-05-15 19:38:26; 23:35:01; 23:44:23 & Same-day err
 
 \begin{table}[htbp]
 \centering
-\caption{BOTSv1 evaluation dates for tabled rows. Source timestamps are the Inspect log \texttt{created} headers for the logs listed in \texttt{tables/provenance.md}.}
+\caption{BOTSv1 evaluation dates for tabled rows. Source timestamps are the Inspect log \texttt{created} headers listed in internal provenance records.}
 \label{tab:bots-eval-dates}
 \small
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.35\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.33\linewidth}@{}}
@@ -546,7 +546,7 @@ Paired contrasts resample only task IDs common to both compared runs.
 
 \begin{table}[htbp]
 \centering
-\caption{Cybench challenge-level bootstrap intervals. The DeepSeek v4 Flash \$0.80 row uses the same retrospective cap as Table~\ref{tab:cybench}.}
+\caption{Cybench challenge-level bootstrap intervals. The DeepSeek v4 Flash \$0.80 row uses the same retrospective cap as Table~\ref{tab:cybench}. Last-digit differences from the main table reflect independent recomputation and rounding from logs.}
 \label{tab:cybench-bootstrap}
 \small
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llrr@{}}
@@ -602,7 +602,7 @@ Table~\ref{tab:bots-dependencies} shows the direct prerequisite chart; the promp
 
 \begin{table}[!htbp]
 \centering
-\caption{BOTSv1 direct prerequisite chart from the benchmark metadata. Only dependent scored questions are shown; independent scored questions and the warm-up are omitted. Source: \texttt{inspect-cyber-eval/bots/v1/eval.yaml}.}
+\caption{BOTSv1 direct prerequisite chart from the benchmark metadata. Only dependent scored questions are shown; independent scored questions and the warm-up are omitted. Source: benchmark metadata.}
 \label{tab:bots-dependencies}
 \small
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llll@{}}
