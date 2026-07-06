@@ -26,6 +26,27 @@ Audit state when this note was updated: paper worktree branch `worktree-paper-re
 - `source-eval-repo/charts/make_botsv1_report.py`
 - `source-eval-repo/charts/botsv1_tool_costs.py`
 
+## Evaluation run date appendix provenance
+
+Appendix `Evaluation Run Dates` reads the UTC `created` timestamp from Inspect log headers using `inspect_ai.log.read_eval_log(..., header_only=True)`. Source logs are the same logs listed in the Cybench, BOTSv1, and BOTSv1 decontamination provenance tables below.
+
+| Paper row | Source log(s) | Inspect `created` timestamp(s) |
+|---|---|---|
+| Cybench GPT-5.5, `$2.10` | `logs/2026-05-14T18-34-57-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval`; `logs/2026-05-14T20-45-04-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval`; `logs/2026-05-14T20-52-17-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval`; `logs/2026-05-14T21-03-03-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval` | `2026-05-14T18:34:57+00:00`; `2026-05-14T20:45:04+00:00`; `2026-05-14T20:52:17+00:00`; `2026-05-14T21:03:03+00:00` |
+| Cybench DeepSeek v4 Flash, `$2.10`; Cybench DeepSeek v4 Flash, `$0.80` retrospective | `logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval` | `2026-05-19T16:35:07+00:00` |
+| Cybench Claude Opus 4.8, `$2.10` | `logs/2026-06-22T18-37-21-00-00_cybench_YFhtUWESgt8vbFNpCB5hRY.eval`; `logs/2026-06-23T19-08-17-00-00_cybench_YFhtUWESgt8vbFNpCB5hRY.eval` | `2026-06-22T18:37:21+00:00`; `2026-06-23T19:08:17+00:00` |
+| Cybench DeepSeek v4 Pro, `$0.75` | `logs/2026-05-15T19-38-26-00-00_cybench_8YcazcCkyPBwkENiRQ2Pee.eval`; `logs/2026-05-15T23-35-01-00-00_cybench_JUTe7XGGcGJBQWg8ZnetYQ.eval`; `logs/2026-05-15T23-44-23-00-00_cybench_VWFUUdor5Useewi4zjrRdo.eval` | `2026-05-15T19:38:26+00:00`; `2026-05-15T23:35:01+00:00`; `2026-05-15T23:44:23+00:00` |
+| BOTSv1 Claude Opus 4.8, full agent, `$2.10` | `logs/2026-06-15T04-30-45-00-00_botsv_iusRJmJKvQTdrAcnhqVFU3.eval` | `2026-06-15T04:30:45+00:00` |
+| BOTSv1 GPT-5.5 high effort, full agent, `$2.10` | `logs/2026-06-15T06-09-42-00-00_botsv_VYcxyGse2gyga8MGcsWNYg.eval` | `2026-06-15T06:09:42+00:00` |
+| BOTSv1 GPT-5.5, full agent, `$2.10` | `logs/2026-06-14T21-12-20-00-00_botsv_6cHBshKy4Xxt82no2geqK3.eval` | `2026-06-14T21:12:20+00:00` |
+| BOTSv1 DeepSeek v4 Pro, full agent, `$2.10` | `logs/2026-06-14T23-14-52-00-00_botsv_nKdSUbcTJe6XrzyRvsmgvV.eval` | `2026-06-14T23:14:52+00:00` |
+| BOTSv1 DeepSeek v4 Flash, full agent, `$4.20` | `logs/2026-06-15T04-59-44-00-00_botsv_9LMvv2EkysNTH3VtjK2mxm.eval` | `2026-06-15T04:59:44+00:00` |
+| BOTSv1 DeepSeek v4 Flash, full agent, `$2.10` | `logs/2026-06-14T23-07-00-00-00_botsv_kndnbzEAcciuAjoNMDxPaj.eval` | `2026-06-14T23:07:00+00:00` |
+| BOTSv1 Claude Opus 4.8, no tools, `prereq_context=true` | `logs/2026-06-23T21-32-08-00-00_botsv_mTEKs37gYSuKc7S7KuT3ZX.eval` | `2026-06-23T21:32:08+00:00` |
+| BOTSv1 Claude Opus 4.8, no tools, `prereq_context=false` | `logs/2026-06-23T21-51-42-00-00_botsv_2ASKgbtAgPUBBDuqReKCqH.eval` | `2026-06-23T21:51:42+00:00` |
+| BOTSv1 GPT-5.5, no tools, `prereq_context=true` | `logs/2026-06-23T22-21-31-00-00_botsv_hRdzhJdiadJDPZs8SaC5ie.eval` | `2026-06-23T22:21:31+00:00` |
+| BOTSv1 GPT-5.5, no tools, `prereq_context=false` | `logs/2026-06-23T22-43-04-00-00_botsv_NaJvXYaArgXZEXFgKjiKAV.eval` | `2026-06-23T22:43:04+00:00` |
+
 ## Cybench table provenance
 
 Source table: `source-eval-repo/charts/cybench_cost_table.csv`.

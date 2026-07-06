@@ -500,6 +500,54 @@ Public SOC benchmarks remain valuable, but our no-tools BOTSv1 controls show tha
 
 % Internal provenance was removed from the visible appendix; see tables/provenance.md.
 
+\section{Evaluation Run Dates}
+\label{app:evaluation-run-dates}
+
+Tables~\ref{tab:cybench-eval-dates} and~\ref{tab:bots-eval-dates} report the UTC creation timestamp recorded in each source Inspect log used by the paper tables.
+Rows that appear in multiple result, scaling, or robustness tables are listed once.
+Where a row aggregates retry logs into the reported cost, the retry timestamps are included.
+The retrospective cap rows are derived from the listed source trace and were not separate evaluation runs.
+
+\begin{table}[htbp]
+\centering
+\caption{Cybench evaluation dates for tabled rows. Source timestamps are the Inspect log \texttt{created} headers for the logs listed in \texttt{tables/provenance.md}.}
+\label{tab:cybench-eval-dates}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.38\linewidth}@{}}
+\toprule
+Table row & Source evaluation timestamp (UTC) & Notes \\
+\midrule
+GPT-5.5, \$2.10 & 2026-05-14 18:34:57; 20:45:04; 20:52:17; 21:03:03 & Three quota-failed retries plus final success; used in Tables~\ref{tab:cybench}, \ref{tab:scaling-headroom}, and \ref{tab:cybench-bootstrap} \\
+DeepSeek v4 Flash, \$2.10 & 2026-05-19 16:35:07 & Same trace also supplies the retrospective \$0.80 row \\
+Claude Opus 4.8, \$2.10 & 2026-06-22 18:37:21; 2026-06-23 19:08:17 & Partial/error retry plus final success \\
+DeepSeek v4 Pro, \$0.75 & 2026-05-15 19:38:26; 23:35:01; 23:44:23 & Same-day error retries plus final success \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{BOTSv1 evaluation dates for tabled rows. Source timestamps are the Inspect log \texttt{created} headers for the logs listed in \texttt{tables/provenance.md}.}
+\label{tab:bots-eval-dates}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.35\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.33\linewidth}@{}}
+\toprule
+Table row & Source evaluation timestamp (UTC) & Notes \\
+\midrule
+Claude Opus 4.8, full agent, \$2.10 & 2026-06-15 04:30:45 & Tables~\ref{tab:bots}, \ref{tab:scaling-headroom}, \ref{tab:bots-bootstrap}, and \ref{tab:bots-no-tools} \\
+GPT-5.5 high effort, full agent, \$2.10 & 2026-06-15 06:09:42 & Tables~\ref{tab:bots} and \ref{tab:bots-bootstrap} \\
+GPT-5.5, full agent, \$2.10 & 2026-06-14 21:12:20 & Tables~\ref{tab:bots}, \ref{tab:scaling-headroom}, \ref{tab:bots-bootstrap}, and \ref{tab:bots-no-tools} \\
+DeepSeek v4 Pro, full agent, \$2.10 & 2026-06-14 23:14:52 & Tables~\ref{tab:bots}, \ref{tab:scaling-headroom}, and \ref{tab:bots-bootstrap} \\
+DeepSeek v4 Flash, full agent, \$4.20 & 2026-06-15 04:59:44 & Tables~\ref{tab:bots} and \ref{tab:bots-bootstrap} \\
+DeepSeek v4 Flash, full agent, \$2.10 & 2026-06-14 23:07:00 & Tables~\ref{tab:bots}, \ref{tab:scaling-headroom}, and \ref{tab:bots-bootstrap} \\
+Claude Opus 4.8, no tools, prereq context & 2026-06-23 21:32:08 & Table~\ref{tab:bots-no-tools} \\
+Claude Opus 4.8, no tools, question only & 2026-06-23 21:51:42 & Table~\ref{tab:bots-no-tools} \\
+GPT-5.5, no tools, prereq context & 2026-06-23 22:21:31 & Table~\ref{tab:bots-no-tools} \\
+GPT-5.5, no tools, question only & 2026-06-23 22:43:04 & Table~\ref{tab:bots-no-tools} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Uncertainty Method}
 \label{app:uncertainty}
 
