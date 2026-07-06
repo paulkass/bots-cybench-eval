@@ -155,7 +155,7 @@ Our BOTSv1 study complements this emerging line by preserving official BOTS scor
 Public benchmarks also require leakage controls.
 Benchmark-contamination studies show that public test sets can overlap with model-training data or be partially recoverable from model behavior, inflating apparent capability and complicating fair comparisons \citep{deng2024datacontamination,wang2024benchmarkleakage,li2024contaminationsurvey}.
 Practical mitigation work recommends protected test releases, training-exclusion controls, private or retroactive holdouts, and care with API-mediated leakage \citep{jacovi2023testdata,balloccu2024leak,haimes2024benchmarkinflation}.
-Because BOTSv1 is public and old, Appendix~\ref{app:bots-no-tools} treats no-tools and no-context probes as contamination controls rather than as primary capability results.
+Because BOTSv1 is public and old, Section~\ref{sec:bots-contamination} treats no-tools and no-context probes as contamination controls rather than as primary capability results.
 
 \section{Evaluation Design}
 \label{sec:evaluation-design}
@@ -340,7 +340,52 @@ DeepSeek v4 Flash & \$2.10 & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & \$43.50 & 
 \end{tabular}}
 \end{table}
 
-We report no-tools controls for interpreting public BOTSv1 scores in Appendix~\ref{app:bots-no-tools}.
+These full-agent scores should be interpreted alongside the contamination controls in Section~\ref{sec:bots-contamination}, not as a clean public leaderboard.
+
+\section{BOTSv1 Contamination Controls}
+\label{sec:bots-contamination}
+
+BOTSv1 is valuable because it supplies real Splunk data and official scoring, but it is also public and old.
+We therefore include a no-tools probe as a contamination control.
+The no-tools condition provides no Splunk, web, bash, Python, or other tools; it asks the model to answer from the question text, optional prerequisite context, and prior knowledge only.
+
+We find the results too high to treat absolute BOTSv1 scores as clean evidence of live investigation skill.
+With prerequisite context enabled, Claude Opus 4.8 scores 7,700/10,300 points (74.8\%) and GPT-5.5 scores 6,400/10,300 (62.1\%) with zero tool events.
+With prerequisite context disabled, Claude still scores 5,150 points (50.0\%) and GPT-5.5 scores 5,650 points (54.9\%).
+These controls do not make BOTS useless; they make decontamination controls mandatory.
+No-tools, no-context, perturbed-question, answer-before-query, private-holdout, or fresh-incident checks should accompany any public SOC benchmark before absolute scores are interpreted as capability evidence.
+BOTS remains useful as a reproducible harness and cost-accounting testbed; it should not be used as a clean leaderboard by itself.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/botsv1_decontamination}
+% Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
+\caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are three-epoch mean runs. Only completed no-tools probes are shown.}
+\label{fig:bots-decontamination}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{BOTSv1 no-tools contamination-control results.}
+\label{tab:bots-no-tools}
+\small
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llrrr@{}}
+\toprule
+Model & Condition & Points & Binary acc. & Tool events \\
+\midrule
+Claude Opus 4.8 & full agent + tools & 93.9\% & 96.8\% & 603 \\
+Claude Opus 4.8 & no tools, prereq context & 74.8\% & 77.4\% & 0 \\
+Claude Opus 4.8 & no tools, question only & 50.0\% & 58.1\% & 0 \\
+GPT-5.5 & full agent + tools & 81.0\% & 90.3\% & 1{,}481 \\
+GPT-5.5 & no tools, prereq context & 62.1\% & 74.2\% & 0 \\
+GPT-5.5 & no tools, question only & 54.9\% & 71.0\% & 0 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+The completed no-tools probes contain zero tool events.
+Table~\ref{tab:bots-no-tools} includes only completed probes.
+% Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
 
 \section{Scaling Findings}
 \label{sec:scaling-findings}
@@ -505,51 +550,6 @@ DeepSeek v4 Flash & \$2.10 & 73.0\% & 52.7--91.1\% \\
 Claude Opus 4.8's paired margin over the standard GPT-5.5 row is 12.8 percentage points, with a question-level paired bootstrap interval of +0.9 to +27.4 percentage points.
 Its margin over GPT-5.5 high effort is 12.5 percentage points, with interval +2.4 to +23.7 percentage points.
 The DeepSeek v4 Flash \$4.20-cap row exceeds the \$2.10-cap row by only 0.9 percentage points, with interval -4.9 to +6.9 percentage points, so that budget change is inconclusive.
-
-\section{BOTSv1 No-Tools Probe}
-\label{app:bots-no-tools}
-
-BOTSv1 is valuable because it supplies real Splunk data and official scoring, but it is also public and old.
-We therefore include a no-tools probe as a contamination control.
-The no-tools condition provides no Splunk, web, bash, Python, or other tools; it asks the model to answer from the question text, optional prerequisite context, and prior knowledge only.
-
-We find the results too high to treat absolute BOTSv1 scores as clean evidence of live investigation skill.
-With prerequisite context enabled, Claude Opus 4.8 scores 7,700/10,300 points (74.8\%) and GPT-5.5 scores 6,400/10,300 (62.1\%) with zero tool events.
-With prerequisite context disabled, Claude still scores 5,150 points (50.0\%) and GPT-5.5 scores 5,650 points (54.9\%).
-These controls do not make BOTS useless; they make decontamination controls mandatory.
-No-tools, no-context, perturbed-question, answer-before-query, private-holdout, or fresh-incident checks should accompany any public SOC benchmark before absolute scores are interpreted as capability evidence.
-BOTS remains useful as a reproducible harness and cost-accounting testbed; it should not be used as a clean leaderboard by itself.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\linewidth]{figures/botsv1_decontamination}
-% Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
-\caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are three-epoch mean runs. Only completed no-tools probes are shown.}
-\label{fig:bots-decontamination}
-\end{figure}
-
-\begin{table}[htbp]
-\centering
-\caption{BOTSv1 no-tools contamination-control results.}
-\label{tab:bots-no-tools}
-\small
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llrrr@{}}
-\toprule
-Model & Condition & Points & Binary acc. & Tool events \\
-\midrule
-Claude Opus 4.8 & full agent + tools & 93.9\% & 96.8\% & 603 \\
-Claude Opus 4.8 & no tools, prereq context & 74.8\% & 77.4\% & 0 \\
-Claude Opus 4.8 & no tools, question only & 50.0\% & 58.1\% & 0 \\
-GPT-5.5 & full agent + tools & 81.0\% & 90.3\% & 1{,}481 \\
-GPT-5.5 & no tools, prereq context & 62.1\% & 74.2\% & 0 \\
-GPT-5.5 & no tools, question only & 54.9\% & 71.0\% & 0 \\
-\bottomrule
-\end{tabular*}
-\end{table}
-
-The completed no-tools probes contain zero tool events.
-Table~\ref{tab:bots-no-tools} includes only completed probes.
-% Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
 
 \section{BOTSv1 Sequential-Context Check}
 \label{app:bots-context}
