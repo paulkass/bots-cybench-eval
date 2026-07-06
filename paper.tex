@@ -41,35 +41,19 @@
 \newcommand{\widepaperfig}[1]{\makebox[\linewidth][c]{\includegraphics[width=1.04\linewidth]{#1}}}
 
 \jmlrvolume{299}
-\jmlryear{2025}
-\jmlrworkshop{Conference on Applied Machine Learning for Information Security}
+\jmlryear{2026}
+\jmlrworkshop{CAMLIS 2026}
 
 \title[Cost-Aware Security Agent Evaluation]{Beyond Success Rate: Cost-Aware Evaluation of Offensive and Defensive Security Agents}
 
-% \author{\Name{Paul Kassianik}
-% \AND
-% \Name{Blaine Nelson}
-% \AND
-% \Name{Yaron Singer}
-% }
-
 \author{\Name{Anonymous Authors}}
-
-% \editor{Edward Raff and Ethan M. Rudd}
 
 \hypersetup{
   pdftitle={Cost-Aware Evaluation of Offensive and Defensive Security Agents},
   pdfsubject={Cybersecurity benchmark evaluation},
-  pdfauthor={Paul Kassianik, Blaine Nelson, and Yaron Singer},
+  pdfauthor={Anonymous Authors},
   pdfkeywords={cybersecurity benchmarks, AI agents, Cybench, BOTS, SOC, cost accounting}
 }
-
-\newif\ifshowcomments
-\showcommentstrue
-\newcommand{\inlinecomment}[3]{\ifshowcomments\textcolor{#1}{\textbf{[#2:} #3\textbf{]}}\fi}
-\newcommand{\PK}[1]{\inlinecomment{teal}{Paul}{#1}}
-\newcommand{\BN}[1]{\inlinecomment{brown}{Blaine}{#1}}
-\newcommand{\YS}[1]{\inlinecomment{magenta}{Yaron}{#1}}
 
 \newcommand{\BOTSvOne}{BOTS~v1}
 \newcommand{\Inspect}{Inspect}
@@ -225,7 +209,7 @@ After an incorrect submission the next hint is revealed; a later correct answer 
 We exclude the official warm-up question, leaving 31 scored questions worth 10,300 official competition points.
 Agents receive Splunk discovery, search, and event-inspection tools over Splunk Search Processing Language \citep{splunk_search_reference}, plus limited VirusTotal, WHOIS, DNS, Brave Search, bash, and Python tools \citep{virustotal_api,whoisxmlapi_whois_history,brave_search_api,rfc3912,rfc1035}.
 We make Splunk telemetry the primary evidence source in the prompt and ask agents to use external enrichment selectively.
-To preserve cost efficiency, we limit the calls to VirusTotal and WhoISXML APIs to 3 calls while limiting web search to 5 calls.
+To preserve cost efficiency, we limit VirusTotal and WhoisXMLAPI calls to 3 while limiting web search to 5 calls.
 We implement strict keyword filtering to prevent competition writeups and solution leakage.
 
 We use \texttt{bots\_points} as the primary metric: a correct answer earns official points minus hint penalties; an incorrect answer earns zero.
@@ -315,7 +299,7 @@ GPT-5.5 & \$2.10 & \textbf{94.1\%} & \textbf{36.7} & \$42.47 & \$1.16 & \textbf{
 DeepSeek v4 Flash & \$2.10 & 86.4\% & 33.7 & \$48.88 & \$1.45 & 144.7 \\
 Claude Opus 4.8 & \$2.10 & 74.4\% & 29.0 & \$108.21 & \$3.73 & 26.7 \\
 DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & \$30.43 & \textbf{\$1.03} & 95.9 \\
-DeepSeek v4 Pro & \$0.75 & 43.8\% & 17.1 & \$64.58 & \$3.78 & 21.3 \\
+DeepSeek v4 Pro & \$0.75 & 43.9\% & 17.1 & \$64.58 & \$3.78 & 21.3 \\
 \bottomrule
 \end{tabular}}
 \end{table}
