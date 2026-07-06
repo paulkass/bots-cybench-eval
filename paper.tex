@@ -93,6 +93,14 @@ Cost-aware, SOC-native evaluations provide a clearer picture of which models are
 cybersecurity benchmarks, AI agents, security operations centers, Cybench, BOTS, cost accounting
 \end{keywords}
 
+\clearpage
+\begin{figure}[t!]
+\centering
+\widepaperfig{figures/main_results_chart}
+\caption{Resource scaling for three representative models. \textbf{(a)} Cybench success versus a retrospective per-sample cost budget: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{(b)} BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls. Offensive success climbs steadily with spend, while defensively Claude Opus 4.8 is near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
+\label{fig:main-results-chart}
+\end{figure}
+
 \section{Introduction}
 \label{sec:introduction}
 
@@ -358,21 +366,21 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/cybench_scaling_panels}
-\caption{Cybench scaling curves. Left: success under retrospective per-sample cost budgets. Right: success as cumulative token budget increases. Extra compute buys additional solves for some traces, especially DeepSeek v4 Flash.}
+\caption{Cybench scaling curves (``+ac'' = auto-compacting agent; the DeepSeek v4 Flash \$0.80 curve retrospectively caps the \$2.10 run's traces). Left: success versus retrospective per-sample cost budget (USD, log scale). Right: success versus cumulative tokens (input, output, cached, and reasoning). Success keeps rising toward the run limits: extra compute buys additional solves, most visibly for DeepSeek v4 Flash and Claude Opus 4.8, while GPT-5.5 solves most challenges at low per-sample spend.}
 \label{fig:cybench-scaling-panels}
 \end{figure}
 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/botsv1_scaling_panels}
-\caption{BOTSv1 scaling curves. Left: official BOTS points under per-sample model-plus-priced-tool cost budgets. Right: official BOTS points as cumulative token budget increases. More budget does not by itself identify the best defensive agent.}
+\caption{BOTSv1 scaling curves for the full-agent runs in Table~\ref{tab:bots}. Left: official BOTS points (\% of 10,300) versus a retrospective per-sample budget covering model-token plus priced-tool spend; dotted companions show the model-token-only budget, and the small gap indicates priced tools contribute little cost. Right: points versus cumulative tokens. Unlike Cybench, higher spend does not identify the best agent: Claude Opus 4.8 scores highest with roughly an order of magnitude fewer tokens than the DeepSeek runs.}
 \label{fig:botsv1-scaling-panels}
 \end{figure}
 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/tool_call_scaling_panels}
-\caption{Tool-call scaling curves for Cybench and BOTSv1. Left: Cybench success under non-submit tool-call caps. Right: BOTSv1 binary answer accuracy under the same cap rule. Tool volume is useful for some traces, but high tool volume is not the same as high defensive score.}
+\caption{Tool-call scaling: success at cap $x$ counts a sample-epoch only if it succeeded within $x$ non-submit tool calls. Left: Cybench success; most models saturate within ${\sim}50$ calls, but DeepSeek v4 Flash keeps extracting solves past 800 --- on offense, interaction volume can substitute for per-call quality. Right: BOTSv1 binary accuracy; the ordering inverts, with Claude Opus 4.8 highest at the fewest calls and the DeepSeek runs plateauing lower despite several times more. High tool volume is not a proxy for defensive score.}
 \label{fig:tool-call-scaling-panels}
 \end{figure}
 
@@ -524,7 +532,7 @@ BOTS remains useful as a reproducible harness and cost-accounting testbed; it sh
 \centering
 \includegraphics[width=\linewidth]{figures/botsv1_decontamination}
 % Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
-\caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are three-epoch mean runs. Only completed no-tools probes are shown.}
+\caption{BOTSv1 no-tools contamination probe: official BOTS points (\% of 10,300) for the full agent with tools, no tools with prerequisite case context, and no tools with the question alone. Both models recover much of their score with zero tool events, so public BOTSv1 answers are partially recoverable from prior knowledge. No-tools probes are single-epoch controls; full-agent baselines are three-epoch means; only completed probes are shown.}
 \label{fig:bots-decontamination}
 \end{figure}
 
