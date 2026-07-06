@@ -53,7 +53,7 @@
 % \Name{Yaron Singer}
 % }
 
-\author{\Name{Anonymous}}
+\author{\Name{Anonymous Authors}}
 
 % \editor{Edward Raff and Ethan M. Rudd}
 
@@ -419,9 +419,8 @@ BOTSv1 rows are more uniform at the task level, though provider defaults and rea
 The bootstrap intervals in Appendix~\ref{app:uncertainty} are descriptive robustness checks, not formal population-level inferences.
 
 Our defensive analysis covers only BOTSv1, the 32-question Po1s0n1vy/Cerber scenario built around a public Splunk dataset.
-BOTS v2 and v3 are not simple repeats of v1: v2 expands to a 51-question Frothly enterprise intrusion with a much larger endpoint, network, email, and web dataset, while v3 uses a 58-question cloud-heavy Frothly scenario spanning AWS CloudTrail, osquery, Windows, and network telemetry.
+BOTS v2 and v3 expand on top of v1: v2 expands to a 51-question Frothly enterprise intrusion with a much larger endpoint, network, email, and web dataset, while v3 uses a 58-question cloud-heavy Frothly scenario spanning AWS CloudTrail, osquery, Windows, and network telemetry.
 Comparable multi-model results for these later versions are not yet available, so extending the same cost-aware analysis to BOTS v2 and v3 is future work.
-BOTSv1 is also public, answerable above chance without tools, and dependent on prerequisite context for many questions, and external-enrichment prices drift across providers and enterprise contracts.
 We therefore present the SOC conclusion as an evaluation-design result rather than a final claim about production SOC readiness.
 
 \section{Artifact and Ethical Considerations}
