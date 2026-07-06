@@ -10,6 +10,35 @@
 
 \setlength{\bibsep}{0pt}
 \setlength{\emergencystretch}{3em}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\belowcaptionskip}{2pt}
+
+\makeatletter
+\long\def\@makecaption#1#2{%
+   \vskip 6pt
+   \small
+   \setbox\@tempboxa\hbox{#1: #2}%
+   \ifdim \wd\@tempboxa >\hsize
+       \begin{list}{#1:}{%
+       \settowidth{\labelwidth}{#1:}
+       \setlength{\leftmargin}{\labelwidth}
+       \addtolength{\leftmargin}{\labelsep}
+        }\item #2 \end{list}\par
+     \else
+       \hbox to\hsize{\hfil\box\@tempboxa\hfil}
+   \fi}
+\renewcommand*{\@jmlrenddoc}{%
+  \FloatBarrier
+  \phantomsection
+  \protected@edef\@currentlabelname{end of \@shorttitle}%
+  \label{jmlrend}%
+  \global\let\@reprint\@empty}
+\makeatother
+
+\newcommand{\widepaperfig}[1]{\makebox[\linewidth][c]{\includegraphics[width=1.04\linewidth]{#1}}}
 
 \jmlrvolume{299}
 \jmlryear{2025}
@@ -208,9 +237,9 @@ Table~\ref{tab:cost-pricing} summarizes the pricing assumptions used in the repo
 \caption{Cost-accounting assumptions for model and tool spend.}
 \label{tab:cost-pricing}
 \small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.14\linewidth}>
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.13\linewidth}>
                   {\raggedright\arraybackslash}p{0.30\linewidth}>
-                  {\raggedright\arraybackslash}p{0.34\linewidth}>
+                  {\raggedright\arraybackslash}p{0.33\linewidth}>
                   {\raggedright\arraybackslash}p{0.14\linewidth}@{}}
 \toprule
 Availability & Cost item & Unit price in reports & Per-question limit \\
@@ -265,7 +294,7 @@ Claude Opus 4.8 solves 74.4\% of challenges but does so at \$3.73 per solve, mor
 % Internal source: source-eval-repo/charts/cybench_report.html and cybench_cost_table.csv plus raw-log tool-event counts.
 % GPT-5.5 is grouped under the designated $2.10 cap here; its successful Inspect log header records cost_limit=None.
 % DeepSeek v4 Flash $0.80 row is a retrospective cap applied to logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval.
-\caption{Cybench hard-variant operating points for models also evaluated on BOTSv1. The DeepSeek v4 Flash \$0.80 row is a retrospective event-level cap on the \$2.10 trace. Mean tool calls count non-submit tool events.}
+\caption{Cybench hard-variant operating points for the shared BOTSv1 model set. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrr}
@@ -292,7 +321,7 @@ DeepSeek v4 Flash supplies the clearest negative budget result: doubling its cap
 \begin{table}[t]
 \centering
 % Internal source: source-eval-repo/charts/botsv1_report.html.
-\caption{BOTSv1 full-run results for models also evaluated on Cybench, plus GPT-5.5 high effort for comparison with Claude Opus 4.8. BOTS points are the primary \texttt{bots\_points} metric with hint penalties. Model+tools includes model-token spend plus priced Brave Search and WhoisXMLAPI calls.}
+\caption{BOTSv1 full-run results for the shared Cybench model set, plus GPT-5.5 high effort. BOTS points use \texttt{bots\_points}; model+tools adds priced Brave Search and WhoisXMLAPI calls.}
 \label{tab:bots}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrr}
@@ -326,28 +355,28 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/cybench_scaling_panels}
-\caption{Cybench scaling curves. Left: success under retrospective per-sample cost budgets. Right: success as cumulative token budget increases. Extra compute buys additional solves for some traces, especially DeepSeek v4 Flash, while GPT-5.5 solves most successful challenges below lower budgets.}
+\widepaperfig{figures/cybench_scaling_panels}
+\caption{Cybench scaling curves. Left: success under retrospective per-sample cost budgets. Right: success as cumulative token budget increases. Extra compute buys additional solves for some traces, especially DeepSeek v4 Flash.}
 \label{fig:cybench-scaling-panels}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/botsv1_scaling_panels}
+\widepaperfig{figures/botsv1_scaling_panels}
 \caption{BOTSv1 scaling curves. Left: official BOTS points under per-sample model-plus-priced-tool cost budgets. Right: official BOTS points as cumulative token budget increases. More budget does not by itself identify the best defensive agent.}
 \label{fig:botsv1-scaling-panels}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/tool_call_scaling_panels}
+\widepaperfig{figures/tool_call_scaling_panels}
 \caption{Tool-call scaling curves for Cybench and BOTSv1. Left: Cybench success under non-submit tool-call caps. Right: BOTSv1 binary answer accuracy under the same cap rule. Tool volume is useful for some traces, but high tool volume is not the same as high defensive score.}
 \label{fig:tool-call-scaling-panels}
 \end{figure}
 
 \begin{table}[t]
 \centering
-\caption{Retrospective budget headroom above \$0.80 per sample for the shared model set. Deltas are full-trace score minus the same trace capped at \$0.80; intervals are descriptive paired bootstraps over challenge IDs for Cybench and question IDs for BOTSv1.}
+\caption{Retrospective budget headroom above \$0.80 per sample. Deltas are full-trace score minus the same trace capped at \$0.80; intervals are paired bootstraps over task IDs.}
 \label{tab:scaling-headroom}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lrrrr}
@@ -432,8 +461,8 @@ Paired contrasts resample only task IDs common to both compared runs.
 \centering
 \caption{Cybench challenge-level bootstrap intervals. The DeepSeek v4 Flash \$0.80 row uses the same retrospective cap as Table~\ref{tab:cybench}.}
 \label{tab:cybench-bootstrap}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{llrr}
+\small
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llrr@{}}
 \toprule
 Model & cost cap & success rate & 95\% bootstrap interval \\
 \midrule
@@ -443,7 +472,7 @@ DeepSeek v4 Flash & \$0.80 & 76.1\% & 63.2--87.2\% \\
 Claude Opus 4.8 & \$2.10 & 74.4\% & 61.5--86.3\% \\
 DeepSeek v4 Pro & \$0.75 & 43.9\% & 29.8--57.9\% \\
 \bottomrule
-\end{tabular}}
+\end{tabular*}
 \end{table}
 
 The main scaling contrasts are reported in Table~\ref{tab:scaling-headroom}.
@@ -457,8 +486,8 @@ Claude Opus 4.8 does not close the gap to those leaders: paired contrasts are GP
 \centering
 \caption{BOTSv1 question-level bootstrap intervals.}
 \label{tab:bots-bootstrap}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{llrr}
+\small
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llrr@{}}
 \toprule
 Model & cost cap & BOTS points & 95\% bootstrap interval \\
 \midrule
@@ -469,7 +498,7 @@ DeepSeek v4 Pro & \$2.10 & 77.8\% & 61.0--93.1\% \\
 DeepSeek v4 Flash & \$4.20 & 73.9\% & 53.2--91.9\% \\
 DeepSeek v4 Flash & \$2.10 & 73.0\% & 52.7--91.1\% \\
 \bottomrule
-\end{tabular}}
+\end{tabular*}
 \end{table}
 
 Claude Opus 4.8's paired margin over the standard GPT-5.5 row is 12.8 percentage points, with a question-level paired bootstrap interval of +0.9 to +27.4 percentage points.
@@ -492,7 +521,7 @@ BOTS remains useful as a reproducible harness and cost-accounting testbed; it sh
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.95\linewidth]{figures/botsv1_decontamination}
+\includegraphics[width=\linewidth]{figures/botsv1_decontamination}
 % Internal note: DeepSeek v4 Flash no-tools attempts failed before scored samples because OpenRouter returned 401 User not found.
 \caption{BOTSv1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are three-epoch mean runs. Only completed no-tools probes are shown.}
 \label{fig:bots-decontamination}
@@ -502,8 +531,8 @@ BOTS remains useful as a reproducible harness and cost-accounting testbed; it sh
 \centering
 \caption{BOTSv1 no-tools contamination-control results.}
 \label{tab:bots-no-tools}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{llrrr}
+\small
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llrrr@{}}
 \toprule
 Model & Condition & Points & Binary acc. & Tool events \\
 \midrule
@@ -514,7 +543,7 @@ GPT-5.5 & full agent + tools & 81.0\% & 90.3\% & 1{,}481 \\
 GPT-5.5 & no tools, prereq context & 62.1\% & 74.2\% & 0 \\
 GPT-5.5 & no tools, question only & 54.9\% & 71.0\% & 0 \\
 \bottomrule
-\end{tabular}}
+\end{tabular*}
 \end{table}
 
 The completed no-tools probes contain zero tool events.
