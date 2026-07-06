@@ -75,7 +75,7 @@ Source report: `source-eval-repo/charts/botsv1_report.html`.
 ### BOTSv1 robustness and caveats
 
 - Official warm-up q1 is excluded by task default; full runs contain 31 scored questions.
-- Twenty-three of 31 scored questions have explicit prerequisite dependencies and receive prerequisite context in the prompt; this measures follow-up investigation with known case state, not cold-start reconstruction.
+- Twenty-three of 31 scored questions have explicit prerequisite dependencies and receive prerequisite context in the prompt; this measures follow-up investigation with known case state, not cold-start reconstruction. Appendix D's dependency chart is copied from `~/projects/inspect-cyber-eval/bots/v1/eval.yaml` `metadata.depends_on` entries.
 - Rows use three epochs and mean reduction, so points are reduced back to the single-epoch point scale (10,300 possible).
 - Primary metric is `bots_points`; binary `includes` is secondary.
 - Tool costs include Brave Search and non-cache WhoisXMLAPI DRS credits where transcript events show a charged provider call. VirusTotal public API, DNS, and live WHOIS/RDAP are treated as zero marginal cost.

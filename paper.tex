@@ -565,6 +565,36 @@ The DeepSeek v4 Flash \$4.20-cap row exceeds the \$2.10-cap row by only 0.9 perc
 We exclude the official BOTSv1 warm-up question and evaluate 31 scored questions.
 Twenty-three of those questions have explicit dependencies on earlier case facts and receive prerequisite context in the prompt.
 This matches the benchmark's sequential investigation structure, but we interpret it as follow-up investigation with known case state rather than cold-start reconstruction.
+Table~\ref{tab:bots-dependencies} shows the direct prerequisite chart; the prompt preamble expands these edges transitively.
+
+\begin{table}[!htbp]
+\centering
+\caption{BOTSv1 direct prerequisite chart from the benchmark metadata. Only dependent scored questions are shown; independent scored questions and the warm-up are omitted. Source: \texttt{inspect-cyber-eval/bots/v1/eval.yaml}.}
+\label{tab:bots-dependencies}
+\small
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llll@{}}
+\toprule
+Dependent Q & Direct prior Q(s) & Dependent Q & Direct prior Q(s) \\
+\midrule
+\multicolumn{4}{l}{\textit{Po1s0n1vy web defacement}} \\
+Q104 & Q101 & Q112 & Q111 \\
+Q105 & Q104 & Q113 & Q106 \\
+Q106 & Q104 & Q114 & Q108 \\
+Q107 & Q106 & Q115 & Q114 \\
+Q108 & Q101 & Q116 & Q114 \\
+Q109 & Q108 & Q117 & Q114 \\
+Q110 & Q109 & Q118 & Q116 \\
+Q111 & Q106 & Q119 & Q114 \\
+\midrule
+\multicolumn{4}{l}{\textit{Cerber ransomware}} \\
+Q202 & Q200 & Q208 & Q204 \\
+Q203 & Q202 & Q210 & Q203 \\
+Q206 & Q200 & Q211 & Q210 \\
+Q207 & Q206 & & \\
+\bottomrule
+\end{tabular*}
+\end{table}
+\FloatBarrier
 
 For Claude Opus 4.8, independent questions score 1,445/1,500 points (96.3\%) and dependent questions score 8,221.7/8,800 points (93.4\%).
 The standard GPT-5.5 row scores 1,345/1,500 points (89.7\%) on independent questions and 7,000/8,800 points (79.5\%) on dependent questions.
