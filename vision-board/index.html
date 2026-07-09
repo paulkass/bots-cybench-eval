@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Academic Paper Vision Board</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="identity" href="#top" aria-label="Frontier research vision board">
+        <span class="identity-mark"><img src="assets/frontier-logo.svg" alt="" /></span>
+        <span>
+          <strong>Frontier Research</strong>
+          <small>Paper direction study</small>
+        </span>
+      </a>
+      <p class="header-note">Reference study · not a venue submission template</p>
+    </header>
+
+    <main id="top">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Academic format library</p>
+          <h1 id="page-title">Build the visual argument<br />before the template.</h1>
+        </div>
+        <div class="intro-copy">
+          <p>
+            Select papers whose academic character feels right. Then identify what
+            to borrow from each—typography, title treatment, grid, figures, or
+            restrained institutional identity.
+          </p>
+          <p class="quiet">
+            Every preview is the first page of a real paper. Open it at full size,
+            then use the linked paper—not a style guide—to judge the format.
+          </p>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Vision board builder">
+        <div class="library-panel">
+          <div class="library-toolbar">
+            <div>
+              <p class="section-kicker">01 · Gather</p>
+              <h2>Choose visual references</h2>
+            </div>
+            <div class="filter-group" aria-label="Filter references">
+              <button class="filter is-active" type="button" data-filter="all">All</button>
+              <button class="filter" type="button" data-filter="single">Single column</button>
+              <button class="filter" type="button" data-filter="double">Two column</button>
+              <button class="filter" type="button" data-filter="journal">Journals</button>
+              <button class="filter" type="button" data-filter="conference">Conferences</button>
+              <button class="filter" type="button" data-filter="lab">Research lab</button>
+            </div>
+          </div>
+
+          <div id="reference-grid" class="reference-grid" aria-live="polite"></div>
+        </div>
+
+        <aside class="board-panel" aria-labelledby="board-title">
+          <div class="board-heading">
+            <div>
+              <p class="section-kicker">02 · Synthesize</p>
+              <h2 id="board-title">Your vision board</h2>
+            </div>
+            <span id="selection-count" class="selection-count">0</span>
+          </div>
+
+          <div id="empty-board" class="empty-board">
+            <span class="empty-glyph">＋</span>
+            <p>Select two to four references to reveal the common direction.</p>
+          </div>
+          <div id="board-list" class="board-list"></div>
+
+          <div class="direction-fields">
+            <fieldset>
+              <legend>Typography mood</legend>
+              <div id="type-options" class="choice-row">
+                <label><input type="checkbox" value="Bookish serif" /> Bookish</label>
+                <label><input type="checkbox" value="Compact Times" /> Compact</label>
+                <label><input type="checkbox" value="Contemporary serif" /> Contemporary</label>
+              </div>
+            </fieldset>
+            <label class="notes-label" for="direction-notes">Direction notes</label>
+            <textarea
+              id="direction-notes"
+              rows="4"
+              placeholder="For example: quiet first page, modest title, one warm accent, figures should carry the color…"
+            ></textarea>
+          </div>
+
+          <div class="board-actions">
+            <button id="copy-brief" class="primary-action" type="button">Copy Markdown brief</button>
+            <button id="download-brief" class="secondary-action" type="button">Download .md</button>
+            <button id="clear-board" class="text-action" type="button">Clear board</button>
+          </div>
+          <p id="action-status" class="action-status" role="status" aria-live="polite"></p>
+        </aside>
+      </section>
+    </main>
+
+    <footer>
+      <p>Academic paper vision board · selections stay in this browser</p>
+      <a href="#top">Back to top ↑</a>
+    </footer>
+
+    <dialog id="paper-preview-dialog" class="preview-dialog">
+      <div class="dialog-bar">
+        <div>
+          <p id="dialog-format" class="section-kicker"></p>
+          <h2 id="dialog-title"></h2>
+        </div>
+        <button id="close-dialog" type="button" aria-label="Close preview">×</button>
+      </div>
+      <div class="dialog-page-wrap">
+        <img id="dialog-image" src="" alt="" />
+      </div>
+      <a id="dialog-paper-link" class="dialog-paper-link" href="" target="_blank" rel="noreferrer">Open the complete paper ↗</a>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

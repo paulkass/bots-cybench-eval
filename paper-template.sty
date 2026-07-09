@@ -1,0 +1,148 @@
+%% Branded preprint layer for the security-agent evaluation paper.
+%% This package is intentionally not loaded by the PMLR submission build.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{paper-template}[2026/07/09 Branded paper template]
+
+\newif\ifpaper@palatino
+\newif\ifpaper@times
+\newif\ifpaper@modern
+\DeclareOption{palatino}{\paper@palatinotrue}
+\DeclareOption{times}{\paper@timestrue}
+\DeclareOption{modern}{\paper@moderntrue}
+\ExecuteOptions{palatino}
+\ProcessOptions\relax
+
+% Each option includes matching text and mathematics where the local TeX
+% installation provides it. Helvetica is used only for display typography.
+\ifpaper@times
+  \paper@palatinofalse
+  \RequirePackage{mathptmx}
+\else\ifpaper@modern
+  \paper@palatinofalse
+  \RequirePackage{lmodern}
+\else
+  \RequirePackage{mathpazo}
+\fi\fi
+
+\RequirePackage{color}
+
+% A warm, low-saturation palette that remains legible in charts and body copy.
+\definecolor{PaperForest}{rgb}{0.06,0.24,0.19}
+\definecolor{PaperLeaf}{rgb}{0.24,0.46,0.34}
+\definecolor{PaperMint}{rgb}{0.86,0.95,0.79}
+\definecolor{PaperWash}{rgb}{0.96,0.98,0.89}
+\definecolor{PaperYellow}{rgb}{0.98,0.84,0.28}
+\definecolor{PaperOlive}{rgb}{0.43,0.44,0.10}
+\definecolor{PaperInk}{rgb}{0.08,0.12,0.10}
+\definecolor{PaperRule}{rgb}{0.72,0.80,0.60}
+
+\newcommand{\PaperDisplayFont}{\fontfamily{phv}\selectfont}
+\newcommand{\PaperKicker}[1]{{\PaperDisplayFont\bfseries\footnotesize
+  \color{PaperLeaf}\MakeUppercase{#1}}}
+
+\makeatletter
+
+% Full-width title hero. The JMLR class places this block above the columns,
+% so the manuscript content and float behavior remain unchanged.
+\def\@jmlrmaketitle{%
+  {\setlength{\fboxsep}{14pt}%
+   \noindent\colorbox{PaperMint}{%
+     \begin{minipage}{\dimexpr\textwidth-2\fboxsep\relax}
+       \begin{minipage}[c]{0.72\linewidth}
+         \PaperKicker{Security agent evaluation \enspace/\enspace research paper}
+       \end{minipage}%
+       \hfill
+       \begin{minipage}[c]{0.20\linewidth}
+         \raggedleft
+         \setlength{\fboxsep}{7pt}%
+         \colorbox{PaperYellow}{%
+           \includegraphics[width=0.34in,height=0.34in,keepaspectratio]{figures/frontier-logo.png}}
+       \end{minipage}
+       \par\vspace{0.18in}
+       {\PaperDisplayFont\bfseries\fontsize{24}{27}\selectfont
+        \color{PaperForest}\raggedright
+        \def\titletag##1{##1}\@title\par}
+       \vspace{0.16in}
+       {\color{PaperForest}\rule{0.20\linewidth}{2.5pt}}%
+       {\color{PaperYellow}\rule{0.09\linewidth}{2.5pt}}
+       \par\vspace{0.05in}
+       {\PaperDisplayFont\footnotesize\color{PaperLeaf}
+        COST \textbullet\ CAPABILITY \textbullet\ OPERATIONAL FIT}
+     \end{minipage}}
+  }%
+  \par\vspace{0.14in}
+  \noindent{\color{PaperRule}\rule{\textwidth}{0.7pt}}\par\vspace{0.08in}
+  \jmlrpreauthor\ignorespaces\@author\jmlrpostauthor
+}
+
+\def\@name{\normalsize\upshape\PaperDisplayFont\bfseries\color{PaperForest}}
+\def\@email{\hfill\small\mdseries\PaperDisplayFont\color{PaperLeaf}}
+\setlength\aftermaketitskip{0.18in plus 0.06in minus 0.06in}
+
+% Clear section hierarchy without adding visual noise to a dense paper.
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+  {-0.24in \@plus -1ex \@minus -.2ex}%
+  {0.10in \@plus .2ex}%
+  {\normalfont\PaperDisplayFont\bfseries\large\color{PaperForest}\raggedright}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+  {-0.20in \@plus -1ex \@minus -.2ex}%
+  {0.08in \@plus .2ex}%
+  {\normalfont\PaperDisplayFont\bfseries\normalsize\color{PaperLeaf}\raggedright}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{\z@}%
+  {-0.18in \@plus -1ex \@minus -.2ex}%
+  {0.08in \@plus .2ex}%
+  {\normalfont\PaperDisplayFont\bfseries\small\color{PaperForest}\raggedright}}
+\renewcommand*{\@seccntformat}[1]{%
+  {\color{PaperOlive}\csname the#1\endcsname}\enskip}
+\renewcommand{\labelitemi}{{\color{PaperOlive}\small\textbullet}}
+
+% Branded running heads. The first page keeps proceedings information but uses
+% the same typographic system; later pages prioritize the short title and folio.
+\def\ps@jmlrps{%
+  \let\@mkboth\@gobbletwo
+  \def\@oddhead{{\PaperDisplayFont\scriptsize\color{PaperLeaf}\@shorttitle}%
+    \hfill\colorbox{PaperYellow}{\PaperDisplayFont\scriptsize\color{PaperForest}\strut\thepage}}%
+  \let\@evenhead\@oddhead
+  \def\@oddfoot{}%
+  \let\@evenfoot\@oddfoot}
+\def\ps@jmlrtps{%
+  \let\@mkboth\@gobbletwo
+  \def\@oddhead{{\PaperDisplayFont\scriptsize\color{PaperLeaf}BRANDED PREPRINT}%
+    \hfill{\PaperDisplayFont\scriptsize\color{PaperLeaf}\@jmlrworkshop}}%
+  \let\@evenhead\@oddhead
+  \def\@oddfoot{{\PaperDisplayFont\scriptsize\color{PaperLeaf}\@titlefoot}}%
+  \let\@evenfoot\@oddfoot}
+\pagestyle{jmlrps}
+
+\hypersetup{
+  linkcolor=PaperForest,
+  citecolor=PaperOlive,
+  urlcolor=PaperLeaf
+}
+
+% Abstract and keywords become a compact highlighted briefing block. Rules and
+% inset copy are used instead of an unbreakable box, preserving column flow.
+\renewenvironment{abstract}{%
+  \par\smallskip\begingroup
+  \leftskip 9pt\rightskip 9pt
+  \noindent{\color{PaperYellow}\rule{\dimexpr\linewidth-18pt\relax}{3pt}}\par\vspace{0.7ex}
+  {\PaperDisplayFont\bfseries\small\color{PaperForest}ABSTRACT}\par\vspace{0.5ex}
+  \small\color{PaperInk}\noindent\ignorespaces}%
+ {\par\vspace{0.6ex}\noindent{\color{PaperRule}\rule{\dimexpr\linewidth-18pt\relax}{0.7pt}}%
+  \par\endgroup\vspace{0.35ex}}
+\renewenvironment{keywords}{%
+  \begingroup\small\noindent
+  {\PaperDisplayFont\bfseries\color{PaperLeaf}Keywords}\enspace\ignorespaces}%
+ {\par\endgroup\vspace{0.25ex}}
+
+\AtBeginDocument{%
+  % Captions use a strong label and quieter explanatory text.
+  \long\def\@makecaption#1#2{%
+    \vskip 6pt
+    \small\noindent
+    {\PaperDisplayFont\bfseries\color{PaperForest}#1}\enspace
+    {\color{PaperInk}#2}\par}
+}
+
+\makeatother
+\endinput

@@ -1,0 +1,149 @@
+%% Frontier academic research-paper theme.
+%% Synthesized from the selected JMLR, NeurIPS, FAIR, OpenAI, and DeepMind
+%% references. The paper remains conventionally academic; company identity is
+%% confined to publication furniture and a small set of structural accents.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{frontier-template}[2026/07/09 Frontier academic research paper]
+
+\RequirePackage{lmodern}
+\RequirePackage{color}
+\RequirePackage[letterpaper,top=0.79in,bottom=0.82in,left=1.00in,right=1.00in,
+  headheight=21pt,headsep=0.19in,footskip=0.38in]{geometry}
+\RequirePackage{fancyhdr}
+
+\definecolor{FrontierForest}{rgb}{0.122,0.318,0.216}
+\definecolor{FrontierLeaf}{rgb}{0.337,0.455,0.380}
+\definecolor{FrontierAcid}{rgb}{0.863,0.910,0.294}
+\definecolor{FrontierOlive}{rgb}{0.431,0.443,0.110}
+\definecolor{FrontierInk}{rgb}{0.082,0.102,0.086}
+\definecolor{FrontierMuted}{rgb}{0.376,0.416,0.388}
+\definecolor{FrontierRule}{rgb}{0.788,0.816,0.784}
+\definecolor{FrontierWash}{rgb}{0.949,0.961,0.918}
+
+\newcommand{\FrontierSans}{\sffamily}
+\newcommand{\FrontierShortTitle}{Cost-Aware Security Agent Evaluation}
+\newcommand{\FrontierPaperID}{FRR--2026--01}
+
+\setlength{\parindent}{1.15em}
+\setlength{\parskip}{0pt}
+\setlength{\bibsep}{1pt plus 0.2ex}
+\linespread{1.035}
+\urlstyle{same}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=FrontierForest,
+  citecolor=FrontierOlive,
+  urlcolor=FrontierLeaf
+}
+
+\fancypagestyle{frontierpaper}{%
+  \fancyhf{}%
+  \fancyhead[L]{{\FrontierSans\fontsize{7.2}{8}\selectfont\color{FrontierMuted}
+    FRONTIER RESEARCH \enspace\textcolor{FrontierRule}{/}\enspace \FrontierShortTitle}}%
+  \fancyhead[R]{{\FrontierSans\fontsize{7.2}{8}\selectfont\bfseries\color{FrontierForest}\thepage}}%
+  \renewcommand{\headrulewidth}{0.35pt}%
+  \renewcommand{\headrule}{\hbox to\headwidth{%
+    \color{FrontierRule}\leaders\hrule height \headrulewidth\hfill}}%
+  \renewcommand{\footrulewidth}{0pt}}
+\fancypagestyle{frontierfirst}{%
+  \fancyhf{}%
+  \fancyfoot[L]{{\FrontierSans\fontsize{7}{8}\selectfont\color{FrontierMuted}
+    Frontier Research Report \enspace\textcolor{FrontierAcid}{\textbullet}\enspace \FrontierPaperID}}%
+  \fancyfoot[R]{{\FrontierSans\fontsize{7}{8}\selectfont\bfseries\color{FrontierForest}\thepage}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}}
+\pagestyle{frontierpaper}
+
+\makeatletter
+
+\renewcommand{\maketitle}{%
+  \thispagestyle{frontierfirst}%
+  \begingroup
+    \setlength{\parindent}{0pt}%
+    \noindent
+    \begin{minipage}[c]{0.70\linewidth}
+      \begin{minipage}[c]{0.25in}
+        \includegraphics[width=0.22in,height=0.22in,keepaspectratio]{figures/frontier-logo.png}
+      \end{minipage}%
+      \hspace{0.42em}%
+      \begin{minipage}[c]{2.0in}
+        {\FrontierSans\fontsize{7.7}{8.6}\selectfont\bfseries\color{FrontierForest}
+         FRONTIER RESEARCH}\par
+        {\FrontierSans\fontsize{6.2}{7.1}\selectfont\color{FrontierMuted}
+         SECURITY EVALUATION}
+      \end{minipage}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[c]{0.27\linewidth}
+      \raggedleft
+      {\FrontierSans\fontsize{6.5}{7.4}\selectfont\bfseries\color{FrontierForest}
+       RESEARCH ARTICLE}\par
+      {\FrontierSans\fontsize{6.3}{7.2}\selectfont\color{FrontierMuted}
+       \FrontierPaperID \enspace / \enspace JULY 2026}
+    \end{minipage}
+    \par\vspace{0.095in}
+    \noindent{\color{FrontierForest}\rule{0.91\linewidth}{0.9pt}}%
+    {\color{FrontierAcid}\rule{0.09\linewidth}{0.9pt}}
+    \par\vspace{0.22in}
+    {\bfseries\fontsize{19}{22.2}\selectfont\color{FrontierInk}\raggedright\@title\par}
+    \vspace{0.15in}
+    {\FrontierSans\fontsize{9.3}{11}\selectfont\bfseries\color{FrontierForest}\@author\par}
+    \vspace{0.022in}
+    {\FrontierSans\fontsize{7.7}{9}\selectfont\color{FrontierMuted}
+      Frontier Security Research \enspace\textcolor{FrontierRule}{/}\enspace \@date\par}
+    \vspace{0.055in}
+  \endgroup
+}
+
+\newsavebox{\FrontierAbstractBox}
+\renewenvironment{abstract}{%
+  \par\vspace{0.10in}
+  \begin{lrbox}{\FrontierAbstractBox}%
+    \begin{minipage}{\dimexpr\linewidth-20pt\relax}
+      \noindent{\color{FrontierForest}\rule{\linewidth}{0.75pt}}\par
+      \vspace{0.065in}
+      {\FrontierSans\fontsize{8.3}{9.2}\selectfont\bfseries\color{FrontierForest}ABSTRACT}\par
+      \vspace{0.05in}
+      \fontsize{9.25}{11.65}\selectfont\color{FrontierInk}\noindent\ignorespaces}%
+ {\par\vspace{0.045in}
+      \noindent{\color{FrontierRule}\rule{\linewidth}{0.4pt}}
+    \end{minipage}%
+  \end{lrbox}%
+  \noindent\begingroup\setlength{\fboxsep}{10pt}%
+    \colorbox{FrontierWash}{\usebox{\FrontierAbstractBox}}%
+  \endgroup
+  \par\vspace{0.075in}}
+
+\newenvironment{keywords}{%
+  \begingroup\fontsize{8.3}{10}\selectfont\noindent
+  {\FrontierSans\bfseries\color{FrontierForest}KEYWORDS}\enspace\ignorespaces}%
+ {\par\endgroup\vspace{0.14in}}
+
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+  {-2.6ex \@plus -0.8ex \@minus -.2ex}%
+  {0.95ex \@plus .2ex}%
+  {\normalfont\FrontierSans\bfseries\large\color{FrontierInk}\raggedright}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+  {-2.1ex \@plus -0.7ex \@minus -.2ex}%
+  {0.72ex \@plus .2ex}%
+  {\normalfont\FrontierSans\bfseries\normalsize\color{FrontierInk}\raggedright}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{\z@}%
+  {-1.8ex \@plus -0.6ex \@minus -.2ex}%
+  {0.58ex \@plus .2ex}%
+  {\normalfont\FrontierSans\bfseries\small\color{FrontierLeaf}\raggedright}}
+\renewcommand*{\@seccntformat}[1]{%
+  {\color{FrontierForest}\csname the#1\endcsname}\hspace{0.62em}}
+
+\renewcommand{\labelitemi}{{\color{FrontierOlive}\small\textbullet}}
+
+\AtBeginDocument{%
+  \long\def\@makecaption#1#2{%
+    \vskip 5pt
+    \small\noindent
+    {\FrontierSans\fontsize{8}{9.4}\selectfont\bfseries\color{FrontierForest}#1.}\enspace
+    {\color{FrontierInk}#2}\par}%
+}
+
+\makeatother
+\endinput
