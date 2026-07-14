@@ -49,7 +49,7 @@
   \begin{figure}[t!]
   \centering
   \widepaperfig{figures/main_results_chart}
-  \caption{Resource scaling for three representative models. \textbf{(a)} Cybench success versus a retrospective per-sample cost budget: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{(b)} BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls. Offensive success climbs steadily with spend, while defensively Claude Opus 4.8 is near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
+  \caption{Resource scaling for three representative models. Left: Cybench success versus a retrospective per-sample cost budget; a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. Right: BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls. Offensive success climbs steadily with spend, while defensively Claude Opus 4.8 is near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
   \label{fig:main-results-chart}
   \end{figure}}
 
@@ -353,7 +353,7 @@ On Cybench, policy gating instead dominates the lower GPT-5.6 and Fable results:
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/gpt56_comparison_with_refusals}
-\caption{Performance and policy refusals for the GPT-5.6-focused comparison. BOTSv1 labels report any affected sample-epoch as secondary context, even when a later attempt earns points. Cybench gold segments are failed refusal outcomes and therefore do not overlap solved share. Source: GPT-5.6 Cyber Evaluation Results Notion page; values verified against source logs and generated reports.}
+\caption{Performance and policy refusals for the GPT-5.6-focused comparison. Left: BOTSv1 performance, with labels reporting any affected sample-epoch as secondary context even when a later attempt earns points. Right: Cybench performance, where hatched segments are failed refusal outcomes and therefore do not overlap solved share. Source: GPT-5.6 Cyber Evaluation Results Notion page; values verified against source logs and generated reports.}
 \label{fig:gpt56-refusals}
 \end{figure}
 

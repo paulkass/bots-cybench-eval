@@ -36,6 +36,12 @@ MARKERS = {"Opus 4.8": "o", "Opus 4.7": "s", "GPT-5.5": "^",
            "GPT-5.5 high": "v", "DeepSeek Flash": "D",
            "DeepSeek Flash $0.80": "P", "DeepSeek Flash $4.20": "X",
            "DeepSeek Pro": "<", "Kimi K2.6": ">"}
+MODEL_FAMILIES = [
+    ["Opus 4.8", "Opus 4.7"],
+    ["GPT-5.5", "GPT-5.5 high"],
+    ["DeepSeek Flash", "DeepSeek Flash $0.80", "DeepSeek Flash $4.20", "DeepSeek Pro"],
+    ["Kimi K2.6"],
+]
 
 mpl.font_manager.fontManager.addfont(FONT)
 mpl.rcParams.update({"font.family": "Latin Modern Sans", "font.size": 8.2,
@@ -49,8 +55,7 @@ def finish(fig, name):
     plt.close(fig)
 
 
-def style(ax, panel, xlabel, ylabel, *, xscale="linear", xlim=None, xticks=None):
-    ax.text(-.08, 1.04, panel, transform=ax.transAxes, weight="bold", fontsize=10)
+def style(ax, xlabel, ylabel, *, xscale="linear", xlim=None, xticks=None):
     ax.set(xlabel=xlabel, ylabel=ylabel, ylim=(0, 100))
     if xscale == "log": ax.set_xscale("log")
     if xscale == "symlog": ax.set_xscale("symlog", linthresh=25)
@@ -65,6 +70,27 @@ def handles(labels):
     return [Line2D([0], [0], color=COLORS[x], lw=2, marker=MARKERS[x],
                    markersize=4.2, markeredgecolor="white", markeredgewidth=.35,
                    label=DISPLAY.get(x, x)) for x in labels]
+
+
+def family_legend(labels):
+    """Lay out one model family per legend column."""
+    present = set(labels)
+    columns = [[label for label in family if label in present]
+               for family in MODEL_FAMILIES]
+    columns = [column for column in columns if column]
+    rows = max(map(len, columns))
+    ordered = []
+    for column in columns:
+        ordered.extend(column + [None] * (rows - len(column)))
+    legend_handles, legend_labels = [], []
+    for label in ordered:
+        if label is None:
+            legend_handles.append(Line2D([], [], linestyle="none", alpha=0))
+            legend_labels.append("")
+        else:
+            legend_handles.extend(handles([label]))
+            legend_labels.append(DISPLAY.get(label, label))
+    return legend_handles, legend_labels, len(columns), rows
 
 
 def digitized(name, crop, source_colors, *, source_alpha=1.0):
@@ -134,7 +160,7 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05)):
             ax.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=4.0,
                     color=COLORS[key], markeredgecolor="white", markeredgewidth=.4,
                     zorder=4)
-        style(ax, p["panel"], p["xlabel"], p["ylabel"],
+        style(ax, p["xlabel"], p["ylabel"],
               xscale=p.get("xscale", "log" if p["log"] else "linear"),
               xlim=p["xlim"], xticks=p.get("xticks"))
         if p.get("reference"):
@@ -143,10 +169,11 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05)):
                       ["Model + priced tools", "Model tokens only"],
                       loc="upper left", frameon=False, fontsize=7.2,
                       handlelength=2.2)
-    fig.legend(handles(labels), [DISPLAY.get(x, x) for x in labels], loc="lower center",
-               ncol=min(4, len(labels)), frameon=False, handlelength=1.8,
-               columnspacing=1.05, fontsize=7.6)
-    fig.subplots_adjust(left=.085, right=.99, top=.94, bottom=.27, wspace=.30)
+    legend_handles, legend_labels, columns, rows = family_legend(labels)
+    fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
+               frameon=False, handlelength=1.8, columnspacing=1.2, fontsize=7.6)
+    bottom = {1: .22, 2: .25, 3: .29, 4: .34}[rows]
+    fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=bottom, wspace=.30)
     finish(fig, name)
 
 
@@ -154,9 +181,9 @@ def main_results():
     labels = ["Opus 4.8", "GPT-5.5", "DeepSeek Flash"]
     scaling_figure("main_results_chart", [
       dict(crop=(117,27,1037,477), series=dict(zip(labels,["blue","orange","green"])),
-           panel="(a)", xlabel="Per-sample cost budget (USD)", ylabel="Cybench solved (%)", log=True, xlim=(4e-4,5)),
+           xlabel="Per-sample cost budget (USD)", ylabel="Cybench solved (%)", log=True, xlim=(4e-4,5)),
       dict(crop=(1207,27,2128,477), series=dict(zip(labels,["blue","orange","green"])),
-           panel="(b)", xlabel="Non-submit tool-call cap", ylabel="BOTSv1 correct (%)", log=False, xlim=(0,137)),
+           xlabel="Non-submit tool-call cap", ylabel="BOTSv1 correct (%)", log=False, xlim=(0,137)),
     ], labels, (7.25,2.75))
 
 
@@ -164,10 +191,10 @@ def cybench():
     labels=["GPT-5.5","DeepSeek Flash $0.80","DeepSeek Flash","Kimi K2.6","DeepSeek Pro","Opus 4.7","Opus 4.8"]
     src=["orange","green","blue","brown","pink","purple","red"]
     panels=[]
-    for panel,crop,xlabel,xlim in [
-      ("(a)",(63,29,1518,488),"Per-sample cost budget (USD)",(4e-4,4)),
-      ("(b)",(1772,29,3194,488),"Cumulative tokens",(1.5e3,1.7e9))]:
-        panels.append(dict(crop=crop,series=dict(zip(labels,src)),panel=panel,xlabel=xlabel,
+    for crop,xlabel,xlim in [
+      ((63,29,1518,488),"Per-sample cost budget (USD)",(4e-4,4)),
+      ((1772,29,3194,488),"Cumulative tokens",(1.5e3,1.7e9))]:
+        panels.append(dict(crop=crop,series=dict(zip(labels,src)),xlabel=xlabel,
                            ylabel="Cybench solved (%)",log=True,xlim=xlim))
     scaling_figure("cybench_scaling_panels",panels,labels)
 
@@ -176,8 +203,8 @@ def bots():
     labels=["Opus 4.8","GPT-5.5 high","GPT-5.5","DeepSeek Pro","DeepSeek Flash $4.20","DeepSeek Flash"]
     src=["blue","orange","green","red","purple","brown"]
     scaling_figure("botsv1_scaling_panels",[
-      dict(crop=(131,101,935,676),series=dict(zip(labels,src)),panel="(a)",xlabel="Per-sample budget (USD)",ylabel="BOTS points (% of max)",log=True,xlim=(.01,8),reference=True),
-      dict(crop=(1502,101,2305,676),series=dict(zip(labels,src)),panel="(b)",xlabel="Cumulative tokens",ylabel="BOTS points (% of max)",log=True,xlim=(.4,1e9)),
+      dict(crop=(131,101,935,676),series=dict(zip(labels,src)),xlabel="Per-sample budget (USD)",ylabel="BOTS points (% of max)",log=True,xlim=(.01,8),reference=True),
+      dict(crop=(1502,101,2305,676),series=dict(zip(labels,src)),xlabel="Cumulative tokens",ylabel="BOTS points (% of max)",log=True,xlim=(.4,1e9)),
     ],labels)
 
 
@@ -188,9 +215,9 @@ def tool_calls():
     rightsrc=["blue","green","orange","red","brown","purple"]
     all_labels=["Opus 4.8","Opus 4.7","GPT-5.5","GPT-5.5 high","DeepSeek Flash","DeepSeek Flash $0.80","DeepSeek Flash $4.20","DeepSeek Pro","Kimi K2.6"]
     scaling_figure("tool_call_scaling_panels",[
-      dict(crop=(72,29,1439,495),series=dict(zip(left,leftsrc)),panel="(a)",xlabel="Non-submit tool-call cap",ylabel="Cybench solved (%)",log=False,xlim=(0,930),
+      dict(crop=(72,29,1439,495),series=dict(zip(left,leftsrc)),xlabel="Non-submit tool-call cap",ylabel="Cybench solved (%)",log=False,xlim=(0,930),
            xscale="symlog",xticks=[0,25,50,100,250,500,900]),
-      dict(crop=(1811,29,3151,495),series=dict(zip(right,rightsrc)),panel="(b)",xlabel="Non-submit tool-call cap",ylabel="BOTSv1 correct (%)",log=False,xlim=(0,132)),
+      dict(crop=(1811,29,3151,495),series=dict(zip(right,rightsrc)),xlabel="Non-submit tool-call cap",ylabel="BOTSv1 correct (%)",log=False,xlim=(0,132)),
     ],all_labels,(7.25,3.25))
 
 
@@ -204,7 +231,7 @@ def decontamination():
         bars=ax.bar(range(3),v,color=colors,width=.62,
                     hatch=[None, "///", "xxx"], edgecolor=[FOREST, INK, INK], linewidth=.45)
         ax.bar_label(bars,labels=[f"{x:.1f}%" for x in v],padding=2,fontsize=8)
-        style(ax,f"({chr(97+i)})","", "BOTS points (%)" if i==0 else "")
+        style(ax,"", "BOTS points (%)" if i==0 else "")
         ax.set_xticks([]); ax.text(.5,-.12,model,transform=ax.transAxes,ha="center",weight="bold")
     fig.legend([mpl.patches.Patch(facecolor=c, hatch=h, edgecolor=INK, linewidth=.45)
                 for c,h in zip(colors,[None,"///","xxx"])],labels,
@@ -230,7 +257,7 @@ def refusals():
                xlim=(0,100 if bench == "BOTSv1" else 118),
                xlabel="Performance (%)")
         ax.set_xticks(np.arange(0,101,20))
-        ax.invert_yaxis(); ax.text(-.08,1.04,f"({chr(97+i)})  {bench}",transform=ax.transAxes,weight="bold",fontsize=10)
+        ax.invert_yaxis()
         ax.grid(axis="x",color=RULE,lw=.55); ax.set_axisbelow(True); ax.spines[["top","right","left"]].set_visible(False); ax.tick_params(axis="y",length=0)
         for yi,(p,count) in enumerate(zip(perf,counts)):
             if bench == "BOTSv1":
