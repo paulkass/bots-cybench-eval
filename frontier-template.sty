@@ -1,15 +1,15 @@
 %% Frontier academic research-paper theme.
-%% Synthesized from the selected JMLR, NeurIPS, FAIR, OpenAI, and DeepMind
-%% references. The paper remains conventionally academic; company identity is
-%% confined to publication furniture and a small set of structural accents.
+%% Company identity is confined to publication furniture and structural accents.
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{frontier-template}[2026/07/09 Frontier academic research paper]
+\ProvidesPackage{frontier-template}[2026/07/10 Frontier academic research paper]
 
 \RequirePackage{lmodern}
 \RequirePackage{color}
 \RequirePackage[letterpaper,top=0.79in,bottom=0.82in,left=1.00in,right=1.00in,
   headheight=21pt,headsep=0.19in,footskip=0.38in]{geometry}
 \RequirePackage{fancyhdr}
+\RequirePackage{graphicx}
+\RequirePackage{hyperref}
 
 \definecolor{FrontierForest}{rgb}{0.122,0.318,0.216}
 \definecolor{FrontierLeaf}{rgb}{0.337,0.455,0.380}
@@ -21,12 +21,17 @@
 \definecolor{FrontierWash}{rgb}{0.949,0.961,0.918}
 
 \newcommand{\FrontierSans}{\sffamily}
-\newcommand{\FrontierShortTitle}{Cost-Aware Security Agent Evaluation}
-\newcommand{\FrontierPaperID}{FRR--2026--01}
+\providecommand{\FrontierShortTitle}{Paper Short Title}
+\providecommand{\FrontierPaperID}{FRR--YYYY--NN}
+\providecommand{\FrontierDivision}{RESEARCH}
+\providecommand{\FrontierArticleType}{RESEARCH ARTICLE}
+\providecommand{\FrontierPublicationDate}{MONTH YEAR}
+\providecommand{\FrontierAffiliation}{Frontier Research}
+\providecommand{\FrontierReportLabel}{Frontier Research Report}
+\providecommand{\FrontierLogo}{assets/frontier-logo.png}
 
 \setlength{\parindent}{1.15em}
 \setlength{\parskip}{0pt}
-\setlength{\bibsep}{1pt plus 0.2ex}
 \linespread{1.035}
 \urlstyle{same}
 
@@ -49,7 +54,7 @@
 \fancypagestyle{frontierfirst}{%
   \fancyhf{}%
   \fancyfoot[L]{{\FrontierSans\fontsize{7}{8}\selectfont\color{FrontierMuted}
-    Frontier Research Report \enspace\textcolor{FrontierAcid}{\textbullet}\enspace \FrontierPaperID}}%
+    \FrontierReportLabel \enspace\textcolor{FrontierAcid}{\textbullet}\enspace \FrontierPaperID}}%
   \fancyfoot[R]{{\FrontierSans\fontsize{7}{8}\selectfont\bfseries\color{FrontierForest}\thepage}}%
   \renewcommand{\headrulewidth}{0pt}%
   \renewcommand{\footrulewidth}{0pt}}
@@ -64,23 +69,23 @@
     \noindent
     \begin{minipage}[c]{0.70\linewidth}
       \begin{minipage}[c]{0.25in}
-        \includegraphics[width=0.22in,height=0.22in,keepaspectratio]{figures/frontier-logo.png}
+        \includegraphics[width=0.22in,height=0.22in,keepaspectratio]{\FrontierLogo}
       \end{minipage}%
       \hspace{0.42em}%
       \begin{minipage}[c]{2.0in}
         {\FrontierSans\fontsize{7.7}{8.6}\selectfont\bfseries\color{FrontierForest}
          FRONTIER RESEARCH}\par
         {\FrontierSans\fontsize{6.2}{7.1}\selectfont\color{FrontierMuted}
-         SECURITY EVALUATION}
+         \FrontierDivision}
       \end{minipage}
     \end{minipage}%
     \hfill
     \begin{minipage}[c]{0.27\linewidth}
       \raggedleft
       {\FrontierSans\fontsize{6.5}{7.4}\selectfont\bfseries\color{FrontierForest}
-       RESEARCH ARTICLE}\par
+       \FrontierArticleType}\par
       {\FrontierSans\fontsize{6.3}{7.2}\selectfont\color{FrontierMuted}
-       \FrontierPaperID \enspace / \enspace JULY 2026}
+       \FrontierPaperID \enspace / \enspace \FrontierPublicationDate}
     \end{minipage}
     \par\vspace{0.095in}
     \noindent{\color{FrontierForest}\rule{0.91\linewidth}{0.9pt}}%
@@ -88,10 +93,11 @@
     \par\vspace{0.22in}
     {\bfseries\fontsize{19}{22.2}\selectfont\color{FrontierInk}\raggedright\@title\par}
     \vspace{0.15in}
+    \def\and{\enspace\textcolor{FrontierRule}{/}\enspace}%
     {\FrontierSans\fontsize{9.3}{11}\selectfont\bfseries\color{FrontierForest}\@author\par}
     \vspace{0.022in}
     {\FrontierSans\fontsize{7.7}{9}\selectfont\color{FrontierMuted}
-      Frontier Security Research \enspace\textcolor{FrontierRule}{/}\enspace \@date\par}
+      \FrontierAffiliation \enspace\textcolor{FrontierRule}{/}\enspace \@date\par}
     \vspace{0.055in}
   \endgroup
 }

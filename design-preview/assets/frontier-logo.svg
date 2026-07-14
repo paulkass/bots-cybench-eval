@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Frontier Security icon">
-  <title>Frontier Security</title>
-  <rect width="160" height="160" rx="32" fill="#0A0A0A"/>
-  <g transform="translate(32, 32)" fill="none" stroke="#FAFAF7" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter">
-    <path d="M32 32 L48 16 L64 32"/>
-    <path d="M16 64 L48 32 L80 64"/>
-    <path d="M0 96 L48 48 L96 96"/>
-  </g>
-</svg>
