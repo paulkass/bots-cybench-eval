@@ -2,7 +2,7 @@
 
 Companion provenance for `paper.tex`. This file preserves source mapping for quantitative claims without copying raw logs into the paper. Source-of-truth artifacts live in a separate source evaluation repository, referenced below as `source-eval-repo/`. Raw `.eval` logs should not be copied into this paper repository or submitted as artifacts without a separate sanitization pass.
 
-Audit state when this note was updated: paper repository branch `main`; source repository HEAD `b73f0ea` (`Charge cached WhoisXMLAPI tool use`). Numeric BOTSv1 chart/report artifacts used by the paper were last changed in source commit `b73f0ea`; Cybench chart/table artifacts used by the paper were last changed in source commit `508ef47` (`charts: use posthoc DeepSeek Flash cap`).
+Audit state when this note was updated: paper repository branch `main`; latest GPT-5.6/Fable source results from clean source branch `worktree-gpt56-evals` at `0a630e4` (`Track Fable and refusals in eval charts`). Earlier paper rows retain their previously audited source artifacts.
 
 ## Source artifacts inspected
 
@@ -33,10 +33,18 @@ Appendix `Evaluation Run Dates` reads the UTC `created` timestamp from Inspect l
 | Paper row | Source log(s) | Inspect `created` timestamp(s) |
 |---|---|---|
 | Cybench GPT-5.5, `$2.10` | `logs/2026-05-14T18-34-57-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval`; `logs/2026-05-14T20-45-04-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval`; `logs/2026-05-14T20-52-17-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval`; `logs/2026-05-14T21-03-03-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval` | `2026-05-14T18:34:57+00:00`; `2026-05-14T20:45:04+00:00`; `2026-05-14T20:52:17+00:00`; `2026-05-14T21:03:03+00:00` |
+| Cybench GPT-5.6 Luna, high effort | `logs/2026-07-09T20-44-03-00-00_cybench_a8YJcmqfzGz4AviAk2LJW6.eval` | `2026-07-09T20:44:03+00:00` |
+| Cybench GPT-5.6 Terra, high effort | `logs/2026-07-10T06-43-26-00-00_cybench_AZqG8zUtJtoFu48xYMRfg9.eval` | `2026-07-10T06:43:26+00:00` |
+| Cybench GPT-5.6 Sol, high effort | `logs/2026-07-10T15-35-10-00-00_cybench_Far9ACWawnPSErx2NWGNNe.eval` | `2026-07-10T15:35:10+00:00` |
+| Cybench Claude Fable 5, high effort | `logs/2026-07-13T18-04-21-00-00_cybench_7Pf8QumwJG3RYASBvpu8Py.eval` | `2026-07-13T18:04:21+00:00` |
 | Cybench DeepSeek v4 Flash, `$2.10`; Cybench DeepSeek v4 Flash, `$0.80` retrospective | `logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval` | `2026-05-19T16:35:07+00:00` |
 | Cybench Claude Opus 4.8, `$2.10` | `logs/2026-06-22T18-37-21-00-00_cybench_YFhtUWESgt8vbFNpCB5hRY.eval`; `logs/2026-06-23T19-08-17-00-00_cybench_YFhtUWESgt8vbFNpCB5hRY.eval` | `2026-06-22T18:37:21+00:00`; `2026-06-23T19:08:17+00:00` |
 | Cybench DeepSeek v4 Pro, `$0.75` | `logs/2026-05-15T19-38-26-00-00_cybench_8YcazcCkyPBwkENiRQ2Pee.eval`; `logs/2026-05-15T23-35-01-00-00_cybench_JUTe7XGGcGJBQWg8ZnetYQ.eval`; `logs/2026-05-15T23-44-23-00-00_cybench_VWFUUdor5Useewi4zjrRdo.eval` | `2026-05-15T19:38:26+00:00`; `2026-05-15T23:35:01+00:00`; `2026-05-15T23:44:23+00:00` |
 | BOTSv1 Claude Opus 4.8, full agent, `$2.10` | `logs/2026-06-15T04-30-45-00-00_botsv_iusRJmJKvQTdrAcnhqVFU3.eval` | `2026-06-15T04:30:45+00:00` |
+| BOTSv1 GPT-5.6 Terra, high effort, `$2.10` | `logs/2026-07-13T19-54-58-00-00_botsv_Rd86YGL82fhwVe5rCXKEkz.eval` | `2026-07-13T19:54:58+00:00` |
+| BOTSv1 GPT-5.6 Sol, high effort, `$2.10` | `logs/2026-07-13T19-55-19-00-00_botsv_RSnH45WLy7J55CRLx9Hinv.eval` | `2026-07-13T19:55:19+00:00` |
+| BOTSv1 Claude Fable 5, high effort, `$2.10` | `logs/2026-07-13T18-19-40-00-00_botsv_nFuPAjYncJ5HePTm645po8.eval` | `2026-07-13T18:19:40+00:00` |
+| BOTSv1 GPT-5.6 Luna, high effort, `$2.10` | `logs/2026-07-13T17-43-15-00-00_botsv_WisTKCkgrdwGWJuqMwpBUA.eval` | `2026-07-13T17:43:15+00:00` |
 | BOTSv1 GPT-5.5 high effort, full agent, `$2.10` | `logs/2026-06-15T06-09-42-00-00_botsv_VYcxyGse2gyga8MGcsWNYg.eval` | `2026-06-15T06:09:42+00:00` |
 | BOTSv1 GPT-5.5, full agent, `$2.10` | `logs/2026-06-14T21-12-20-00-00_botsv_6cHBshKy4Xxt82no2geqK3.eval` | `2026-06-14T21:12:20+00:00` |
 | BOTSv1 DeepSeek v4 Pro, full agent, `$2.10` | `logs/2026-06-14T23-14-52-00-00_botsv_nKdSUbcTJe6XrzyRvsmgvV.eval` | `2026-06-14T23:14:52+00:00` |
@@ -54,6 +62,10 @@ Source table: `source-eval-repo/charts/cybench_cost_table.csv`.
 | Paper row | Source log(s) | Notes |
 |---|---|---|
 | GPT-5.5 + autocompact | `logs/2026-05-14T21-03-03-00-00_cybench_BX35J4hLm3ysoLizzwAD48.eval` | Successful run; chart cost also aggregates same-day failed retries. |
+| GPT-5.6 Luna + autocompact, high effort | `logs/2026-07-09T20-44-03-00-00_cybench_a8YJcmqfzGz4AviAk2LJW6.eval` | 79.49% raw pass@1; 8.5% refused; successful retry cost reconstructed from cumulative tokens. |
+| GPT-5.6 Terra + autocompact, high effort | `logs/2026-07-10T06-43-26-00-00_cybench_AZqG8zUtJtoFu48xYMRfg9.eval` | 65.81% raw pass@1; 33.3% refused; `cost_limit=2.10`. |
+| GPT-5.6 Sol + autocompact, high effort | `logs/2026-07-10T15-35-10-00-00_cybench_Far9ACWawnPSErx2NWGNNe.eval` | 9.40% raw pass@1; 90.6% refused; `cost_limit=2.10`. |
+| Claude Fable 5 + autocompact, high effort | `logs/2026-07-13T18-04-21-00-00_cybench_7Pf8QumwJG3RYASBvpu8Py.eval` | 0% raw pass@1; all 117 sample-epochs ended `content_filter` before tool use; `cost_limit=2.10`. |
 | DeepSeek v4 Flash + autocompact ($2.10 cap) | `logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval` | Same model/solver as lower-cap row, higher per-sample cap. |
 | Claude Opus 4.8 + autocompact | `logs/2026-06-23T19-08-17-00-00_cybench_YFhtUWESgt8vbFNpCB5hRY.eval` | `cost_limit=2.10`; k8s sandbox on `non-prod`/`pk-bots-eval`; successful retry log carries cumulative usage from the partial 2026-06-22 run. |
 | Claude Opus 4.7 + autocompact | `logs/2026-05-26T06-06-51-00-00_cybench_nhMeY9ziwx7dguUqQbVYkG.eval` | Cost computed from Anthropic token counts/rates where API did not populate `total_cost`. |
@@ -65,7 +77,8 @@ Source table: `source-eval-repo/charts/cybench_cost_table.csv`.
 
 - The rows are not a controlled model-only experiment.
 - Cost limits, OpenRouter routing, concurrency, and one challenge denominator varied.
-- GPT-5.5 and DeepSeek v4 Pro cost rows include same-day failed-retry overhead in the charted cost totals.
+- GPT-5.5 and DeepSeek v4 Pro cost rows include same-day failed-retry overhead in the charted cost totals; GPT-5.6 Luna cost is reconstructed from cumulative retry tokens because its successful log ledger is incomplete.
+- GPT-5.6/Fable results use raw pass@1, not refusal-adjusted attempted-only accuracy. Fable's $1.6402 cost is dominated by cache-write tokens omitted from the compact CSV token columns.
 - Reported `solved` is fractional pass@1 (mean correctness over three epochs), not an integer challenge count.
 - Challenge-level bootstrap intervals from existing logs used in the visible appendix: GPT-5.5 94.0% [87.2, 99.2], DeepSeek Flash $2.10 cap 86.3% [76.9, 94.9], DeepSeek Flash $0.80 retrospective cap 76.1% [63.2, 87.2], Claude Opus 4.8 74.4% [61.5, 86.3], DeepSeek Pro 43.9% [29.8, 57.9]. Intervals resample challenge IDs and retain three epochs per challenge. Main-table and appendix percentages are independently rounded from logs; DeepSeek Pro's 43.85% is shown as 43.9% in the paper even though the source markdown table may display 43.8% under its formatter.
 - Paired challenge-level bootstrap contrasts retained for model-ranking context: GPT-5.5 minus DeepSeek Flash $2.10 = +7.7 percentage points [1.7, 15.4]; GPT-5.5 minus Claude Opus 4.8 = +19.7 percentage points [9.4, 30.8]; DeepSeek Flash $2.10 minus Claude Opus 4.8 = +12.0 percentage points [1.7, 23.1].
@@ -87,6 +100,10 @@ Source report: `source-eval-repo/charts/botsv1_report.html`.
 | Paper row | Source log | Notes |
 |---|---|---|
 | Claude Opus 4.8 | `logs/2026-06-15T04-30-45-00-00_botsv_iusRJmJKvQTdrAcnhqVFU3.eval` | Cost limit `$2.10`; high/default reasoning effort; k8s `chart`. |
+| GPT-5.6 Terra, high effort | `logs/2026-07-13T19-54-58-00-00_botsv_Rd86YGL82fhwVe5rCXKEkz.eval` | 9,485/10,300 points (92.1%); 95.7% binary; model+tools $33.66; 1,567 tool calls. |
+| GPT-5.6 Sol, high effort | `logs/2026-07-13T19-55-19-00-00_botsv_RSnH45WLy7J55CRLx9Hinv.eval` | 9,416.7/10,300 points (91.4%); 97.8% binary; model+tools $44.29; 1,357 tool calls. |
+| Claude Fable 5, high effort | `logs/2026-07-13T18-19-40-00-00_botsv_nFuPAjYncJ5HePTm645po8.eval` | 9,108.3/10,300 points (88.4%); 95.7% binary; 5/93 refusals; model+tools $32.04; 309 tool calls. |
+| GPT-5.6 Luna, high effort | `logs/2026-07-13T17-43-15-00-00_botsv_WisTKCkgrdwGWJuqMwpBUA.eval` | 8,625/10,300 points (83.7%); 93.5% binary; model+tools $29.66; 1,867 tool calls. |
 | GPT-5.5 high effort | `logs/2026-06-15T06-09-42-00-00_botsv_VYcxyGse2gyga8MGcsWNYg.eval` | Cost limit `$2.10`; high reasoning effort; k8s `chart`. |
 | GPT-5.5 | `logs/2026-06-14T21-12-20-00-00_botsv_6cHBshKy4Xxt82no2geqK3.eval` | Cost limit `$2.10`; medium/default reasoning effort; k8s `chart`. |
 | DeepSeek v4 Pro | `logs/2026-06-14T23-14-52-00-00_botsv_nKdSUbcTJe6XrzyRvsmgvV.eval` | Cost limit `$2.10`; k8s `chart`. |
@@ -102,7 +119,7 @@ Source report: `source-eval-repo/charts/botsv1_report.html`.
 - Tool costs include Brave Search and WhoisXMLAPI DRS credits, including host-cache hits priced at the same DRS-credit value as fresh provider responses. VirusTotal public API, DNS, and live WHOIS/RDAP are treated as zero marginal cost.
 - Tool-adjusted cost excludes Kubernetes/Splunk infrastructure, free-tier effects, and enterprise pricing variation.
 - Question-level bootstrap intervals from existing logs used in the visible appendix: Claude Opus 4.8 93.9% [82.7, 99.5], GPT-5.5 high effort 81.4% [67.4, 94.1], GPT-5.5 81.0% [64.1, 96.4], DeepSeek v4 Pro 77.8% [61.0, 93.1], DeepSeek Flash $4.20 cap 73.9% [53.2, 91.9], DeepSeek Flash $2.10 cap 73.0% [52.7, 91.1]. Intervals resample question IDs and retain three epochs and official point weights per question.
-- Paired question-level bootstrap contrasts retained for model-ranking/scaling context: Claude Opus 4.8 minus GPT-5.5 = +12.8 percentage points [0.9, 27.4]; Claude Opus 4.8 minus GPT-5.5 high effort = +12.5 percentage points [2.4, 23.7]; DeepSeek Flash $4.20 minus $2.10 = +0.9 percentage points [-4.9, 6.9].
+- Paired question-level bootstrap contrasts retained for model-ranking/scaling context: Claude Opus 4.8 minus GPT-5.5 = +12.8 percentage points [0.9, 27.4]; Claude Opus 4.8 minus GPT-5.5 high effort = +12.5 percentage points [2.4, 23.7]; DeepSeek Flash $4.20 minus $2.10 = +0.9 percentage points [-4.9, 6.9]. GPT-5.6 and Fable intervals/scaling contrasts were not recomputed and are omitted from those appendix analyses.
 - Sequential-context audit: Claude Opus 4.8 scores 1,445/1,500 on independent questions and 8,221.7/8,800 on dependent questions; GPT-5.5 scores 1,345/1,500 and 7,000/8,800 respectively.
 
 ## BOTSv1 decontamination probe provenance

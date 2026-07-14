@@ -262,23 +262,25 @@ We use a host-side cache for WhoisXMLAPI history responses to avoid repeated pro
 \section{Evaluation Results}
 \label{sec:results}
 
-We report results for the model set evaluated on both benchmark families: GPT-5.5, Claude Opus 4.8, DeepSeek v4 Flash, and DeepSeek v4 Pro.
-For BOTSv1 we additionally include GPT-5.5 at high reasoning effort, the closest available comparison to Claude Opus 4.8, whose default setting is high effort.
+We report results for GPT-5.5; GPT-5.6 Luna, Terra, and Sol; Claude Opus 4.8 and Fable 5; and DeepSeek v4 Flash and Pro.
+The GPT-5.6 and Fable rows use high reasoning effort.
+For BOTSv1 we additionally retain GPT-5.5 at high reasoning effort, the closest older comparison to Claude Opus 4.8, whose default setting is high effort.
 
 \subsection{Offensive CTFs}
 \label{sec:cybench-results}
 
 Table~\ref{tab:cybench} summarizes Cybench hard-variant results for the shared model set.
-GPT-5.5 posts the strongest operating point we observe, solving 94.1\% of challenges at \$1.16 per solved-equivalent challenge.
+GPT-5.5 remains the strongest operating point we observe, solving 94.1\% of challenges at \$1.16 per solved-equivalent challenge.
+Among GPT-5.6 variants, Luna performs best at 79.5\%, followed by Terra at 65.8\%; Sol reaches 9.4\% after refusing 90.6\% of sample-epochs.
+Fable refuses all 117 sample-epochs before any tool call, so its 0\% result is a policy-filter outcome rather than evidence of zero underlying capability.
 DeepSeek v4 Flash provides the clearest illustration of cost scaling: replaying the same trace under a retrospective \$0.80 cap yields 76.1\% success, which rises to 86.4\% when the full \$2.10 budget is allowed.
-Claude Opus 4.8 solves 74.4\% of challenges but does so at \$3.73 per solve, more than three times the per-solve cost of GPT-5.5.
 
 \begin{table}[t]
 \centering
 % Internal source: source-eval-repo/charts/cybench_report.html and cybench_cost_table.csv plus raw-log tool-event counts.
 % GPT-5.5 is grouped under the designated $2.10 cap here; its successful Inspect log header records cost_limit=None.
 % DeepSeek v4 Flash $0.80 row is a retrospective cap applied to logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval.
-\caption{Cybench hard-variant operating points for the shared BOTSv1 model set. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits. GPT-5.5's successful log had no prospective cost cap and is grouped under the common \$2.10 analysis row; DeepSeek v4 Pro completed 38 of 39 challenges after one sandbox-initialization failure and is normalized to the 39-challenge denominator.}
+\caption{Cybench hard-variant operating points. GPT-5.6 and Fable use high reasoning effort; raw success counts refusals as failures. Refusal rates are Luna 8.5\%, Terra 33.3\%, Sol 90.6\%, and Fable 100\%. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits. GPT-5.5 and the successful Luna retry are grouped under the common \$2.10 analysis row although their successful log headers had no prospective cap. DeepSeek v4 Pro is normalized to the 39-challenge denominator after one sandbox-initialization failure.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrr}
@@ -287,9 +289,13 @@ Model & cost cap & success rate & solved & run cost & \$/solve & mean tool calls
 \midrule
 GPT-5.5 & \$2.10 & \textbf{94.1\%} & \textbf{36.7} & \$42.47 & \$1.16 & \textbf{20.6} \\
 DeepSeek v4 Flash & \$2.10 & 86.4\% & 33.7 & \$48.88 & \$1.45 & 144.7 \\
-Claude Opus 4.8 & \$2.10 & 74.4\% & 29.0 & \$108.21 & \$3.73 & 26.7 \\
+GPT-5.6 Luna & \$2.10 & 79.5\% & 31.0 & \$40.66 & \$1.31 & 34.4 \\
 DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & \$30.43 & \textbf{\$1.03} & 95.9 \\
+Claude Opus 4.8 & \$2.10 & 74.4\% & 29.0 & \$108.21 & \$3.73 & 26.7 \\
+GPT-5.6 Terra & \$2.10 & 65.8\% & 25.7 & \$36.63 & \$1.43 & 15.7 \\
 DeepSeek v4 Pro & \$0.75 & 43.9\% & 17.1 & \$64.58 & \$3.78 & 21.3 \\
+GPT-5.6 Sol & \$2.10 & 9.4\% & 3.7 & \$1.55 & \$0.42 & 1.4 \\
+Claude Fable 5 & \$2.10 & 0.0\% & 0.0 & \$1.64 & -- & 0.0 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -298,21 +304,26 @@ DeepSeek v4 Pro & \$0.75 & 43.9\% & 17.1 & \$64.58 & \$3.78 & 21.3 \\
 \label{sec:bots-results}
 
 Table~\ref{tab:bots} reports BOTSv1 full-agent results for the shared model set, with priced external-tool spend added to model-token spend.
-Claude Opus 4.8 leads the defensive workload on every axis at once: it scores 9,666.7 of 10,300 points (93.9\%), delivers the best cost efficiency at \$2.98 per 1,000 points, and issues the fewest non-submit tool calls.
-Raising GPT-5.5 to high reasoning effort does not close the gap; it reaches 81.4\%, essentially tied with the standard setting and still well behind Claude Opus 4.8.
+Claude Opus 4.8 retains the highest defensive score at 9,666.7 of 10,300 points (93.9\%) and the best cost efficiency at \$2.98 per 1,000 points.
+GPT-5.6 Terra and Sol follow at 92.1\% and 91.4\%; Fable reaches 88.4\% with the fewest non-submit tool calls, and Luna reaches 83.7\%.
+All four exceed the standard GPT-5.5 row, but the public-benchmark contamination caveat below still applies.
 DeepSeek v4 Flash supplies the clearest negative budget result: doubling its cap from \$2.10 to \$4.20 moves its score from 73.0\% to only 73.9\%, while tool calls climb from 4,450 to 4,938.
 
 \begin{table}[t]
 \centering
 % Internal source: source-eval-repo/charts/botsv1_report.html.
-\caption{BOTSv1 full-run results for the shared Cybench model set, plus GPT-5.5 high effort. BOTS points use \texttt{bots\_points}; model+tools adds priced Brave Search and WhoisXMLAPI calls.}
+\caption{BOTSv1 full-run results, including the latest high-effort GPT-5.6 and Fable runs. BOTS points use \texttt{bots\_points}; model+tools adds priced Brave Search and WhoisXMLAPI calls.}
 \label{tab:bots}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrr}
 \toprule
 Model & cost cap & BOTS points & points & binary acc. & model+tools & \$/1k pts & tool calls \\
 \midrule
-Claude Opus 4.8 & \$2.10 & \textbf{9{,}666.7 / 10{,}300} & \textbf{93.9\%} & \textbf{96.8\%} & \$28.80 & \textbf{\$2.98} & \textbf{603} \\
+Claude Opus 4.8 & \$2.10 & \textbf{9{,}666.7 / 10{,}300} & \textbf{93.9\%} & 96.8\% & \$28.80 & \textbf{\$2.98} & 603 \\
+GPT-5.6 Terra & \$2.10 & 9{,}485.0 / 10{,}300 & 92.1\% & 95.7\% & \$33.66 & \$3.55 & 1{,}567 \\
+GPT-5.6 Sol & \$2.10 & 9{,}416.7 / 10{,}300 & 91.4\% & \textbf{97.8\%} & \$44.29 & \$4.70 & 1{,}357 \\
+Claude Fable 5 & \$2.10 & 9{,}108.3 / 10{,}300 & 88.4\% & 95.7\% & \$32.04 & \$3.52 & \textbf{309} \\
+GPT-5.6 Luna & \$2.10 & 8{,}625.0 / 10{,}300 & 83.7\% & 93.5\% & \$29.66 & \$3.44 & 1{,}867 \\
 GPT-5.5 (high effort) & \$2.10 & 8{,}383.3 / 10{,}300 & 81.4\% & 91.4\% & \$64.57 & \$7.70 & 1{,}580 \\
 GPT-5.5 & \$2.10 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & \$56.42 & \$6.76 & 1{,}481 \\
 DeepSeek v4 Pro & \$2.10 & 8{,}013.3 / 10{,}300 & 77.8\% & 84.9\% & \$71.82 & \$8.96 & 3{,}363 \\
@@ -385,14 +396,14 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/cybench_scaling_panels}
-\caption{Cybench scaling curves (``+ac'' = auto-compacting agent; the DeepSeek v4 Flash \$0.80 curve retrospectively caps the \$2.10 run's traces). Left: success versus retrospective per-sample cost budget (USD, log scale). Right: success versus cumulative tokens (input, output, cached, and reasoning). Success keeps rising toward the run limits: extra compute buys additional solves, most visibly for DeepSeek v4 Flash and Claude Opus 4.8, while GPT-5.5 solves most challenges at low per-sample spend.}
+\caption{Cybench scaling curves for the previously audited model subset (``+ac'' = auto-compacting agent; the DeepSeek v4 Flash \$0.80 curve retrospectively caps the \$2.10 run's traces). Left: success versus retrospective per-sample cost budget (USD, log scale). Right: success versus cumulative tokens (input, output, cached, and reasoning). Success keeps rising toward the run limits: extra compute buys additional solves, most visibly for DeepSeek v4 Flash and Claude Opus 4.8, while GPT-5.5 solves most challenges at low per-sample spend.}
 \label{fig:cybench-scaling-panels}
 \end{figure}
 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/botsv1_scaling_panels}
-\caption{BOTSv1 scaling curves for the full-agent runs in Table~\ref{tab:bots}. Left: official BOTS points (\% of 10,300) versus a retrospective per-sample budget covering model-token plus priced-tool spend; dotted companions show the model-token-only budget, while solid curves include priced Brave Search and WhoisXMLAPI calls. Right: points versus cumulative tokens. Unlike Cybench, higher spend does not identify the best agent: Claude Opus 4.8 scores highest with roughly an order of magnitude fewer tokens than the DeepSeek runs, even though priced tools contribute materially to several runs' total cost.}
+\caption{BOTSv1 scaling curves for the previously audited full-agent subset. Left: official BOTS points (\% of 10,300) versus a retrospective per-sample budget covering model-token plus priced-tool spend; dotted companions show the model-token-only budget, while solid curves include priced Brave Search and WhoisXMLAPI calls. Right: points versus cumulative tokens. Unlike Cybench, higher spend does not identify the best agent: Claude Opus 4.8 scores highest with roughly an order of magnitude fewer tokens than the DeepSeek runs, even though priced tools contribute materially to several runs' total cost.}
 \label{fig:botsv1-scaling-panels}
 \end{figure}
 
@@ -464,8 +475,8 @@ Any public release should include only sanitized materials.
 
 Security-agent evaluation should be cost-aware and workflow-specific.
 Offensive CTFs and defensive SOC investigations stress different behaviors and show different scaling patterns.
-We find that more test-time compute can improve CTF success for some frontier/shared models, especially Claude Opus 4.8 and DeepSeek v4 Flash under retrospective caps.
-We also find that SOC work does not scale with raw budget in the same way; it depends on disciplined tool use, telemetry navigation, and selective enrichment.
+We find that more test-time compute can improve CTF success for some frontier/shared models, especially Claude Opus 4.8 and DeepSeek v4 Flash under retrospective caps; the new GPT-5.6 and Fable runs also show that policy refusals can dominate offensive scores.
+We also find that SOC work does not scale with raw budget in the same way; GPT-5.6 Terra and Sol approach the leading Claude Opus 4.8 score, while success still depends on disciplined tool use, telemetry navigation, and selective enrichment.
 Public SOC benchmarks remain valuable, but our no-tools BOTSv1 controls show that their absolute scores require decontamination checks before they are used as capability claims.
 
 \bibliography{references}
@@ -492,6 +503,10 @@ The retrospective cap rows are derived from the listed source trace and were not
 Table row & Source evaluation timestamp (UTC) & Notes \\
 \midrule
 GPT-5.5, \$2.10 & 2026-05-14 18:34:57; 20:45:04; 20:52:17; 21:03:03 & Three quota-failed retries plus final success; used in Tables~\ref{tab:cybench}, \ref{tab:scaling-headroom}, and \ref{tab:cybench-bootstrap} \\
+GPT-5.6 Luna, \$2.10 & 2026-07-09 20:44:03 & Successful retry; cost reconstructed from cumulative tokens \\
+GPT-5.6 Terra, \$2.10 & 2026-07-10 06:43:26 & High reasoning effort \\
+GPT-5.6 Sol, \$2.10 & 2026-07-10 15:35:10 & High reasoning effort; 90.6\% refused \\
+Claude Fable 5, \$2.10 & 2026-07-13 18:04:21 & High reasoning effort; all sample-epochs content-filtered \\
 DeepSeek v4 Flash, \$2.10 & 2026-05-19 16:35:07 & Same trace also supplies the retrospective \$0.80 row \\
 Claude Opus 4.8, \$2.10 & 2026-06-22 18:37:21; 2026-06-23 19:08:17 & Partial/error retry plus final success \\
 DeepSeek v4 Pro, \$0.75 & 2026-05-15 19:38:26; 23:35:01; 23:44:23 & Same-day error retries plus final success \\
@@ -509,6 +524,10 @@ DeepSeek v4 Pro, \$0.75 & 2026-05-15 19:38:26; 23:35:01; 23:44:23 & Same-day err
 Table row & Source evaluation timestamp (UTC) & Notes \\
 \midrule
 Claude Opus 4.8, full agent, \$2.10 & 2026-06-15 04:30:45 & Tables~\ref{tab:bots}, \ref{tab:scaling-headroom}, \ref{tab:bots-bootstrap}, and \ref{tab:bots-no-tools} \\
+GPT-5.6 Terra, full agent, \$2.10 & 2026-07-13 19:54:58 & High reasoning effort; Table~\ref{tab:bots} \\
+GPT-5.6 Sol, full agent, \$2.10 & 2026-07-13 19:55:19 & High reasoning effort; Table~\ref{tab:bots} \\
+Claude Fable 5, full agent, \$2.10 & 2026-07-13 18:19:40 & High reasoning effort; Table~\ref{tab:bots} \\
+GPT-5.6 Luna, full agent, \$2.10 & 2026-07-13 17:43:15 & High reasoning effort; Table~\ref{tab:bots} \\
 GPT-5.5 high effort, full agent, \$2.10 & 2026-06-15 06:09:42 & Tables~\ref{tab:bots} and \ref{tab:bots-bootstrap} \\
 GPT-5.5, full agent, \$2.10 & 2026-06-14 21:12:20 & Tables~\ref{tab:bots}, \ref{tab:scaling-headroom}, \ref{tab:bots-bootstrap}, and \ref{tab:bots-no-tools} \\
 DeepSeek v4 Pro, full agent, \$2.10 & 2026-06-14 23:14:52 & Tables~\ref{tab:bots}, \ref{tab:scaling-headroom}, and \ref{tab:bots-bootstrap} \\
@@ -530,6 +549,7 @@ For Cybench, each replicate resamples challenge IDs with replacement and retains
 For BOTSv1, each replicate resamples question IDs with replacement and retains the three epochs and official point weights for each selected question.
 For retrospective cap contrasts, each replicate compares the capped and uncapped values for the same sampled task IDs.
 Paired contrasts resample only task IDs common to both compared runs.
+The GPT-5.6 and Fable rows are not included in these previously computed bootstrap or scaling analyses.
 
 \section{Cybench Robustness}
 \label{app:cybench-robustness}
