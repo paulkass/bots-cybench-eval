@@ -48,6 +48,8 @@ mpl.rcParams.update({"font.family": "Latin Modern Sans", "font.size": 8.2,
     "axes.labelcolor": INK, "axes.edgecolor": INK, "text.color": INK,
     "xtick.color": MUTED, "ytick.color": MUTED, "axes.linewidth": .65,
     "figure.facecolor": "white", "savefig.facecolor": "white"})
+LEGEND_BOX = {"frameon": True, "fancybox": False, "framealpha": .96,
+              "facecolor": "white", "edgecolor": RULE}
 
 
 def finish(fig, name):
@@ -167,11 +169,12 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05)):
             ax.legend([Line2D([0],[0],color=MUTED,lw=1.5),
                        Line2D([0],[0],color=MUTED,lw=1.5,ls=":")],
                       ["Model + priced tools", "Model tokens only"],
-                      loc="upper left", frameon=False, fontsize=7.2,
-                      handlelength=2.2)
+                      loc="upper left", fontsize=7.2, handlelength=2.2,
+                      **LEGEND_BOX)
     legend_handles, legend_labels, columns, rows = family_legend(labels)
     fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
-               frameon=False, handlelength=1.8, columnspacing=1.2, fontsize=7.6)
+               handlelength=1.8, columnspacing=1.2, fontsize=7.6,
+               **LEGEND_BOX)
     bottom = {1: .22, 2: .25, 3: .29, 4: .34}[rows]
     fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=bottom, wspace=.30)
     finish(fig, name)
@@ -235,7 +238,7 @@ def decontamination():
         ax.set_xticks([]); ax.text(.5,-.12,model,transform=ax.transAxes,ha="center",weight="bold")
     fig.legend([mpl.patches.Patch(facecolor=c, hatch=h, edgecolor=INK, linewidth=.45)
                 for c,h in zip(colors,[None,"///","xxx"])],labels,
-               loc="lower center",ncol=3,frameon=False,fontsize=7.8)
+               loc="lower center",ncol=3,fontsize=7.8,**LEGEND_BOX)
     fig.subplots_adjust(left=.09,right=.99,top=.93,bottom=.30,wspace=.16)
     finish(fig,"botsv1_decontamination")
 
@@ -243,7 +246,8 @@ def decontamination():
 def refusals():
     groups=[
         ("BOTSv1", ["Opus 4.8","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5","GPT-5.6 Luna"],
-         [93.9,92.1,91.4,88.4,83.7], [0,0,0,0,0], ["2/93","0/93","0/93","5/93","0/93"]),
+         [93.9,92.1,91.4,88.4,83.7], [100*2/93,0,0,100*5/93,0],
+         ["2/93","0/93","0/93","5/93","0/93"]),
         ("Cybench", ["GPT-5.5","GPT-5.6 Luna","Opus 4.8","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5"],
          [94.1,79.5,76.2,65.8,9.4,0], [6.0,8.5,4.3,33.3,90.6,100],
          ["7/117","10/117","5/117","39/117","106/117","117/117"]),
@@ -253,23 +257,34 @@ def refusals():
         y=np.arange(len(names)); ax.barh(y,perf,color=FOREST,height=.56)
         if bench == "Cybench":
             ax.barh(y,ref,left=perf,color=OLIVE,height=.56,hatch="///",edgecolor="white",linewidth=.3)
+        else:
+            # BOTSv1 refusal events can coexist with earned points, so show
+            # their independent rate as diamonds rather than stacked segments.
+            rates = np.asarray(ref)
+            shown = rates > 0
+            ax.scatter(rates[shown], y[shown], marker="D", s=22, color=OLIVE,
+                       edgecolor="white", linewidth=.55, zorder=5)
         ax.set(yticks=y,yticklabels=names,
                xlim=(0,100 if bench == "BOTSv1" else 118),
                xlabel="Performance (%)")
         ax.set_xticks(np.arange(0,101,20))
         ax.invert_yaxis()
         ax.grid(axis="x",color=RULE,lw=.55); ax.set_axisbelow(True); ax.spines[["top","right","left"]].set_visible(False); ax.tick_params(axis="y",length=0)
-        for yi,(p,count) in enumerate(zip(perf,counts)):
+        for yi,(p,count,rate) in enumerate(zip(perf,counts,ref)):
             if bench == "BOTSv1":
                 # Keep secondary refusal context inside the performance bar so
                 # it cannot collide with the neighboring panel's model labels.
-                ax.text(p-1.6,yi,f"{p:.1f}% · ref {count}",ha="right",va="center",
-                        fontsize=7.4,color="white")
+                ax.text(p-1.6,yi,f"{p:.1f}% · ref {count} ({rate:.1f}%)",ha="right",va="center",
+                        fontsize=7.1,color="white")
             else:
                 ax.text(101.5,yi,f"{p:.1f}% · ref {count}",va="center",
                         fontsize=7.4,color=MUTED)
-    fig.legend([mpl.patches.Patch(color=FOREST),mpl.patches.Patch(facecolor=OLIVE,hatch="///")],
-               ["Performance","Failed policy refusal (Cybench)"],loc="lower center",ncol=2,frameon=False)
+    fig.legend([mpl.patches.Patch(color=FOREST),
+                Line2D([0],[0],linestyle="none",marker="D",markersize=5,
+                       markerfacecolor=OLIVE,markeredgecolor="white"),
+                mpl.patches.Patch(facecolor=OLIVE,hatch="///")],
+               ["Performance","Refusal-event rate (BOTSv1)","Failed refusal (Cybench)"],
+               loc="lower center",ncol=3,fontsize=7.5,**LEGEND_BOX)
     fig.subplots_adjust(left=.14,right=.995,top=.92,bottom=.22,wspace=.36)
     finish(fig,"gpt56_comparison_with_refusals")
 
