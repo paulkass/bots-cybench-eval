@@ -11,6 +11,9 @@ Audit state when this note was updated: paper repository branch `main`; latest G
 - `source-eval-repo/bots/README.md`
 - `source-eval-repo/bots/bots.py`
 - `source-eval-repo/agents/bots_scoring.py`
+- `source-eval-repo/agents/refusal_limit.py`
+- `source-eval-repo/agents/react_autocompact.py`
+- `source-eval-repo/agents/bots_react_autocompact.py`
 - `source-eval-repo/docs/actual-deck.odp` (messaging/framing only)
 - `source-eval-repo/charts/README.md`
 - `source-eval-repo/charts/cybench_cost_table.csv`
@@ -78,10 +81,24 @@ Source table: `source-eval-repo/charts/cybench_cost_table.csv`.
 - The rows are not a controlled model-only experiment.
 - Cost limits, OpenRouter routing, concurrency, and one challenge denominator varied.
 - GPT-5.5 and DeepSeek v4 Pro cost rows include same-day failed-retry overhead in the charted cost totals; GPT-5.6 Luna cost is reconstructed from cumulative retry tokens because its successful log ledger is incomplete.
-- GPT-5.6/Fable results use raw pass@1, not refusal-adjusted attempted-only accuracy. Fable's $1.6402 cost is dominated by cache-write tokens omitted from the compact CSV token columns.
+- GPT-5.6/Fable results use raw pass@1, not the chart's refusal-adjusted counterfactual value. Fable's $1.6402 cost is dominated by cache-write tokens omitted from the compact CSV token columns.
 - Reported `solved` is fractional pass@1 (mean correctness over three epochs), not an integer challenge count.
 - Challenge-level bootstrap intervals from existing logs used in the visible appendix: GPT-5.5 94.0% [87.2, 99.2], DeepSeek Flash $2.10 cap 86.3% [76.9, 94.9], DeepSeek Flash $0.80 retrospective cap 76.1% [63.2, 87.2], Claude Opus 4.8 74.4% [61.5, 86.3], DeepSeek Pro 43.9% [29.8, 57.9]. Intervals resample challenge IDs and retain three epochs per challenge. Main-table and appendix percentages are independently rounded from logs; DeepSeek Pro's 43.85% is shown as 43.9% in the paper even though the source markdown table may display 43.8% under its formatter.
 - Paired challenge-level bootstrap contrasts retained for model-ranking context: GPT-5.5 minus DeepSeek Flash $2.10 = +7.7 percentage points [1.7, 15.4]; GPT-5.5 minus Claude Opus 4.8 = +19.7 percentage points [9.4, 30.8]; DeepSeek Flash $2.10 minus Claude Opus 4.8 = +12.0 percentage points [1.7, 23.1].
+
+## Refusal-accounting provenance
+
+The methods subsection `Refusal accounting` follows the runtime detector in `agents/refusal_limit.py` and the two ReAct solver hooks in `agents/react_autocompact.py` and `agents/bots_react_autocompact.py` at source commit `0a630e4`.
+Assistant text is NFKC-normalized, quote-folded, and lowercased before matching 11 case-insensitive apology, inability, policy, or fabrication patterns; only nonblank assistant messages without tool calls are eligible.
+A provider `stop_reason="content_filter"` is also a refusal.
+Both solvers use `refusal_limit(1)`, so a detection reaching the continuation hook stops the sample and scoring uses its current output.
+
+Post-hoc reporting is benchmark-specific.
+For Cybench, `charts/make_report.py` classifies a sample-epoch from its final assistant text or any content-filter model event, then retains only refused-and-unsolved epochs in the reported refusal count $R$; the refusal rate is $100R/N$ and three-epoch charts show $R/3$ challenge-equivalents.
+Raw pass@1 remains $100S/N$: refused epochs are not removed from the denominator.
+For BOTSv1, `charts/make_botsv1_report.py` scans any assistant message or content-filter event and reports $R/N$ independently of `bots_points` and binary `includes`.
+Consequently, a transient refusal can coexist with points if a later or retried attempt answers correctly; this occurs in two Fable q114 epochs in `logs/2026-07-13T18-19-40-00-00_botsv_nFuPAjYncJ5HePTm645po8.eval`.
+The Cybench chart's separate adjusted value is $(S+R)/N$, which gives failed refusals counterfactual credit; it is not attempted-only accuracy $S/(N-R)$ and is not reported in the paper.
 
 ## Scaling-headroom provenance
 

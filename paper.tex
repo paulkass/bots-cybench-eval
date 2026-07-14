@@ -211,6 +211,20 @@ We provide prerequisite case context from earlier official questions for 23 of t
 %BOTS v2 and v3 also exist, but comparable multi-model results are available only for v1.
 %We therefore treat v2/v3 as future evaluation coverage rather than evidence for model comparison.
 
+\subsection{Refusal accounting}
+\label{sec:refusal-accounting}
+
+We classify refusals at the sample-epoch level using both agent text and provider metadata.
+During evaluation, an assistant turn is treated as a refusal when it contains nonblank text, makes no tool call, and matches a case-insensitive set of apology, inability, or policy phrases after Unicode normalization, or when the provider returns \texttt{content\_filter}.
+Both benchmark agents use a refusal limit of one: the first detection that reaches the agent continuation hook aborts that sample, which is then scored on its current output.
+This text detector is a heuristic rather than a provider policy label.
+
+For reporting, let $N$ be the number of loaded scored sample-epochs and $R$ the number classified as refusals.
+Cybench counts only failed sample-epochs whose final assistant turn matches the text detector or whose model-event log contains a content filter; it reports refusal rate $100R/N$, or $R/3$ challenge-equivalents for three-epoch runs.
+Raw Cybench pass@1 is unchanged, so refused epochs remain failures.
+BOTSv1 instead flags any matching assistant turn or content-filter event in the transcript and reports $R/N$ as secondary context without changing official points or binary accuracy.
+A BOTSv1 refusal event can therefore coexist with points if a later or retried attempt answers correctly.
+
 \subsection{Cost accounting}
 \label{sec:cost-accounting}
 
