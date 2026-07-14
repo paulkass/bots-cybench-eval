@@ -18,6 +18,14 @@ make
 
 This writes `paper.pdf`. The manuscript uses the official Frontier branded style from `~/frontier/branded-paper-template/`, vendored here as `frontier-template.sty` with its logo assets under `assets/`.
 
+## Regenerate charts
+
+```bash
+make charts
+```
+
+The chart generator uses pinned Python plotting dependencies through `uv`. Dense scaling trajectories are reconstructed from the audited snapshots in `scripts/chart_sources/`; simple bar charts use the values reported in `paper.tex`.
+
 ## Clean
 
 ```bash

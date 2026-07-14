@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+"""Render the six paper figures in the shared Frontier chart style.
+
+The four scaling figures digitize only the coloured trajectory pixels from the
+paper's audited source PNGs in ``chart_sources``.  Those snapshots remain the
+numerical authority; axes, labels, legends, grids, and typography are rebuilt
+here.  This avoids silently substituting newer predecessor-repo runs.  The two
+bar figures use the exact values reported in paper.tex.
+"""
+from pathlib import Path
+import numpy as np
+from PIL import Image
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT, SRC = ROOT / "figures", Path(__file__).with_name("chart_sources")
+FONT = "/usr/share/texmf/fonts/opentype/public/lm/lmsans10-regular.otf"
+FOREST, LEAF, OLIVE, INK = "#1F5137", "#567461", "#6E711C", "#151A16"
+MUTED, RULE, WASH = "#606A63", "#C9D0C8", "#F2F5EA"
+BLUE, RUST, PURPLE = "#2563A8", "#A64B35", "#756187"
+TAB = {"blue": (31,119,180), "orange": (255,127,14), "green": (44,160,44),
+       "red": (214,39,40), "purple": (148,103,189), "brown": (140,86,75),
+       "pink": (227,119,194)}
+COLORS = {"Opus 4.8": FOREST, "Opus 4.7": LEAF, "GPT-5.5": OLIVE,
+          "GPT-5.5 high": "#A17818", "DeepSeek Flash": BLUE,
+          "DeepSeek Flash $0.80": "#7796A7", "DeepSeek Flash $4.20": "#4E7F9F",
+          "DeepSeek Pro": RUST, "Kimi K2.6": PURPLE}
+
+mpl.font_manager.fontManager.addfont(FONT)
+mpl.rcParams.update({"font.family": "Latin Modern Sans", "font.size": 8.2,
+    "axes.labelcolor": INK, "axes.edgecolor": INK, "text.color": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.linewidth": .65,
+    "figure.facecolor": "white", "savefig.facecolor": "white"})
+
+
+def finish(fig, name):
+    fig.savefig(OUT / f"{name}.png", dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+
+def style(ax, panel, xlabel, ylabel, *, logx=False, xlim=None):
+    ax.text(-.08, 1.04, panel, transform=ax.transAxes, weight="bold", fontsize=10)
+    ax.set(xlabel=xlabel, ylabel=ylabel, ylim=(0, 100))
+    if logx: ax.set_xscale("log")
+    if xlim: ax.set_xlim(*xlim)
+    ax.grid(axis="y", color=RULE, linewidth=.55, alpha=.75)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.tick_params(length=3, width=.65)
+
+
+def handles(labels):
+    return [Line2D([0], [0], color=COLORS[x], lw=2, label=x) for x in labels]
+
+
+def digitized(name, crop, source_colors, *, source_alpha=1.0):
+    """Return normalized trajectory point clouds from an audited raster crop.
+
+    Core colors recover solid trajectories. Passing the source plot's alpha
+    recovers its lighter dotted reference trajectories without inventing data.
+    """
+    a = np.asarray(Image.open(SRC / f"{name}.png").convert("RGB"), dtype=float)
+    x0, y0, x1, y1 = crop
+    panel = a[y0:y1 + 1, x0:x1 + 1]
+    result = {}
+    for label, old in source_colors.items():
+        source = np.array(TAB[old], dtype=float)
+        target = source_alpha * source + (1 - source_alpha) * 255
+        dist = np.linalg.norm(panel - target, axis=2)
+        yy, xx = np.where(dist < (34 if source_alpha == 1 else 24))
+        # Remove anti-aliased fringe and thin the pixel cloud for clean print lines.
+        keep = np.arange(len(xx)) % 2 == 0
+        result[label] = (xx[keep] / (x1-x0), 100 * (1 - yy[keep] / (y1-y0)))
+    return result
+
+
+def plot_cloud(ax, cloud, *, dotted=False):
+    for label, (x, y) in cloud.items():
+        ax.scatter(x, y, s=.34 if not dotted else .22, marker="s", linewidths=0,
+                   color=COLORS[label], alpha=.88, rasterized=True)
+
+
+def scaling_figure(name, panels, labels, figsize=(7.25, 3.05)):
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    for ax, p in zip(axes, panels):
+        cloud = digitized(name, p["crop"], p["series"])
+        # BOTSv1's cost panel also contains alpha=.38 dotted model-token-only
+        # companions. Faded antialias pixels from the solid paths have the same
+        # composite color, so retain only reference pixels visibly above the
+        # nearby solid trajectory (the token-only budget is never larger).
+        if p.get("reference"):
+            reference = digitized(name, p["crop"], p["series"], source_alpha=.38)
+            for key, (u, y) in reference.items():
+                solid_u, solid_y = cloud[key]
+                bins = np.rint(solid_u * 1000).astype(int)
+                ceiling = {}
+                for b, value in zip(bins, solid_y):
+                    ceiling[b] = max(value, ceiling.get(b, -np.inf))
+                ref_bins = np.rint(u * 1000).astype(int)
+                baseline = np.array([
+                    max((ceiling.get(b + delta, -np.inf) for delta in range(-3, 4)))
+                    for b in ref_bins
+                ])
+                keep = np.isfinite(baseline) & (y > baseline + 1.0)
+                lo, hi = p["xlim"]
+                x = 10 ** (np.log10(lo) + u[keep] * (np.log10(hi)-np.log10(lo)))
+                ax.scatter(x, y[keep], s=.28, marker="s", linewidths=0,
+                           color=COLORS[key], alpha=.48, rasterized=True)
+        # Digitized x is mapped back through the source axis transform.
+        for key, (u, y) in cloud.items():
+            lo, hi = p["xlim"]
+            x = 10 ** (np.log10(lo) + u * (np.log10(hi)-np.log10(lo))) if p["log"] else lo + u*(hi-lo)
+            ax.scatter(x, y, s=.34, marker="s", linewidths=0, color=COLORS[key], alpha=.9, rasterized=True)
+        style(ax, p["panel"], p["xlabel"], p["ylabel"], logx=p["log"], xlim=p["xlim"])
+        if p.get("reference"):
+            ax.legend([Line2D([0],[0],color=MUTED,lw=1.5),
+                       Line2D([0],[0],color=MUTED,lw=1.5,ls=":")],
+                      ["Model + priced tools", "Model tokens only"],
+                      loc="upper left", frameon=False, fontsize=6.7,
+                      handlelength=2.2)
+    fig.legend(handles(labels), labels, loc="lower center", ncol=min(4, len(labels)),
+               frameon=False, handlelength=2.4, columnspacing=1.25, fontsize=7.4)
+    fig.subplots_adjust(left=.085, right=.99, top=.94, bottom=.27, wspace=.30)
+    finish(fig, name)
+
+
+def main_results():
+    labels = ["Opus 4.8", "GPT-5.5", "DeepSeek Flash"]
+    scaling_figure("main_results_chart", [
+      dict(crop=(117,27,1037,477), series=dict(zip(labels,["blue","orange","green"])),
+           panel="(a)", xlabel="Per-sample cost budget (USD)", ylabel="Cybench solved (%)", log=True, xlim=(4e-4,5)),
+      dict(crop=(1207,27,2128,477), series=dict(zip(labels,["blue","orange","green"])),
+           panel="(b)", xlabel="Non-submit tool-call cap", ylabel="BOTSv1 correct (%)", log=False, xlim=(0,137)),
+    ], labels, (7.25,2.75))
+
+
+def cybench():
+    labels=["GPT-5.5","DeepSeek Flash $0.80","DeepSeek Flash","Kimi K2.6","DeepSeek Pro","Opus 4.7","Opus 4.8"]
+    src=["orange","green","blue","brown","pink","purple","red"]
+    panels=[]
+    for panel,crop,xlabel,xlim in [
+      ("(a)",(63,29,1518,488),"Per-sample cost budget (USD)",(4e-4,4)),
+      ("(b)",(1772,29,3194,488),"Cumulative tokens",(1.5e3,1.7e9))]:
+        panels.append(dict(crop=crop,series=dict(zip(labels,src)),panel=panel,xlabel=xlabel,
+                           ylabel="Cybench solved (%)",log=True,xlim=xlim))
+    scaling_figure("cybench_scaling_panels",panels,labels)
+
+
+def bots():
+    labels=["Opus 4.8","GPT-5.5 high","GPT-5.5","DeepSeek Pro","DeepSeek Flash $4.20","DeepSeek Flash"]
+    src=["blue","orange","green","red","purple","brown"]
+    scaling_figure("botsv1_scaling_panels",[
+      dict(crop=(131,101,935,676),series=dict(zip(labels,src)),panel="(a)",xlabel="Per-sample budget (USD)",ylabel="BOTS points (% of max)",log=True,xlim=(.01,8),reference=True),
+      dict(crop=(1502,101,2305,676),series=dict(zip(labels,src)),panel="(b)",xlabel="Cumulative tokens",ylabel="BOTS points (% of max)",log=True,xlim=(.4,1e9)),
+    ],labels)
+
+
+def tool_calls():
+    left=["GPT-5.5","Kimi K2.6","Opus 4.7","DeepSeek Flash $0.80","DeepSeek Pro","DeepSeek Flash","Opus 4.8"]
+    leftsrc=["orange","brown","purple","green","pink","blue","red"]
+    right=["Opus 4.8","GPT-5.5","GPT-5.5 high","DeepSeek Pro","DeepSeek Flash","DeepSeek Flash $4.20"]
+    rightsrc=["blue","green","orange","red","brown","purple"]
+    all_labels=["Opus 4.8","Opus 4.7","GPT-5.5","GPT-5.5 high","DeepSeek Flash","DeepSeek Flash $0.80","DeepSeek Flash $4.20","DeepSeek Pro","Kimi K2.6"]
+    scaling_figure("tool_call_scaling_panels",[
+      dict(crop=(72,29,1439,495),series=dict(zip(left,leftsrc)),panel="(a)",xlabel="Non-submit tool-call cap",ylabel="Cybench solved (%)",log=False,xlim=(0,930)),
+      dict(crop=(1811,29,3151,495),series=dict(zip(right,rightsrc)),panel="(b)",xlabel="Non-submit tool-call cap",ylabel="BOTSv1 correct (%)",log=False,xlim=(0,132)),
+    ],all_labels,(7.25,3.25))
+
+
+def decontamination():
+    models=["Claude Opus 4.8","GPT-5.5"]
+    vals=[[93.9,74.8,50.0],[81.0,62.1,54.9]]
+    labels=["Full agent + tools","No tools + context","No tools, question only"]
+    colors=[FOREST,OLIVE,LEAF]
+    fig,axs=plt.subplots(1,2,figsize=(7.25,2.55),sharey=True)
+    for i,(ax,model,v) in enumerate(zip(axs,models,vals)):
+        bars=ax.bar(range(3),v,color=colors,width=.62)
+        ax.bar_label(bars,labels=[f"{x:.1f}%" for x in v],padding=2,fontsize=8)
+        style(ax,f"({chr(97+i)})","", "BOTS points (%)" if i==0 else "")
+        ax.set_xticks([]); ax.text(.5,-.12,model,transform=ax.transAxes,ha="center",weight="bold")
+    fig.legend([mpl.patches.Patch(color=c) for c in colors],labels,loc="lower center",ncol=3,frameon=False,fontsize=7.5)
+    fig.subplots_adjust(left=.09,right=.99,top=.93,bottom=.30,wspace=.16)
+    finish(fig,"botsv1_decontamination")
+
+
+def refusals():
+    groups=[
+        ("BOTSv1", ["Opus 4.8","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5","GPT-5.6 Luna"],
+         [93.9,92.1,91.4,88.4,83.7], [0,0,0,0,0], ["2/93","0/93","0/93","5/93","0/93"]),
+        ("Cybench", ["GPT-5.5","GPT-5.6 Luna","Opus 4.8","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5"],
+         [94.1,79.5,76.2,65.8,9.4,0], [6.0,8.5,4.3,33.3,90.6,100],
+         ["7/117","10/117","5/117","39/117","106/117","117/117"]),
+    ]
+    fig,axs=plt.subplots(1,2,figsize=(7.25,3.05))
+    for i,(ax,(bench,names,perf,ref,counts)) in enumerate(zip(axs,groups)):
+        y=np.arange(len(names)); ax.barh(y,perf,color=FOREST,height=.56)
+        if bench == "Cybench":
+            ax.barh(y,ref,left=perf,color=OLIVE,height=.56,hatch="///",edgecolor="white",linewidth=.3)
+        ax.set(yticks=y,yticklabels=names,xlim=(0,116),xlabel="Performance (%)")
+        ax.set_xticks(np.arange(0,101,20))
+        ax.invert_yaxis(); ax.text(-.08,1.04,f"({chr(97+i)})  {bench}",transform=ax.transAxes,weight="bold",fontsize=10)
+        ax.grid(axis="x",color=RULE,lw=.55); ax.set_axisbelow(True); ax.spines[["top","right","left"]].set_visible(False); ax.tick_params(axis="y",length=0)
+        for yi,(p,count) in enumerate(zip(perf,counts)):
+            ax.text(102,yi,f"{p:.1f}% · ref {count}",va="center",fontsize=6.7,color=MUTED)
+    fig.legend([mpl.patches.Patch(color=FOREST),mpl.patches.Patch(facecolor=OLIVE,hatch="///")],
+               ["Performance","Failed policy refusal (Cybench)"],loc="lower center",ncol=2,frameon=False)
+    fig.subplots_adjust(left=.14,right=.99,top=.92,bottom=.22,wspace=.42)
+    finish(fig,"gpt56_comparison_with_refusals")
+
+
+def main():
+    OUT.mkdir(exist_ok=True)
+    main_results(); cybench(); bots(); tool_calls(); decontamination(); refusals()
+    names=["main_results_chart","cybench_scaling_panels","botsv1_scaling_panels","tool_call_scaling_panels","botsv1_decontamination","gpt56_comparison_with_refusals"]
+    assert all((OUT/f"{n}.png").stat().st_size > 10_000 for n in names)
+    print("Regenerated six Frontier charts")
+
+if __name__ == "__main__": main()

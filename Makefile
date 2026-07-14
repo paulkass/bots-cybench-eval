@@ -1,6 +1,9 @@
-.PHONY: all paper clean
+.PHONY: all charts paper clean
 
 all: paper
+
+charts:
+	uv run --with 'matplotlib==3.11.0' --with 'pillow==12.3.0' --with 'numpy==2.5.1' python scripts/generate_charts.py
 
 paper: paper.pdf
 
