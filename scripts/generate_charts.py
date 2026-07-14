@@ -27,6 +27,15 @@ COLORS = {"Opus 4.8": FOREST, "Opus 4.7": LEAF, "GPT-5.5": OLIVE,
           "GPT-5.5 high": "#A17818", "DeepSeek Flash": BLUE,
           "DeepSeek Flash $0.80": "#7796A7", "DeepSeek Flash $4.20": "#4E7F9F",
           "DeepSeek Pro": RUST, "Kimi K2.6": PURPLE}
+DISPLAY = {"Opus 4.8": "Claude Opus 4.8", "Opus 4.7": "Claude Opus 4.7",
+           "DeepSeek Flash": "DeepSeek v4 Flash",
+           "DeepSeek Flash $0.80": "DeepSeek v4 Flash $0.80",
+           "DeepSeek Flash $4.20": "DeepSeek v4 Flash $4.20",
+           "DeepSeek Pro": "DeepSeek v4 Pro"}
+MARKERS = {"Opus 4.8": "o", "Opus 4.7": "s", "GPT-5.5": "^",
+           "GPT-5.5 high": "v", "DeepSeek Flash": "D",
+           "DeepSeek Flash $0.80": "P", "DeepSeek Flash $4.20": "X",
+           "DeepSeek Pro": "<", "Kimi K2.6": ">"}
 
 mpl.font_manager.fontManager.addfont(FONT)
 mpl.rcParams.update({"font.family": "Latin Modern Sans", "font.size": 8.2,
@@ -40,18 +49,22 @@ def finish(fig, name):
     plt.close(fig)
 
 
-def style(ax, panel, xlabel, ylabel, *, logx=False, xlim=None):
+def style(ax, panel, xlabel, ylabel, *, xscale="linear", xlim=None, xticks=None):
     ax.text(-.08, 1.04, panel, transform=ax.transAxes, weight="bold", fontsize=10)
     ax.set(xlabel=xlabel, ylabel=ylabel, ylim=(0, 100))
-    if logx: ax.set_xscale("log")
+    if xscale == "log": ax.set_xscale("log")
+    if xscale == "symlog": ax.set_xscale("symlog", linthresh=25)
     if xlim: ax.set_xlim(*xlim)
+    if xticks: ax.set_xticks(xticks, [str(x) for x in xticks])
     ax.grid(axis="y", color=RULE, linewidth=.55, alpha=.75)
     ax.spines[["top", "right"]].set_visible(False)
     ax.tick_params(length=3, width=.65)
 
 
 def handles(labels):
-    return [Line2D([0], [0], color=COLORS[x], lw=2, label=x) for x in labels]
+    return [Line2D([0], [0], color=COLORS[x], lw=2, marker=MARKERS[x],
+                   markersize=4.2, markeredgecolor="white", markeredgewidth=.35,
+                   label=DISPLAY.get(x, x)) for x in labels]
 
 
 def digitized(name, crop, source_colors, *, source_alpha=1.0):
@@ -69,16 +82,21 @@ def digitized(name, crop, source_colors, *, source_alpha=1.0):
         target = source_alpha * source + (1 - source_alpha) * 255
         dist = np.linalg.norm(panel - target, axis=2)
         yy, xx = np.where(dist < (34 if source_alpha == 1 else 24))
-        # Remove anti-aliased fringe and thin the pixel cloud for clean print lines.
-        keep = np.arange(len(xx)) % 2 == 0
-        result[label] = (xx[keep] / (x1-x0), 100 * (1 - yy[keep] / (y1-y0)))
+        # Keep every core trajectory pixel: thinning made nominally solid paths
+        # visibly stippled at print size.
+        result[label] = (xx / (x1-x0), 100 * (1 - yy / (y1-y0)))
     return result
 
 
-def plot_cloud(ax, cloud, *, dotted=False):
-    for label, (x, y) in cloud.items():
-        ax.scatter(x, y, s=.34 if not dotted else .22, marker="s", linewidths=0,
-                   color=COLORS[label], alpha=.88, rasterized=True)
+def marker_points(x, y, count=6):
+    """Sample the digitized path sparsely without changing its geometry."""
+    if not len(x): return np.empty((2, 0))
+    points = []
+    for target in np.linspace(.10, .90, count):
+        center = np.quantile(x, target)
+        near = np.argsort(np.abs(x - center))[:max(4, len(x) // 300)]
+        points.append((np.median(x[near]), np.median(y[near])))
+    return np.array(points).T
 
 
 def scaling_figure(name, panels, labels, figsize=(7.25, 3.05)):
@@ -105,22 +123,29 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05)):
                 keep = np.isfinite(baseline) & (y > baseline + 1.0)
                 lo, hi = p["xlim"]
                 x = 10 ** (np.log10(lo) + u[keep] * (np.log10(hi)-np.log10(lo)))
-                ax.scatter(x, y[keep], s=.28, marker="s", linewidths=0,
-                           color=COLORS[key], alpha=.48, rasterized=True)
+                ax.scatter(x, y[keep], s=.52, marker="s", linewidths=0,
+                           color=COLORS[key], alpha=.62, rasterized=True)
         # Digitized x is mapped back through the source axis transform.
         for key, (u, y) in cloud.items():
             lo, hi = p["xlim"]
             x = 10 ** (np.log10(lo) + u * (np.log10(hi)-np.log10(lo))) if p["log"] else lo + u*(hi-lo)
-            ax.scatter(x, y, s=.34, marker="s", linewidths=0, color=COLORS[key], alpha=.9, rasterized=True)
-        style(ax, p["panel"], p["xlabel"], p["ylabel"], logx=p["log"], xlim=p["xlim"])
+            ax.scatter(x, y, s=.62, marker="s", linewidths=0, color=COLORS[key], alpha=.98, rasterized=True)
+            mx, my = marker_points(x, y)
+            ax.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=4.0,
+                    color=COLORS[key], markeredgecolor="white", markeredgewidth=.4,
+                    zorder=4)
+        style(ax, p["panel"], p["xlabel"], p["ylabel"],
+              xscale=p.get("xscale", "log" if p["log"] else "linear"),
+              xlim=p["xlim"], xticks=p.get("xticks"))
         if p.get("reference"):
             ax.legend([Line2D([0],[0],color=MUTED,lw=1.5),
                        Line2D([0],[0],color=MUTED,lw=1.5,ls=":")],
                       ["Model + priced tools", "Model tokens only"],
-                      loc="upper left", frameon=False, fontsize=6.7,
+                      loc="upper left", frameon=False, fontsize=7.2,
                       handlelength=2.2)
-    fig.legend(handles(labels), labels, loc="lower center", ncol=min(4, len(labels)),
-               frameon=False, handlelength=2.4, columnspacing=1.25, fontsize=7.4)
+    fig.legend(handles(labels), [DISPLAY.get(x, x) for x in labels], loc="lower center",
+               ncol=min(4, len(labels)), frameon=False, handlelength=1.8,
+               columnspacing=1.05, fontsize=7.6)
     fig.subplots_adjust(left=.085, right=.99, top=.94, bottom=.27, wspace=.30)
     finish(fig, name)
 
@@ -163,7 +188,8 @@ def tool_calls():
     rightsrc=["blue","green","orange","red","brown","purple"]
     all_labels=["Opus 4.8","Opus 4.7","GPT-5.5","GPT-5.5 high","DeepSeek Flash","DeepSeek Flash $0.80","DeepSeek Flash $4.20","DeepSeek Pro","Kimi K2.6"]
     scaling_figure("tool_call_scaling_panels",[
-      dict(crop=(72,29,1439,495),series=dict(zip(left,leftsrc)),panel="(a)",xlabel="Non-submit tool-call cap",ylabel="Cybench solved (%)",log=False,xlim=(0,930)),
+      dict(crop=(72,29,1439,495),series=dict(zip(left,leftsrc)),panel="(a)",xlabel="Non-submit tool-call cap",ylabel="Cybench solved (%)",log=False,xlim=(0,930),
+           xscale="symlog",xticks=[0,25,50,100,250,500,900]),
       dict(crop=(1811,29,3151,495),series=dict(zip(right,rightsrc)),panel="(b)",xlabel="Non-submit tool-call cap",ylabel="BOTSv1 correct (%)",log=False,xlim=(0,132)),
     ],all_labels,(7.25,3.25))
 
@@ -175,11 +201,14 @@ def decontamination():
     colors=[FOREST,OLIVE,LEAF]
     fig,axs=plt.subplots(1,2,figsize=(7.25,2.55),sharey=True)
     for i,(ax,model,v) in enumerate(zip(axs,models,vals)):
-        bars=ax.bar(range(3),v,color=colors,width=.62)
+        bars=ax.bar(range(3),v,color=colors,width=.62,
+                    hatch=[None, "///", "xxx"], edgecolor=[FOREST, INK, INK], linewidth=.45)
         ax.bar_label(bars,labels=[f"{x:.1f}%" for x in v],padding=2,fontsize=8)
         style(ax,f"({chr(97+i)})","", "BOTS points (%)" if i==0 else "")
         ax.set_xticks([]); ax.text(.5,-.12,model,transform=ax.transAxes,ha="center",weight="bold")
-    fig.legend([mpl.patches.Patch(color=c) for c in colors],labels,loc="lower center",ncol=3,frameon=False,fontsize=7.5)
+    fig.legend([mpl.patches.Patch(facecolor=c, hatch=h, edgecolor=INK, linewidth=.45)
+                for c,h in zip(colors,[None,"///","xxx"])],labels,
+               loc="lower center",ncol=3,frameon=False,fontsize=7.8)
     fig.subplots_adjust(left=.09,right=.99,top=.93,bottom=.30,wspace=.16)
     finish(fig,"botsv1_decontamination")
 
@@ -197,15 +226,24 @@ def refusals():
         y=np.arange(len(names)); ax.barh(y,perf,color=FOREST,height=.56)
         if bench == "Cybench":
             ax.barh(y,ref,left=perf,color=OLIVE,height=.56,hatch="///",edgecolor="white",linewidth=.3)
-        ax.set(yticks=y,yticklabels=names,xlim=(0,116),xlabel="Performance (%)")
+        ax.set(yticks=y,yticklabels=names,
+               xlim=(0,100 if bench == "BOTSv1" else 118),
+               xlabel="Performance (%)")
         ax.set_xticks(np.arange(0,101,20))
         ax.invert_yaxis(); ax.text(-.08,1.04,f"({chr(97+i)})  {bench}",transform=ax.transAxes,weight="bold",fontsize=10)
         ax.grid(axis="x",color=RULE,lw=.55); ax.set_axisbelow(True); ax.spines[["top","right","left"]].set_visible(False); ax.tick_params(axis="y",length=0)
         for yi,(p,count) in enumerate(zip(perf,counts)):
-            ax.text(102,yi,f"{p:.1f}% · ref {count}",va="center",fontsize=6.7,color=MUTED)
+            if bench == "BOTSv1":
+                # Keep secondary refusal context inside the performance bar so
+                # it cannot collide with the neighboring panel's model labels.
+                ax.text(p-1.6,yi,f"{p:.1f}% · ref {count}",ha="right",va="center",
+                        fontsize=7.4,color="white")
+            else:
+                ax.text(101.5,yi,f"{p:.1f}% · ref {count}",va="center",
+                        fontsize=7.4,color=MUTED)
     fig.legend([mpl.patches.Patch(color=FOREST),mpl.patches.Patch(facecolor=OLIVE,hatch="///")],
                ["Performance","Failed policy refusal (Cybench)"],loc="lower center",ncol=2,frameon=False)
-    fig.subplots_adjust(left=.14,right=.99,top=.92,bottom=.22,wspace=.42)
+    fig.subplots_adjust(left=.14,right=.995,top=.92,bottom=.22,wspace=.36)
     finish(fig,"gpt56_comparison_with_refusals")
 
 
