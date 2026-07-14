@@ -293,7 +293,7 @@ DeepSeek v4 Flash provides the clearest illustration of cost scaling: replaying 
 % Internal source: source-eval-repo/charts/cybench_report.html and cybench_cost_table.csv plus raw-log tool-event counts.
 % GPT-5.5 is grouped under the designated $2.10 cap here; its successful Inspect log header records cost_limit=None.
 % DeepSeek v4 Flash $0.80 row is a retrospective cap applied to logs/2026-05-19T16-35-07-00-00_cybench_NNuvY6MXYTSRkaAARLBZwT.eval.
-\caption{Cybench hard-variant operating points. GPT-5.6 and Fable use high reasoning effort; raw success counts refusals as failures. Refusal rates are Luna 8.5\%, Terra 33.3\%, Sol 90.6\%, and Fable 100\%. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits. GPT-5.5 and the successful Luna retry are grouped under the common \$2.10 analysis row although their successful log headers had no prospective cap. DeepSeek v4 Pro is normalized to the 39-challenge denominator after one sandbox-initialization failure.}
+\caption{Cybench hard-variant operating points. GPT-5.6 and Fable use high reasoning effort; raw success counts refusals as failures. Refusal rates are Luna 8.5\%, Terra 33.3\%, Sol 90.6\%, and Fable 100\%. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits. GPT-5.5 and the successful Luna retry are grouped under the common \$2.10 analysis row although their successful log headers had no prospective cap. The Opus row is the latest July run; the scaling and bootstrap appendix retains its previously audited June run. DeepSeek v4 Pro is normalized to the 39-challenge denominator after one sandbox-initialization failure.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrr}
@@ -303,8 +303,8 @@ Model & cost cap & success rate & solved & run cost & \$/solve & mean tool calls
 GPT-5.5 & \$2.10 & \textbf{94.1\%} & \textbf{36.7} & \$42.47 & \$1.16 & \textbf{20.6} \\
 DeepSeek v4 Flash & \$2.10 & 86.4\% & 33.7 & \$48.88 & \$1.45 & 144.7 \\
 GPT-5.6 Luna & \$2.10 & 79.5\% & 31.0 & \$40.66 & \$1.31 & 34.4 \\
+Claude Opus 4.8 & \$2.10 & 76.2\% & 29.7 & \$94.58 & \$3.18 & 23.8 \\
 DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & \$30.43 & \textbf{\$1.03} & 95.9 \\
-Claude Opus 4.8 & \$2.10 & 74.4\% & 29.0 & \$108.21 & \$3.73 & 26.7 \\
 GPT-5.6 Terra & \$2.10 & 65.8\% & 25.7 & \$36.63 & \$1.43 & 15.7 \\
 DeepSeek v4 Pro & \$0.75 & 43.9\% & 17.1 & \$64.58 & \$3.78 & 21.3 \\
 GPT-5.6 Sol & \$2.10 & 9.4\% & 3.7 & \$1.55 & \$0.42 & 1.4 \\
@@ -345,6 +345,17 @@ DeepSeek v4 Flash & \$2.10 & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & \$43.50 & 
 \bottomrule
 \end{tabular}}
 \end{table}
+
+Figure~\ref{fig:gpt56-refusals} shows why performance and refusal context should be read together.
+BOTSv1 refusal counts remain small and do not alter earned points; Fable, for example, earns 88.4\% despite refusal events in 5 of 93 sample-epochs.
+On Cybench, policy gating instead dominates the lower GPT-5.6 and Fable results: Terra has 39 failed refusal outcomes, Sol 106, and Fable all 117.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/gpt56_comparison_with_refusals}
+\caption{Performance and policy refusals for the GPT-5.6-focused comparison. BOTSv1 labels report any affected sample-epoch as secondary context, even when a later attempt earns points. Cybench gold segments are failed refusal outcomes and therefore do not overlap solved share. Source: GPT-5.6 Cyber Evaluation Results Notion page; values verified against source logs and generated reports.}
+\label{fig:gpt56-refusals}
+\end{figure}
 
 These full-agent scores should be interpreted alongside the contamination controls in Section~\ref{sec:bots-contamination}, not as a clean public leaderboard.
 
@@ -437,7 +448,7 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 Model & Cybench \$0.80$\rightarrow$full & Cybench $\Delta$ pp & BOTSv1 \$0.80$\rightarrow$full & BOTSv1 $\Delta$ pp \\
 \midrule
 GPT-5.5 & 91.5\%$\rightarrow$94.0\% & +2.6 [0.0, 6.0] & 74.1\%$\rightarrow$81.0\% & +6.9 [1.6, 13.6] \\
-Claude Opus 4.8 & 55.6\%$\rightarrow$74.4\% & +18.8 [10.3, 29.1] & 91.3\%$\rightarrow$93.9\% & +2.6 [0.0, 7.1] \\
+Claude Opus 4.8 (June run) & 55.6\%$\rightarrow$74.4\% & +18.8 [10.3, 29.1] & 91.3\%$\rightarrow$93.9\% & +2.6 [0.0, 7.1] \\
 DeepSeek v4 Flash & 76.1\%$\rightarrow$86.3\% & +10.3 [4.3, 17.1] & 73.0\%$\rightarrow$73.0\% & +0.0 [0.0, 0.0] \\
 DeepSeek v4 Pro & 43.9\%$\rightarrow$43.9\% & +0.0 [0.0, 0.0] & 73.8\%$\rightarrow$77.8\% & +4.0 [0.0, 9.6] \\
 \bottomrule
@@ -521,7 +532,8 @@ GPT-5.6 Terra, \$2.10 & 2026-07-10 06:43:26 & High reasoning effort \\
 GPT-5.6 Sol, \$2.10 & 2026-07-10 15:35:10 & High reasoning effort; 90.6\% refused \\
 Claude Fable 5, \$2.10 & 2026-07-13 18:04:21 & High reasoning effort; all sample-epochs content-filtered \\
 DeepSeek v4 Flash, \$2.10 & 2026-05-19 16:35:07 & Same trace also supplies the retrospective \$0.80 row \\
-Claude Opus 4.8, \$2.10 & 2026-06-22 18:37:21; 2026-06-23 19:08:17 & Partial/error retry plus final success \\
+Claude Opus 4.8, \$2.10 & 2026-07-13 18:17:02 & Latest main-table and refusal-figure run \\
+Claude Opus 4.8, \$2.10 (June run) & 2026-06-22 18:37:21; 2026-06-23 19:08:17 & Scaling and bootstrap analyses \\
 DeepSeek v4 Pro, \$0.75 & 2026-05-15 19:38:26; 23:35:01; 23:44:23 & Same-day error retries plus final success \\
 \bottomrule
 \end{tabular}
@@ -562,7 +574,7 @@ For Cybench, each replicate resamples challenge IDs with replacement and retains
 For BOTSv1, each replicate resamples question IDs with replacement and retains the three epochs and official point weights for each selected question.
 For retrospective cap contrasts, each replicate compares the capped and uncapped values for the same sampled task IDs.
 Paired contrasts resample only task IDs common to both compared runs.
-The GPT-5.6 and Fable rows are not included in these previously computed bootstrap or scaling analyses.
+The GPT-5.6, Fable, and latest July Opus rows are not included in these previously computed bootstrap or scaling analyses.
 
 \section{Cybench Robustness}
 \label{app:cybench-robustness}
@@ -579,7 +591,7 @@ Model & cost cap & success rate & 95\% bootstrap interval \\
 GPT-5.5 & \$2.10 & 94.0\% & 87.2--99.2\% \\
 DeepSeek v4 Flash & \$2.10 & 86.3\% & 76.9--94.9\% \\
 DeepSeek v4 Flash & \$0.80 & 76.1\% & 63.2--87.2\% \\
-Claude Opus 4.8 & \$2.10 & 74.4\% & 61.5--86.3\% \\
+Claude Opus 4.8 (June run) & \$2.10 & 74.4\% & 61.5--86.3\% \\
 DeepSeek v4 Pro & \$0.75 & 43.9\% & 29.8--57.9\% \\
 \bottomrule
 \end{tabular*}
