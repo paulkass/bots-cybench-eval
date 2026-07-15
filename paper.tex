@@ -117,7 +117,7 @@ Our contributions are as follows:
 \begin{figure}[t!]
 \centering
 \widepaperfig{figures/main_results_chart}
-\caption{Resource scaling for five representative models. \textbf{(a)} Cybench success versus a retrospective per-sample cost budget: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{(b)} BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls. GPT-5.6 Sol and Claude Fable 5 use high reasoning effort; Fable's zero Cybench trajectory reflects policy refusals in all 117 sample-epochs before any tool use. Offensive success climbs steadily with spend, while defensively Claude Opus 4.8 is near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
+\caption{Resource scaling for five models per panel. \textbf{(a)} Cybench success versus a retrospective per-sample cost budget: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{(b)} BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls, shown on a symmetric-log axis to separate the low-call trajectories while retaining the long tail. GPT-5.6 Sol appears in both panels; GPT-5.6 Luna is shown on Cybench and Claude Fable 5 on BOTSv1. These GPT-5.6 and Fable runs use high reasoning effort. Offensive success climbs steadily with spend, while defensively the strongest models are near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
 \label{fig:main-results-chart}
 \end{figure}
 

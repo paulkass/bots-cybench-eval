@@ -32,7 +32,7 @@ Audit state when this note was updated: paper repository branch `main`; latest G
 
 ## Figure 1 scaling provenance
 
-`figures/main_results_chart.png` retains the previously audited digitized trajectories for GPT-5.5, Claude Opus 4.8, and DeepSeek v4 Flash. The added GPT-5.6 Sol and Claude Fable 5 trajectories are stored as compact numeric inputs in `scripts/chart_sources/main_results_additions.json`, extracted read-only from the source logs listed in that file using `charts/make_report.py` for Cybench per-sample cost-budget curves and `charts/make_botsv1_report.py` for BOTSv1 non-submit tool-call-cap curves. Sol and Fable use high reasoning effort. Fable's flat 0% Cybench trajectory represents 117/117 policy refusals before tool use, not a normal capability-scaling trace.
+`figures/main_results_chart.png` retains the previously audited digitized trajectories for GPT-5.5, Claude Opus 4.8, and DeepSeek v4 Flash. The added trajectories are stored as compact numeric inputs in `scripts/chart_sources/main_results_additions.json`: GPT-5.6 Sol and Luna for Cybench, and GPT-5.6 Sol and Claude Fable 5 for BOTSv1. They were extracted read-only from the source logs listed in that file using `charts/make_report.py` for Cybench per-sample cost-budget curves and `charts/make_botsv1_report.py` for BOTSv1 non-submit tool-call-cap curves. The added runs use high reasoning effort.
 
 ## GPT-5.6 refusal figure provenance
 

@@ -12,6 +12,7 @@ import json
 import numpy as np
 from PIL import Image
 import matplotlib as mpl
+import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
@@ -21,7 +22,7 @@ FONT = "/usr/share/texmf/fonts/opentype/public/lm/lmsans10-regular.otf"
 FOREST, LEAF, OLIVE, INK = "#1F5137", "#567461", "#6E711C", "#151A16"
 MUTED, RULE, WASH = "#606A63", "#C9D0C8", "#F2F5EA"
 BLUE, RUST, PURPLE = "#2563A8", "#A64B35", "#756187"
-SOL, FABLE = "#7A5AF8", "#C24164"
+SOL, FABLE, LUNA = "#7A5AF8", "#C24164", "#D97706"
 TAB = {"blue": (31,119,180), "orange": (255,127,14), "green": (44,160,44),
        "red": (214,39,40), "purple": (148,103,189), "brown": (140,86,75),
        "pink": (227,119,194)}
@@ -29,7 +30,7 @@ COLORS = {"Opus 4.8": FOREST, "Opus 4.7": LEAF, "GPT-5.5": OLIVE,
           "GPT-5.5 high": "#A17818", "DeepSeek Flash": BLUE,
           "DeepSeek Flash $0.80": "#7796A7", "DeepSeek Flash $4.20": "#4E7F9F",
           "DeepSeek Pro": RUST, "Kimi K2.6": PURPLE,
-          "GPT-5.6 Sol": SOL, "Fable 5": FABLE}
+          "GPT-5.6 Sol": SOL, "GPT-5.6 Luna": LUNA, "Fable 5": FABLE}
 DISPLAY = {"Opus 4.8": "Claude Opus 4.8", "Opus 4.7": "Claude Opus 4.7",
            "DeepSeek Flash": "DeepSeek v4 Flash",
            "DeepSeek Flash $0.80": "DeepSeek v4 Flash $0.80",
@@ -39,7 +40,7 @@ MARKERS = {"Opus 4.8": "o", "Opus 4.7": "s", "GPT-5.5": "^",
            "GPT-5.5 high": "v", "DeepSeek Flash": "D",
            "DeepSeek Flash $0.80": "P", "DeepSeek Flash $4.20": "X",
            "DeepSeek Pro": "<", "Kimi K2.6": ">",
-           "GPT-5.6 Sol": "X", "Fable 5": "P"}
+           "GPT-5.6 Sol": "X", "GPT-5.6 Luna": "s", "Fable 5": "P"}
 MODEL_FAMILIES = [
     ["Opus 4.8", "Opus 4.7"],
     ["GPT-5.5", "GPT-5.5 high"],
@@ -188,9 +189,10 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                                 if label_position and show_leader else None),
                     bbox=(dict(boxstyle="round,pad=.12", facecolor="white",
                                edgecolor="none", alpha=.92)
-                          if label_position else None),
+                          if label_position and p.get("label_boxes", True) else None),
                     va="center", color=COLORS[key], fontsize=7.4,
-                    fontweight="bold", clip_on=False, zorder=5)
+                    fontweight="bold", clip_on=False, zorder=5,
+                    path_effects=[pe.withStroke(linewidth=2, foreground="white")])
             else:
                 ax.scatter(x, y, s=.62, marker="s", linewidths=0,
                            color=COLORS[key], alpha=.98, rasterized=True)
@@ -224,19 +226,23 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
 def main_results():
     original = ["Opus 4.8", "GPT-5.5", "DeepSeek Flash"]
     additions = json.loads((SRC / "main_results_additions.json").read_text())
-    labels = original + ["GPT-5.6 Sol", "Fable 5"]
+    labels = original + ["GPT-5.6 Sol", "GPT-5.6 Luna", "Fable 5"]
     scaling_figure("main_results_chart", [
       dict(crop=(117,27,1037,477), series=dict(zip(original,["blue","orange","green"])),
            extra=additions["cybench_cost"], xlabel="Per-sample cost budget (USD)",
            ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,12),
-           label_positions={"GPT-5.6 Sol": (.28, 12), "Fable 5": (.018, 7)},
-           label_leaders=("GPT-5.6 Sol", "Fable 5"),
-           endpoint_only_markers=("GPT-5.6 Sol", "Fable 5")),
+           label_positions={"GPT-5.6 Sol": (.28, 12), "GPT-5.6 Luna": (3.7, 81),
+                            "Opus 4.8": (3.7, 74)},
+           label_leaders=("GPT-5.6 Sol", "GPT-5.6 Luna", "Opus 4.8"),
+           endpoint_only_markers=("GPT-5.6 Sol",)),
       dict(crop=(1207,27,2128,477), series=dict(zip(original,["blue","orange","green"])),
            extra=additions["botsv1_tool_calls"], xlabel="Non-submit tool-call cap",
-           ylabel="Answers correct (%)", log=False, xlim=(0,137), plot_xlim=(0,175),
-           label_positions={"GPT-5.6 Sol": (70, 98), "Opus 4.8": (70, 94),
-                            "Fable 5": (70, 90), "GPT-5.5": (70, 86)}),
+           ylabel="Answers correct (%)", log=False, xscale="symlog",
+           xlim=(0,137), plot_xlim=(0,175), xticks=[0, 5, 10, 20, 50, 100, 175],
+           label_positions={"GPT-5.6 Sol": (72, 99), "Opus 4.8": (72, 94.25),
+                            "Fable 5": (72, 89.5), "GPT-5.5": (72, 84.75),
+                            "DeepSeek Flash": (72, 80)},
+           label_boxes=False),
     ], labels, (7.25,2.9), headline=True)
 
 
