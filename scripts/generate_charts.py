@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the six paper figures in the shared Frontier chart style.
+"""Render the six figures in the paper's shared chart style.
 
 The four scaling figures digitize only the coloured trajectory pixels from the
 paper's audited source PNGs in ``chart_sources``.  Those snapshots remain the
@@ -127,7 +127,7 @@ def marker_points(x, y, count=6):
     return np.array(points).T
 
 
-def scaling_figure(name, panels, labels, figsize=(7.25, 3.05)):
+def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False):
     fig, axes = plt.subplots(1, 2, figsize=figsize)
     for ax, p in zip(axes, panels):
         cloud = digitized(name, p["crop"], p["series"])
@@ -157,26 +157,46 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05)):
         for key, (u, y) in cloud.items():
             lo, hi = p["xlim"]
             x = 10 ** (np.log10(lo) + u * (np.log10(hi)-np.log10(lo))) if p["log"] else lo + u*(hi-lo)
-            ax.scatter(x, y, s=.62, marker="s", linewidths=0, color=COLORS[key], alpha=.98, rasterized=True)
-            mx, my = marker_points(x, y)
+            if headline:
+                # Collapse the recovered line thickness to its centerline for a
+                # crisp headline chart without changing the digitized geometry.
+                ux, inverse = np.unique(x, return_inverse=True)
+                uy = np.array([np.median(y[inverse == i]) for i in range(len(ux))])
+                ax.plot(ux, uy, color=COLORS[key], linewidth=2.15,
+                        solid_capstyle="round", solid_joinstyle="round", zorder=3)
+                mx, my = marker_points(ux, uy, 5)
+                ax.annotate(DISPLAY.get(key, key), (ux[-1], uy[-1]),
+                            xytext=(7, 0), textcoords="offset points", va="center",
+                            color=COLORS[key], fontsize=7.2, fontweight="bold",
+                            clip_on=False)
+            else:
+                ax.scatter(x, y, s=.62, marker="s", linewidths=0,
+                           color=COLORS[key], alpha=.98, rasterized=True)
+                mx, my = marker_points(x, y)
             ax.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=4.0,
                     color=COLORS[key], markeredgecolor="white", markeredgewidth=.4,
                     zorder=4)
         style(ax, p["xlabel"], p["ylabel"],
               xscale=p.get("xscale", "log" if p["log"] else "linear"),
-              xlim=p["xlim"], xticks=p.get("xticks"))
+              xlim=p.get("plot_xlim", p["xlim"]), xticks=p.get("xticks"))
+        if headline:
+            ax.set_title(p["title"], loc="left", pad=7,
+                         fontsize=8.2, fontweight="bold", color=INK)
         if p.get("reference"):
             ax.legend([Line2D([0],[0],color=MUTED,lw=1.5),
                        Line2D([0],[0],color=MUTED,lw=1.5,ls=":")],
                       ["Model + priced tools", "Model tokens only"],
                       loc="upper left", fontsize=7.2, handlelength=2.2,
                       **LEGEND_BOX)
-    legend_handles, legend_labels, columns, rows = family_legend(labels)
-    fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
-               handlelength=1.8, columnspacing=1.2, fontsize=7.6,
-               **LEGEND_BOX)
-    bottom = {1: .22, 2: .25, 3: .29, 4: .34}[rows]
-    fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=bottom, wspace=.30)
+    if headline:
+        fig.subplots_adjust(left=.085, right=.925, top=.88, bottom=.22, wspace=.38)
+    else:
+        legend_handles, legend_labels, columns, rows = family_legend(labels)
+        fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
+                   handlelength=1.8, columnspacing=1.2, fontsize=7.6,
+                   **LEGEND_BOX)
+        bottom = {1: .22, 2: .25, 3: .29, 4: .34}[rows]
+        fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=bottom, wspace=.30)
     finish(fig, name)
 
 
@@ -184,10 +204,12 @@ def main_results():
     labels = ["Opus 4.8", "GPT-5.5", "DeepSeek Flash"]
     scaling_figure("main_results_chart", [
       dict(crop=(117,27,1037,477), series=dict(zip(labels,["blue","orange","green"])),
-           xlabel="Per-sample cost budget (USD)", ylabel="Cybench solved (%)", log=True, xlim=(4e-4,5)),
+           title="(a) Offensive · Cybench", xlabel="Per-sample cost budget (USD)",
+           ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,12)),
       dict(crop=(1207,27,2128,477), series=dict(zip(labels,["blue","orange","green"])),
-           xlabel="Non-submit tool-call cap", ylabel="BOTSv1 correct (%)", log=False, xlim=(0,137)),
-    ], labels, (7.25,2.75))
+           title="(b) Defensive · BOTS v1", xlabel="Non-submit tool-call cap",
+           ylabel="Answers correct (%)", log=False, xlim=(0,137), plot_xlim=(0,175)),
+    ], labels, (7.25,2.55), headline=True)
 
 
 def cybench():
@@ -338,6 +360,6 @@ def main():
     main_results(); cybench(); bots(); tool_calls(); decontamination(); refusals()
     names=["main_results_chart","cybench_scaling_panels","botsv1_scaling_panels","tool_call_scaling_panels","botsv1_decontamination","gpt56_comparison_with_refusals"]
     assert all((OUT/f"{n}.png").stat().st_size > 10_000 for n in names)
-    print("Regenerated six Frontier charts")
+    print("Regenerated six paper charts")
 
 if __name__ == "__main__": main()
