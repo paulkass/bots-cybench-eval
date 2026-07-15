@@ -16,7 +16,7 @@ sudo apt-get install latexmk texlive-latex-recommended texlive-fonts-recommended
 make
 ```
 
-This writes `paper.pdf`. The manuscript uses the official Frontier branded style from `~/frontier/branded-paper-template/`, vendored here as `frontier-template.sty` with its logo assets under `assets/`.
+This writes `paper.pdf`. The manuscript uses the JMLR/PMLR proceedings template used for CAMLIS.
 
 ## Regenerate charts
 

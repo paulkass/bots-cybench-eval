@@ -1,25 +1,12 @@
-\documentclass[10pt]{article}
+\documentclass[pmlr]{jmlr}% PMLR/CAMLIS proceedings template
 
+% The jmlr class loads amsmath, amssymb, natbib, graphicx, url, and algorithm2e.
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{natbib}
-\usepackage{placeins}
-\usepackage{frontier-template}
-\IfFileExists{booktabs.sty}{\usepackage{booktabs}}{%
-  \newcommand{\toprule}{\hline}
-  \newcommand{\midrule}{\hline}
-  \newcommand{\bottomrule}{\hline}
-  \def\cmidrule(##1)##2{\cline{##2}}}
+\usepackage{lmodern}
+\usepackage{booktabs}
 \usepackage{array}
-\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
-
-\renewcommand{\FrontierShortTitle}{Cost-Aware Security Agent Evaluation}
-\renewcommand{\FrontierPaperID}{FRR--2026--01}
-\renewcommand{\FrontierPublicationDate}{JULY 2026}
-\renewcommand{\FrontierAffiliation}{Frontier Security}
-\renewcommand{\FrontierLogo}{assets/frontier-logo.png}
+\usepackage{microtype}
 
 \setlength{\bibsep}{0pt}
 \setlength{\emergencystretch}{3em}
@@ -29,29 +16,51 @@
 \setlength{\abovecaptionskip}{4pt}
 \setlength{\belowcaptionskip}{2pt}
 
-\newcommand{\widepaperfig}[1]{\includegraphics[width=\linewidth]{#1}}
-\bibliographystyle{plainnat}
+\makeatletter
+\long\def\@makecaption#1#2{%
+   \vskip 6pt
+   \small
+   \setbox\@tempboxa\hbox{#1: #2}%
+   \ifdim \wd\@tempboxa >\hsize
+       \begin{list}{#1:}{%
+       \settowidth{\labelwidth}{#1:}
+       \setlength{\leftmargin}{\labelwidth}
+       \addtolength{\leftmargin}{\labelsep}
+        }\item #2 \end{list}\par
+     \else
+       \hbox to\hsize{\hfil\box\@tempboxa\hfil}
+   \fi}
+\renewcommand*{\@jmlrenddoc}{%
+  \FloatBarrier
+  \phantomsection
+  \protected@edef\@currentlabelname{end of \@shorttitle}%
+  \label{jmlrend}\null
+  \global\let\@reprint\@empty}
+\makeatother
 
-\title{Beyond Success Rate: Cost-Aware Evaluation of Offensive and Defensive Security Agents}
-\author{Paul Kassianik \and Blaine Nelson \and Yaron Singer}
-\date{July 2026}
+\newcommand{\widepaperfig}[1]{\makebox[\linewidth][c]{\includegraphics[width=1.04\linewidth]{#1}}}
+
+\jmlrvolume{299}
+\jmlryear{2026}
+\jmlrworkshop{CAMLIS 2026}
+
+\title[Cost-Aware Security Agent Evaluation]{Beyond Success Rate: Cost-Aware Evaluation of Offensive and Defensive Security Agents}
+
+\author{\Name{Paul Kassianik}
+\AND
+\Name{Blaine Nelson}
+\AND
+\Name{Yaron Singer}}
 
 \hypersetup{
   pdftitle={Cost-Aware Evaluation of Offensive and Defensive Security Agents},
   pdfsubject={Cybersecurity benchmark evaluation},
-  pdfauthor={Paul Kassianik and Yaron Singer},
+  pdfauthor={Paul Kassianik, Blaine Nelson, and Yaron Singer},
   pdfkeywords={cybersecurity benchmarks, AI agents, Cybench, BOTS, SOC, cost accounting}
 }
 
 \newcommand{\BOTSvOne}{BOTS~v1}
 \newcommand{\Inspect}{Inspect}
-\newcommand{\MainResultsFigure}{%
-  \begin{figure}[t!]
-  \centering
-  \widepaperfig{figures/main_results_chart}
-  \caption{Resource scaling for three representative models. Left: Cybench success versus a retrospective per-sample cost budget; a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. Right: BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls. Offensive success climbs steadily with spend, while defensively Claude Opus 4.8 is near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
-  \label{fig:main-results-chart}
-  \end{figure}}
 
 \begin{document}
 \maketitle
@@ -71,6 +80,14 @@ Cost-aware, SOC-native evaluations provide a clearer picture of which models are
 \begin{keywords}
 cybersecurity benchmarks, AI agents, security operations centers, Cybench, BOTS, cost accounting
 \end{keywords}
+
+\clearpage
+\begin{figure}[t!]
+\centering
+\widepaperfig{figures/main_results_chart}
+\caption{Resource scaling for three representative models. \textbf{(a)} Cybench success versus a retrospective per-sample cost budget: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{(b)} BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls. Offensive success climbs steadily with spend, while defensively Claude Opus 4.8 is near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
+\label{fig:main-results-chart}
+\end{figure}
 
 \section{Introduction}
 \label{sec:introduction}
@@ -104,8 +121,6 @@ Our contributions are as follows:
   \item Model-token plus priced-tool cost accounting for SOC investigation, including cost per 1,000 BOTS points;
   \item BOTSv1 no-tools controls showing that public SOC benchmarks require decontamination checks before absolute scores are interpreted as live investigation skill.
 \end{itemize}
-
-\MainResultsFigure
 
 \section{Related Work}
 \label{sec:related-work}

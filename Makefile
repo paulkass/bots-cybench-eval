@@ -7,7 +7,7 @@ charts:
 
 paper: paper.pdf
 
-paper.pdf: paper.tex frontier-template.sty assets/frontier-logo.png placeins.sty references.bib
+paper.pdf: paper.tex jmlr.cls jmlrutils.sty algorithm2e.sty placeins.sty references.bib
 	latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 
 clean:
