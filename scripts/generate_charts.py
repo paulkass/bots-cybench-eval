@@ -8,6 +8,7 @@ here.  This avoids silently substituting newer predecessor-repo runs.  The two
 bar figures use the exact values reported in paper.tex.
 """
 from pathlib import Path
+import json
 import numpy as np
 from PIL import Image
 import matplotlib as mpl
@@ -20,22 +21,25 @@ FONT = "/usr/share/texmf/fonts/opentype/public/lm/lmsans10-regular.otf"
 FOREST, LEAF, OLIVE, INK = "#1F5137", "#567461", "#6E711C", "#151A16"
 MUTED, RULE, WASH = "#606A63", "#C9D0C8", "#F2F5EA"
 BLUE, RUST, PURPLE = "#2563A8", "#A64B35", "#756187"
+SOL, FABLE = "#7A5AF8", "#C24164"
 TAB = {"blue": (31,119,180), "orange": (255,127,14), "green": (44,160,44),
        "red": (214,39,40), "purple": (148,103,189), "brown": (140,86,75),
        "pink": (227,119,194)}
 COLORS = {"Opus 4.8": FOREST, "Opus 4.7": LEAF, "GPT-5.5": OLIVE,
           "GPT-5.5 high": "#A17818", "DeepSeek Flash": BLUE,
           "DeepSeek Flash $0.80": "#7796A7", "DeepSeek Flash $4.20": "#4E7F9F",
-          "DeepSeek Pro": RUST, "Kimi K2.6": PURPLE}
+          "DeepSeek Pro": RUST, "Kimi K2.6": PURPLE,
+          "GPT-5.6 Sol": SOL, "Fable 5": FABLE}
 DISPLAY = {"Opus 4.8": "Claude Opus 4.8", "Opus 4.7": "Claude Opus 4.7",
            "DeepSeek Flash": "DeepSeek v4 Flash",
            "DeepSeek Flash $0.80": "DeepSeek v4 Flash $0.80",
            "DeepSeek Flash $4.20": "DeepSeek v4 Flash $4.20",
-           "DeepSeek Pro": "DeepSeek v4 Pro"}
+           "DeepSeek Pro": "DeepSeek v4 Pro", "Fable 5": "Claude Fable 5"}
 MARKERS = {"Opus 4.8": "o", "Opus 4.7": "s", "GPT-5.5": "^",
            "GPT-5.5 high": "v", "DeepSeek Flash": "D",
            "DeepSeek Flash $0.80": "P", "DeepSeek Flash $4.20": "X",
-           "DeepSeek Pro": "<", "Kimi K2.6": ">"}
+           "DeepSeek Pro": "<", "Kimi K2.6": ">",
+           "GPT-5.6 Sol": "X", "Fable 5": "P"}
 MODEL_FAMILIES = [
     ["Opus 4.8", "Opus 4.7"],
     ["GPT-5.5", "GPT-5.5 high"],
@@ -154,9 +158,14 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                 ax.scatter(x, y[keep], s=.52, marker="s", linewidths=0,
                            color=COLORS[key], alpha=.62, rasterized=True)
         # Digitized x is mapped back through the source axis transform.
+        series = []
         for key, (u, y) in cloud.items():
             lo, hi = p["xlim"]
             x = 10 ** (np.log10(lo) + u * (np.log10(hi)-np.log10(lo))) if p["log"] else lo + u*(hi-lo)
+            series.append((key, x, y))
+        series.extend((key, np.asarray(values["x"]), np.asarray(values["y"]))
+                      for key, values in p.get("extra", {}).items())
+        for key, x, y in series:
             if headline:
                 # Collapse the recovered line thickness to its centerline for a
                 # crisp headline chart without changing the digitized geometry.
@@ -165,10 +174,16 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                 ax.plot(ux, uy, color=COLORS[key], linewidth=2.15,
                         solid_capstyle="round", solid_joinstyle="round", zorder=3)
                 mx, my = marker_points(ux, uy, 5)
-                ax.annotate(DISPLAY.get(key, key), (ux[-1], uy[-1]),
-                            xytext=(7, 0), textcoords="offset points", va="center",
-                            color=COLORS[key], fontsize=7.2, fontweight="bold",
-                            clip_on=False)
+                label_position = p.get("label_positions", {}).get(key)
+                ax.annotate(
+                    DISPLAY.get(key, key), (ux[-1], uy[-1]),
+                    xytext=label_position or p.get("label_offsets", {}).get(key, (7, 0)),
+                    textcoords="data" if label_position else "offset points",
+                    arrowprops=(dict(arrowstyle="-", color=COLORS[key], lw=.65,
+                                     shrinkA=2, shrinkB=2)
+                                if label_position else None),
+                    va="center", color=COLORS[key], fontsize=7.2,
+                    fontweight="bold", clip_on=False)
             else:
                 ax.scatter(x, y, s=.62, marker="s", linewidths=0,
                            color=COLORS[key], alpha=.98, rasterized=True)
@@ -180,8 +195,7 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
               xscale=p.get("xscale", "log" if p["log"] else "linear"),
               xlim=p.get("plot_xlim", p["xlim"]), xticks=p.get("xticks"))
         if headline:
-            ax.set_title(p["title"], loc="left", pad=7,
-                         fontsize=8.2, fontweight="bold", color=INK)
+            ax.spines["bottom"].set_zorder(0)
         if p.get("reference"):
             ax.legend([Line2D([0],[0],color=MUTED,lw=1.5),
                        Line2D([0],[0],color=MUTED,lw=1.5,ls=":")],
@@ -189,7 +203,7 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                       loc="upper left", fontsize=7.2, handlelength=2.2,
                       **LEGEND_BOX)
     if headline:
-        fig.subplots_adjust(left=.085, right=.925, top=.88, bottom=.22, wspace=.38)
+        fig.subplots_adjust(left=.085, right=.925, top=.98, bottom=.22, wspace=.38)
     else:
         legend_handles, legend_labels, columns, rows = family_legend(labels)
         fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
@@ -201,14 +215,19 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
 
 
 def main_results():
-    labels = ["Opus 4.8", "GPT-5.5", "DeepSeek Flash"]
+    original = ["Opus 4.8", "GPT-5.5", "DeepSeek Flash"]
+    additions = json.loads((SRC / "main_results_additions.json").read_text())
+    labels = original + ["GPT-5.6 Sol", "Fable 5"]
     scaling_figure("main_results_chart", [
-      dict(crop=(117,27,1037,477), series=dict(zip(labels,["blue","orange","green"])),
-           title="(a) Offensive · Cybench", xlabel="Per-sample cost budget (USD)",
-           ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,12)),
-      dict(crop=(1207,27,2128,477), series=dict(zip(labels,["blue","orange","green"])),
-           title="(b) Defensive · BOTS v1", xlabel="Non-submit tool-call cap",
-           ylabel="Answers correct (%)", log=False, xlim=(0,137), plot_xlim=(0,175)),
+      dict(crop=(117,27,1037,477), series=dict(zip(original,["blue","orange","green"])),
+           extra=additions["cybench_cost"], xlabel="Per-sample cost budget (USD)",
+           ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,12),
+           label_positions={"GPT-5.6 Sol": (.28, 10), "Fable 5": (.025, 4.5)}),
+      dict(crop=(1207,27,2128,477), series=dict(zip(original,["blue","orange","green"])),
+           extra=additions["botsv1_tool_calls"], xlabel="Non-submit tool-call cap",
+           ylabel="Answers correct (%)", log=False, xlim=(0,137), plot_xlim=(0,175),
+           label_positions={"GPT-5.6 Sol": (70, 99), "Opus 4.8": (70, 94),
+                            "Fable 5": (70, 89), "GPT-5.5": (70, 84)}),
     ], labels, (7.25,2.55), headline=True)
 
 
