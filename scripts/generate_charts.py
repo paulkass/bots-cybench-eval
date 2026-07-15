@@ -173,17 +173,24 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                 uy = np.array([np.median(y[inverse == i]) for i in range(len(ux))])
                 ax.plot(ux, uy, color=COLORS[key], linewidth=2.15,
                         solid_capstyle="round", solid_joinstyle="round", zorder=3)
-                mx, my = marker_points(ux, uy, 5)
+                if key in p.get("endpoint_only_markers", ()):
+                    mx, my = np.array([ux[-1]]), np.array([uy[-1]])
+                else:
+                    mx, my = marker_points(ux, uy, 5)
                 label_position = p.get("label_positions", {}).get(key)
+                show_leader = key in p.get("label_leaders", ())
                 ax.annotate(
                     DISPLAY.get(key, key), (ux[-1], uy[-1]),
                     xytext=label_position or p.get("label_offsets", {}).get(key, (7, 0)),
                     textcoords="data" if label_position else "offset points",
-                    arrowprops=(dict(arrowstyle="-", color=COLORS[key], lw=.65,
-                                     shrinkA=2, shrinkB=2)
-                                if label_position else None),
-                    va="center", color=COLORS[key], fontsize=7.2,
-                    fontweight="bold", clip_on=False)
+                    arrowprops=(dict(arrowstyle="-", color=RULE, lw=.6,
+                                     shrinkA=2, shrinkB=2, zorder=1)
+                                if label_position and show_leader else None),
+                    bbox=(dict(boxstyle="round,pad=.12", facecolor="white",
+                               edgecolor="none", alpha=.92)
+                          if label_position else None),
+                    va="center", color=COLORS[key], fontsize=7.4,
+                    fontweight="bold", clip_on=False, zorder=5)
             else:
                 ax.scatter(x, y, s=.62, marker="s", linewidths=0,
                            color=COLORS[key], alpha=.98, rasterized=True)
@@ -203,7 +210,7 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                       loc="upper left", fontsize=7.2, handlelength=2.2,
                       **LEGEND_BOX)
     if headline:
-        fig.subplots_adjust(left=.085, right=.925, top=.98, bottom=.22, wspace=.38)
+        fig.subplots_adjust(left=.085, right=.925, top=.98, bottom=.20, wspace=.34)
     else:
         legend_handles, legend_labels, columns, rows = family_legend(labels)
         fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
@@ -222,13 +229,15 @@ def main_results():
       dict(crop=(117,27,1037,477), series=dict(zip(original,["blue","orange","green"])),
            extra=additions["cybench_cost"], xlabel="Per-sample cost budget (USD)",
            ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,12),
-           label_positions={"GPT-5.6 Sol": (.28, 10), "Fable 5": (.025, 4.5)}),
+           label_positions={"GPT-5.6 Sol": (.28, 12), "Fable 5": (.018, 7)},
+           label_leaders=("GPT-5.6 Sol", "Fable 5"),
+           endpoint_only_markers=("GPT-5.6 Sol", "Fable 5")),
       dict(crop=(1207,27,2128,477), series=dict(zip(original,["blue","orange","green"])),
            extra=additions["botsv1_tool_calls"], xlabel="Non-submit tool-call cap",
            ylabel="Answers correct (%)", log=False, xlim=(0,137), plot_xlim=(0,175),
-           label_positions={"GPT-5.6 Sol": (70, 99), "Opus 4.8": (70, 94),
-                            "Fable 5": (70, 89), "GPT-5.5": (70, 84)}),
-    ], labels, (7.25,2.55), headline=True)
+           label_positions={"GPT-5.6 Sol": (70, 98), "Opus 4.8": (70, 94),
+                            "Fable 5": (70, 90), "GPT-5.5": (70, 86)}),
+    ], labels, (7.25,2.9), headline=True)
 
 
 def cybench():
