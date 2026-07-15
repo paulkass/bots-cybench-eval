@@ -81,14 +81,6 @@ Cost-aware, SOC-native evaluations provide a clearer picture of which models are
 cybersecurity benchmarks, AI agents, security operations centers, Cybench, BOTS, cost accounting
 \end{keywords}
 
-\clearpage
-\begin{figure}[t!]
-\centering
-\widepaperfig{figures/main_results_chart}
-\caption{Resource scaling for three representative models. \textbf{(a)} Cybench success versus a retrospective per-sample cost budget: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{(b)} BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls. Offensive success climbs steadily with spend, while defensively Claude Opus 4.8 is near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
-\label{fig:main-results-chart}
-\end{figure}
-
 \section{Introduction}
 \label{sec:introduction}
 
@@ -121,6 +113,13 @@ Our contributions are as follows:
   \item Model-token plus priced-tool cost accounting for SOC investigation, including cost per 1,000 BOTS points;
   \item BOTSv1 no-tools controls showing that public SOC benchmarks require decontamination checks before absolute scores are interpreted as live investigation skill.
 \end{itemize}
+
+\begin{figure}[t!]
+\centering
+\widepaperfig{figures/main_results_chart}
+\caption{Resource scaling for three representative models. \textbf{(a)} Cybench success versus a retrospective per-sample cost budget: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{(b)} BOTSv1 binary answer accuracy versus a per-sample cap on non-submit tool calls. Offensive success climbs steadily with spend, while defensively Claude Opus 4.8 is near-maximal within ${\sim}20$ tool calls and DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
+\label{fig:main-results-chart}
+\end{figure}
 
 \section{Related Work}
 \label{sec:related-work}
