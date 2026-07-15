@@ -434,7 +434,7 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/tool_call_scaling_panels}
-\caption{Tool-call scaling: success at cap $x$ counts a sample-epoch only if it succeeded within $x$ non-submit tool calls. Left: Cybench success on a symmetric-log tool-call axis (linear through 25 calls); most models saturate within ${\sim}50$ calls, but DeepSeek v4 Flash keeps extracting solves past 800 --- on offense, interaction volume can substitute for per-call quality. Right: BOTSv1 binary accuracy; the ordering inverts, with Claude Opus 4.8 highest at the fewest calls and the DeepSeek runs plateauing lower despite several times more. High tool volume is not a proxy for defensive score.}
+\caption{Tool-call scaling: success at cap $x$ counts a sample-epoch only if it succeeded within $x$ non-submit tool calls. Top: Cybench success on a linear 0--120-call axis, with the inset showing only the two DeepSeek v4 Flash trajectories over the 120--930-call long tail; most models saturate within ${\sim}50$ calls, but DeepSeek v4 Flash keeps extracting solves past 800 --- on offense, interaction volume can substitute for per-call quality. Bottom: BOTSv1 binary accuracy; the ordering inverts, with Claude Opus 4.8 highest at the fewest calls and the DeepSeek runs plateauing lower despite several times more. High tool volume is not a proxy for defensive score.}
 \label{fig:tool-call-scaling-panels}
 \end{figure}
 

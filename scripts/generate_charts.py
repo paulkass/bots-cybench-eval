@@ -212,16 +212,60 @@ def bots():
 
 
 def tool_calls():
-    left=["GPT-5.5","Kimi K2.6","Opus 4.7","DeepSeek Flash $0.80","DeepSeek Pro","DeepSeek Flash","Opus 4.8"]
-    leftsrc=["orange","brown","purple","green","pink","blue","red"]
-    right=["Opus 4.8","GPT-5.5","GPT-5.5 high","DeepSeek Pro","DeepSeek Flash","DeepSeek Flash $4.20"]
-    rightsrc=["blue","green","orange","red","brown","purple"]
-    all_labels=["Opus 4.8","Opus 4.7","GPT-5.5","GPT-5.5 high","DeepSeek Flash","DeepSeek Flash $0.80","DeepSeek Flash $4.20","DeepSeek Pro","Kimi K2.6"]
-    scaling_figure("tool_call_scaling_panels",[
-      dict(crop=(72,29,1439,495),series=dict(zip(left,leftsrc)),xlabel="Non-submit tool-call cap",ylabel="Cybench solved (%)",log=False,xlim=(0,930),
-           xscale="symlog",xticks=[0,25,50,100,250,500,900]),
-      dict(crop=(1811,29,3151,495),series=dict(zip(right,rightsrc)),xlabel="Non-submit tool-call cap",ylabel="BOTSv1 correct (%)",log=False,xlim=(0,132)),
-    ],all_labels,(7.25,3.25))
+    left = ["GPT-5.5", "Kimi K2.6", "DeepSeek Flash $0.80", "DeepSeek Pro",
+            "DeepSeek Flash", "Opus 4.8"]
+    right = ["Opus 4.8", "GPT-5.5", "GPT-5.5 high", "DeepSeek Pro",
+             "DeepSeek Flash", "DeepSeek Flash $4.20"]
+    all_labels = ["Opus 4.8", "GPT-5.5", "GPT-5.5 high", "DeepSeek Flash",
+                  "DeepSeek Flash $0.80", "DeepSeek Flash $4.20",
+                  "DeepSeek Pro", "Kimi K2.6"]
+    left_cloud = digitized("tool_call_scaling_panels", (72,29,1439,495),
+                           dict(zip(left, ["orange", "brown", "green", "pink", "blue", "red"])))
+    right_cloud = digitized("tool_call_scaling_panels", (1811,29,3151,495),
+                            dict(zip(right, ["blue", "green", "orange", "red", "brown", "purple"])))
+    fig = plt.figure(figsize=(7.25, 5.5))
+    grid = fig.add_gridspec(2, 2, width_ratios=(3.25, 1), hspace=.44, wspace=.18)
+    axes = [fig.add_subplot(grid[0, 0]), fig.add_subplot(grid[1, :])]
+    inset = fig.add_subplot(grid[0, 1])
+
+    # ponytail: Figure 6 needs its own layout; the other scaling figures retain the shared renderer.
+    for ax, cloud, xlim, ylabel in [
+            (axes[0], left_cloud, (0, 930), "Cybench solved (%)"),
+            (axes[1], right_cloud, (0, 132), "BOTSv1 correct (%)")]:
+        for key, (u, y) in cloud.items():
+            x = xlim[0] + u * (xlim[1] - xlim[0])
+            keep = x <= (120 if ax is axes[0] else xlim[1])
+            ax.scatter(x[keep], y[keep], s=.62, marker="s", linewidths=0,
+                       color=COLORS[key], alpha=.98, rasterized=True)
+            mx, my = marker_points(x[keep], y[keep], count=4)
+            ax.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=3.8,
+                    color=COLORS[key], markeredgecolor="white", markeredgewidth=.4, zorder=4)
+        style(ax, "Non-submit tool-call cap", ylabel,
+              xlim=(0, 120) if ax is axes[0] else xlim,
+              xticks=[0, 20, 40, 60, 80, 100, 120])
+
+    for key in ["DeepSeek Flash", "DeepSeek Flash $0.80"]:
+        u, y = left_cloud[key]
+        x = 930 * u
+        keep = x >= 120
+        inset.scatter(x[keep], y[keep], s=.5, marker="s", linewidths=0,
+                      color=COLORS[key], alpha=.98, rasterized=True)
+        mx, my = marker_points(x[keep], y[keep], count=3)
+        inset.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=3.2,
+                   color=COLORS[key], markeredgecolor="white", markeredgewidth=.35)
+    inset.set(xlim=(120, 930), ylim=(45, 86), title="Long tail\n120–930 calls",
+              xlabel="Tool-call cap")
+    inset.set_xticks([120, 500, 900]); inset.set_yticks([50, 70, 85])
+    inset.grid(axis="y", color=RULE, linewidth=.45, alpha=.75)
+    inset.tick_params(labelsize=6.5, length=2, width=.55)
+    inset.title.set_fontsize(7.0); inset.xaxis.label.set_size(7.0)
+    for spine in inset.spines.values(): spine.set_color(MUTED); spine.set_linewidth(.6)
+
+    legend_handles, legend_labels, columns, _ = family_legend(all_labels)
+    fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
+               handlelength=1.8, columnspacing=1.2, fontsize=7.6, **LEGEND_BOX)
+    fig.subplots_adjust(left=.085, right=.99, top=.95, bottom=.22)
+    finish(fig, "tool_call_scaling_panels")
 
 
 def decontamination():
