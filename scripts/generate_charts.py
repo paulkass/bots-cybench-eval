@@ -12,7 +12,6 @@ import json
 import numpy as np
 from PIL import Image
 import matplotlib as mpl
-import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
@@ -41,6 +40,13 @@ MARKERS = {"Opus 4.8": "o", "Opus 4.7": "s", "GPT-5.5": "^",
            "DeepSeek Flash $0.80": "P", "DeepSeek Flash $4.20": "X",
            "DeepSeek Pro": "<", "Kimi K2.6": ">",
            "GPT-5.6 Sol": "X", "GPT-5.6 Luna": "s", "Fable 5": "P"}
+HEADLINE_LINESTYLES = {
+    "Opus 4.8": "-", "GPT-5.5": (0, (5, 2)),
+    "DeepSeek Flash": (0, (3, 1)), "GPT-5.6 Sol": (0, (1, 1)),
+    "GPT-5.6 Luna": (0, (5, 1, 1, 1)), "Fable 5": (0, (3, 1, 1, 1)),
+}
+HEADLINE_DISPLAY = {"GPT-5.6 Luna": "GPT-5.6 Luna (Cybench)",
+                    "Fable 5": "Claude Fable 5 (BOTS)"}
 MODEL_FAMILIES = [
     ["Opus 4.8", "Opus 4.7"],
     ["GPT-5.5", "GPT-5.5 high"],
@@ -172,27 +178,10 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                 # crisp headline chart without changing the digitized geometry.
                 ux, inverse = np.unique(x, return_inverse=True)
                 uy = np.array([np.median(y[inverse == i]) for i in range(len(ux))])
-                ax.plot(ux, uy, color=COLORS[key], linewidth=2.15,
-                        solid_capstyle="round", solid_joinstyle="round", zorder=3)
-                if key in p.get("endpoint_only_markers", ()):
-                    mx, my = np.array([ux[-1]]), np.array([uy[-1]])
-                else:
-                    mx, my = marker_points(ux, uy, 5)
-                label_position = p.get("label_positions", {}).get(key)
-                show_leader = key in p.get("label_leaders", ())
-                ax.annotate(
-                    DISPLAY.get(key, key), (ux[-1], uy[-1]),
-                    xytext=label_position or p.get("label_offsets", {}).get(key, (7, 0)),
-                    textcoords="data" if label_position else "offset points",
-                    arrowprops=(dict(arrowstyle="-", color=RULE, lw=.6,
-                                     shrinkA=2, shrinkB=2, zorder=1)
-                                if label_position and show_leader else None),
-                    bbox=(dict(boxstyle="round,pad=.12", facecolor="white",
-                               edgecolor="none", alpha=.92)
-                          if label_position and p.get("label_boxes", True) else None),
-                    va="center", color=COLORS[key], fontsize=7.4,
-                    fontweight="bold", clip_on=False, zorder=5,
-                    path_effects=[pe.withStroke(linewidth=2, foreground="white")])
+                ax.plot(ux, uy, color=COLORS[key], linewidth=2.0,
+                        linestyle=HEADLINE_LINESTYLES[key], solid_capstyle="round",
+                        solid_joinstyle="round", zorder=3)
+                mx, my = marker_points(ux, uy, 3)
             else:
                 ax.scatter(x, y, s=.62, marker="s", linewidths=0,
                            color=COLORS[key], alpha=.98, rasterized=True)
@@ -212,7 +201,19 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                       loc="upper left", fontsize=7.2, handlelength=2.2,
                       **LEGEND_BOX)
     if headline:
-        fig.subplots_adjust(left=.085, right=.925, top=.98, bottom=.20, wspace=.34)
+        legend_order = ["Opus 4.8", "GPT-5.6 Sol", "GPT-5.5",
+                        "GPT-5.6 Luna", "DeepSeek Flash", "Fable 5"]
+        headline_handles = [
+            Line2D([0], [0], color=COLORS[key], lw=2,
+                   linestyle=HEADLINE_LINESTYLES[key], marker=MARKERS[key],
+                   markersize=4.2, markeredgecolor="white", markeredgewidth=.35,
+                   label=HEADLINE_DISPLAY.get(key, DISPLAY.get(key, key)))
+            for key in legend_order
+        ]
+        fig.legend(headline_handles, [h.get_label() for h in headline_handles],
+                   loc="lower center", ncol=3, frameon=False, fontsize=7.3,
+                   handlelength=2.2, columnspacing=1.35)
+        fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=.29, wspace=.28)
     else:
         legend_handles, legend_labels, columns, rows = family_legend(labels)
         fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
@@ -230,20 +231,12 @@ def main_results():
     scaling_figure("main_results_chart", [
       dict(crop=(117,27,1037,477), series=dict(zip(original,["blue","orange","green"])),
            extra=additions["cybench_cost"], xlabel="Per-sample cost budget (USD)",
-           ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,12),
-           label_positions={"GPT-5.6 Sol": (.28, 12), "GPT-5.6 Luna": (3.7, 81),
-                            "Opus 4.8": (3.7, 74)},
-           label_leaders=("GPT-5.6 Sol", "GPT-5.6 Luna", "Opus 4.8"),
-           endpoint_only_markers=("GPT-5.6 Sol",)),
+           ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,7)),
       dict(crop=(1207,27,2128,477), series=dict(zip(original,["blue","orange","green"])),
            extra=additions["botsv1_tool_calls"], xlabel="Non-submit tool-call cap",
            ylabel="Answers correct (%)", log=False, xscale="symlog",
-           xlim=(0,137), plot_xlim=(0,175), xticks=[0, 5, 10, 20, 50, 100, 175],
-           label_positions={"GPT-5.6 Sol": (72, 99), "Opus 4.8": (72, 94.25),
-                            "Fable 5": (72, 89.5), "GPT-5.5": (72, 84.75),
-                            "DeepSeek Flash": (72, 80)},
-           label_boxes=False),
-    ], labels, (7.25,2.9), headline=True)
+           xlim=(0,137), plot_xlim=(0,140), xticks=[0, 5, 10, 20, 50, 100, 140]),
+    ], labels, (7.25,3.0), headline=True)
 
 
 def cybench():
