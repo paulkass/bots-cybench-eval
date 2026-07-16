@@ -1,5 +1,13 @@
 %% Minimal placeins shim for this paper build.
+%% v2: \FloatBarrier now actually flushes deferred floats (the v1 stub was a
+%% no-op, which let the last table drift past the jmlr end-of-document label
+%% and truncated the first-page "1--N" page range).
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{placeins}[2026/07/01 local shim]
-\newcommand{\FloatBarrier}{\relax}
+\ProvidesPackage{placeins}[2026/07/15 local shim v2]
+\newcommand{\FloatBarrier}{\par
+  \begingroup
+    \let\@elt\relax
+    \edef\@tempa{\@deferlist\@dbldeferlist}%
+    \ifx\@tempa\@empty\else\newpage\fi
+  \endgroup}
 \endinput

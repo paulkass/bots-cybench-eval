@@ -46,7 +46,7 @@ HEADLINE_LINESTYLES = {
     "GPT-5.6 Luna": (0, (5, 1, 1, 1)), "Fable 5": (0, (3, 1, 1, 1)),
 }
 HEADLINE_DISPLAY = {"GPT-5.6 Luna": "GPT-5.6 Luna (Cybench)",
-                    "Fable 5": "Claude Fable 5 (BOTS)"}
+                    "Fable 5": "Claude Fable 5 (BOTSv1)"}
 MODEL_FAMILIES = [
     ["Opus 4.8", "Opus 4.7"],
     ["GPT-5.5", "GPT-5.5 high"],
@@ -243,11 +243,15 @@ def cybench():
     labels=["GPT-5.5","DeepSeek Flash $0.80","DeepSeek Flash","Kimi K2.6","DeepSeek Pro","Opus 4.7","Opus 4.8"]
     src=["orange","green","blue","brown","pink","purple","red"]
     panels=[]
-    for crop,xlabel,xlim in [
-      ((63,29,1518,488),"Per-sample cost budget (USD)",(4e-4,4)),
-      ((1772,29,3194,488),"Cumulative tokens",(1.5e3,1.7e9))]:
+    # Crops and xlims are anchored on the source axis ticks (y=100 tick row 46.5,
+    # y=0 spine row 490; cost decades at cols 246.5..1308.5, token decades at
+    # cols 1733.7..2899.5) so digitized pixels land at true data coordinates.
+    for crop,xlabel,xlim,plot_xlim in [
+      ((63,47,1518,490),"Per-sample cost budget (USD)",(3.03e-4,3.91),None),
+      ((1772,47,3194,490),"Cumulative tokens",(1.46e4,1.83e10),(1.4e4,1.2e10))]:
         panels.append(dict(crop=crop,series=dict(zip(labels,src)),xlabel=xlabel,
-                           ylabel="Cybench solved (%)",log=True,xlim=xlim))
+                           ylabel="Cybench solved (%)",log=True,xlim=xlim,
+                           **({"plot_xlim":plot_xlim} if plot_xlim else {})))
     scaling_figure("cybench_scaling_panels",panels,labels)
 
 
@@ -268,9 +272,13 @@ def tool_calls():
     all_labels = ["Opus 4.8", "GPT-5.5", "GPT-5.5 high", "DeepSeek Flash",
                   "DeepSeek Flash $0.80", "DeepSeek Flash $4.20",
                   "DeepSeek Pro", "Kimi K2.6"]
-    left_cloud = digitized("tool_call_scaling_panels", (72,29,1439,495),
+    # Crops and xlims anchor on the source axis ticks (left: x=0 tick col 119.5,
+    # 1.40625 px/call, y=100 row 53.5, y=0 row 497; right: x=0 tick col 1811.5,
+    # 10.025 px/call, y=100 row 46.5, y=0 row 544) so pixels map to true data.
+    LEFT_XLIM, RIGHT_XLIM = (0.36, 938.3), (0.05, 133.6)
+    left_cloud = digitized("tool_call_scaling_panels", (120,54,1439,497),
                            dict(zip(left, ["orange", "brown", "green", "pink", "blue", "red"])))
-    right_cloud = digitized("tool_call_scaling_panels", (1811,29,3151,495),
+    right_cloud = digitized("tool_call_scaling_panels", (1812,47,3151,544),
                             dict(zip(right, ["blue", "green", "orange", "red", "brown", "purple"])))
     fig = plt.figure(figsize=(7.25, 5.5))
     grid = fig.add_gridspec(2, 2, width_ratios=(3.25, 1), hspace=.44, wspace=.18)
@@ -279,8 +287,8 @@ def tool_calls():
 
     # ponytail: Figure 6 needs its own layout; the other scaling figures retain the shared renderer.
     for ax, cloud, xlim, ylabel in [
-            (axes[0], left_cloud, (0, 930), "Cybench solved (%)"),
-            (axes[1], right_cloud, (0, 132), "BOTSv1 correct (%)")]:
+            (axes[0], left_cloud, LEFT_XLIM, "Cybench solved (%)"),
+            (axes[1], right_cloud, RIGHT_XLIM, "BOTSv1 correct (%)")]:
         for key, (u, y) in cloud.items():
             x = xlim[0] + u * (xlim[1] - xlim[0])
             keep = x <= (120 if ax is axes[0] else xlim[1])
@@ -295,14 +303,14 @@ def tool_calls():
 
     for key in ["DeepSeek Flash", "DeepSeek Flash $0.80"]:
         u, y = left_cloud[key]
-        x = 930 * u
+        x = LEFT_XLIM[0] + u * (LEFT_XLIM[1] - LEFT_XLIM[0])
         keep = x >= 120
         inset.scatter(x[keep], y[keep], s=.5, marker="s", linewidths=0,
                       color=COLORS[key], alpha=.98, rasterized=True)
         mx, my = marker_points(x[keep], y[keep], count=3)
         inset.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=3.2,
                    color=COLORS[key], markeredgecolor="white", markeredgewidth=.35)
-    inset.set(xlim=(120, 930), ylim=(45, 86), title="Long tail\n120–930 calls",
+    inset.set(xlim=(120, 930), ylim=(45, 89), title="Long tail\n120–930 calls",
               xlabel="Tool-call cap")
     inset.set_xticks([120, 500, 900]); inset.set_yticks([50, 70, 85])
     inset.grid(axis="y", color=RULE, linewidth=.45, alpha=.75)

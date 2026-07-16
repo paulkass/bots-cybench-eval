@@ -53,7 +53,7 @@
 \Name{Yaron Singer}}
 
 \hypersetup{
-  pdftitle={Cost-Aware Evaluation of Offensive and Defensive Security Agents},
+  pdftitle={Beyond Success Rate: Cost-Aware Evaluation of Offensive and Defensive Security Agents},
   pdfsubject={Cybersecurity benchmark evaluation},
   pdfauthor={Paul Kassianik, Blaine Nelson, and Yaron Singer},
   pdfkeywords={cybersecurity benchmarks, AI agents, Cybench, BOTS, SOC, cost accounting}
@@ -169,7 +169,7 @@ We set budgets on the cost as the main resource control on agent runs.
 The agents are unaware of cost or token budgets but are aware of limits on certain expensive tool calls.
 
 This design allows us to ascertain the model's success rate at various cost and token consumption caps.
-We can derive valuable practical metrics such as "price per question solved".
+We can derive valuable practical metrics such as ``price per question solved''.
 By varying the cost between 0 and the run limit, we can track how success rate scales with the cost and token budget increases.
 
 For models provided by OpenAI and Anthropic, we use their respective APIs.
@@ -272,9 +272,9 @@ BOTSv1 only & Splunk discovery & \$0 marginal cost & None \\
 \end{table}
 
 In order to manage overall costs, we cap the cost for each sample run.
-We set the cap via \Inspect\'s budget option -- this limits the runtime of a benchmark sample evaluation to a certain cost and aborts the agent if it overruns the budget.
+We set the cap via \Inspect's budget option -- this limits the runtime of a benchmark sample evaluation to a certain cost and aborts the agent if it overruns the budget.
 We treat such examples as failed.
-Most successful models finish way below the cost budget cap.
+Most successful models finish well below the cost budget cap.
 
 We decompose cost into inference spend and priced-tool spend.
 For Cybench, reported cost is model-token cost recorded by the evaluation harness or reconstructed from token counts and registered rates where needed.
@@ -344,7 +344,7 @@ DeepSeek v4 Flash supplies the clearest negative budget result: doubling its cap
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrr}
 \toprule
-Model & cost cap & BOTS points & points & binary acc. & model+tools & \$/1k pts & tool calls \\
+Model & cost cap & BOTS points & points \% & binary acc. & model+tools & \$/1k pts & tool calls \\
 \midrule
 Claude Opus 4.8 & \$2.10 & \textbf{9{,}666.7 / 10{,}300} & \textbf{93.9\%} & 96.8\% & \$28.80 & \textbf{\$2.98} & 603 \\
 GPT-5.6 Terra & \$2.10 & 9{,}485.0 / 10{,}300 & 92.1\% & 95.7\% & \$33.66 & \$3.55 & 1{,}567 \\
@@ -367,7 +367,8 @@ On Cybench, policy gating instead dominates the lower GPT-5.6 and Fable results:
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/gpt56_comparison_with_refusals}
-\caption{Performance and policy refusals for the GPT-5.6-focused comparison. Left: BOTSv1 performance; olive diamonds and labels report the independent rate of affected sample-epochs, which may coexist with earned points when a later attempt succeeds. Right: Cybench performance, where hatched segments are failed refusal outcomes and therefore do not overlap solved share. Source: GPT-5.6 Cyber Evaluation Results Notion page; values verified against source logs and generated reports.}
+% Internal provenance: GPT-5.6 Cyber Evaluation Results Notion page; values verified against source logs and generated reports.
+\caption{Performance and policy refusals for the GPT-5.6-focused comparison. Left: BOTSv1 performance; olive diamonds and labels report the independent rate of affected sample-epochs, which may coexist with earned points when a later attempt succeeds. Right: Cybench performance, where hatched segments are failed refusal outcomes and therefore do not overlap solved share.}
 \label{fig:gpt56-refusals}
 \end{figure}
 
@@ -427,6 +428,7 @@ For Cybench, the cap follows model-call ledger events and marks a sample-epoch a
 For BOTSv1, the cap applies to model-token plus priced-tool spend and zeroes a sample-epoch's points once total sample cost exceeds \$0.80.
 These are descriptive replay analyses rather than new benchmark runs, but they avoid the confound of comparing unrelated models or unrelated traces.
 Figures~\ref{fig:cybench-scaling-panels} and~\ref{fig:botsv1-scaling-panels} show the cost and token resource curves.
+The Cybench panels also retain two additional previously audited runs, Claude Opus 4.7 and Kimi K2.6, which we show for context but do not analyze further.
 Cybench success rises with both per-sample dollar budget and cumulative token spend.
 BOTSv1 has a different scaling shape: Claude Opus 4.8 reaches the highest score at lower cost and token volume, while higher-spend runs do not necessarily win.
 Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling across the two benchmarks.
@@ -639,7 +641,7 @@ DeepSeek v4 Flash & \$2.10 & 73.0\% & 52.7--91.1\% \\
 
 Claude Opus 4.8's paired margin over the standard GPT-5.5 row is 12.8 percentage points, with a question-level paired bootstrap interval of +0.9 to +27.4 percentage points.
 Its margin over GPT-5.5 high effort is 12.5 percentage points, with interval +2.4 to +23.7 percentage points.
-The DeepSeek v4 Flash \$4.20-cap row exceeds the \$2.10-cap row by only 0.9 percentage points, with interval -4.9 to +6.9 percentage points, so that budget change is inconclusive.
+The DeepSeek v4 Flash \$4.20-cap row exceeds the \$2.10-cap row by only 0.9 percentage points, with interval $-4.9$ to $+6.9$ percentage points, so that budget change is inconclusive.
 
 \section{BOTSv1 Sequential-Context Check}
 \label{app:bots-context}
