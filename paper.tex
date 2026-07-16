@@ -352,7 +352,7 @@ On Cybench, policy gating instead dominates the lower GPT-5.6 and Fable results:
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/gpt56_comparison_with_refusals}
-\caption{Performance and policy refusals for the GPT-5.6-focused comparison. Left: BOTS v1 performance; olive diamonds and labels report the independent rate of affected sample-epochs, which may coexist with earned points when a later attempt succeeds. Right: Cybench performance, where hatched segments are failed refusal outcomes and therefore do not overlap solved share.}
+\caption{Performance and policy refusals for the GPT-5.6-focused comparison. Hatched segments show refusal events in both panels. Left: BOTS v1 refusal rates overlay the performance bars because affected sample-epochs may still earn points when a later attempt succeeds. Right: Cybench refusal outcomes are failures and therefore stack beyond, rather than overlap, solved share.}
 \label{fig:gpt56-refusals}
 \end{figure}
 
@@ -361,7 +361,7 @@ These full-agent scores should be interpreted alongside the contamination contro
 \section{BOTS v1 Contamination Controls}
 \label{sec:bots-contamination}
 
-BOTS v1 is valuable because it supplies real Splunk data and official scoring, but it is also public and old.
+BOTS v1 is valuable because it supplies realistic Splunk data and official scoring, however it is also public and old.
 We therefore include a no-tools probe as a contamination control.
 The no-tools condition provides no Splunk, web, bash, Python, or other tools; it asks the model to answer from the question text, optional prerequisite context, and prior knowledge only.
 

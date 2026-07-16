@@ -356,15 +356,12 @@ def refusals():
     fig,axs=plt.subplots(1,2,figsize=(7.25,3.05))
     for i,(ax,(bench,names,perf,ref,counts)) in enumerate(zip(axs,groups)):
         y=np.arange(len(names)); ax.barh(y,perf,color=FOREST,height=.56)
-        if bench == "Cybench":
-            ax.barh(y,ref,left=perf,color=OLIVE,height=.56,hatch="///",edgecolor="white",linewidth=.3)
-        else:
-            # BOTS v1 refusal events can coexist with earned points, so show
-            # their independent rate as diamonds rather than stacked segments.
-            rates = np.asarray(ref)
-            shown = rates > 0
-            ax.scatter(rates[shown], y[shown], marker="D", s=22, color=OLIVE,
-                       edgecolor="white", linewidth=.55, zorder=5)
+        rates = np.asarray(ref)
+        # BOTS v1 refusal events can coexist with earned points, so overlay the
+        # hatch within the performance bar; Cybench refusals remain stacked failures.
+        left = np.maximum(np.asarray(perf)-rates, 0) if bench == "BOTS v1" else perf
+        ax.barh(y,rates,left=left,color=OLIVE,height=.56,hatch="///",
+                edgecolor="white",linewidth=.3)
         ax.set(yticks=y,yticklabels=names,
                xlim=(0,100 if bench == "BOTS v1" else 118),
                xlabel="Performance (%)")
@@ -381,10 +378,8 @@ def refusals():
                 ax.text(101.5,yi,f"{p:.1f}% · ref {count}",va="center",
                         fontsize=7.4,color=MUTED)
     fig.legend([mpl.patches.Patch(color=FOREST),
-                Line2D([0],[0],linestyle="none",marker="D",markersize=5,
-                       markerfacecolor=OLIVE,markeredgecolor="white"),
                 mpl.patches.Patch(facecolor=OLIVE,hatch="///")],
-               ["Performance","Refusal-event rate (BOTS v1)","Failed refusal (Cybench)"],
+               ["Performance","Refusal events"],
                loc="lower center",ncol=3,fontsize=7.5,**LEGEND_BOX)
     fig.subplots_adjust(left=.14,right=.995,top=.92,bottom=.22,wspace=.36)
     finish(fig,"gpt56_comparison_with_refusals")
