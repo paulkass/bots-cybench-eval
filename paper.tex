@@ -1,4 +1,4 @@
-\documentclass[pmlr]{jmlr}% PMLR/CAMLIS proceedings template
+\documentclass{jmlr}% JMLR-derived layout; arXiv preprint without proceedings front matter
 
 % The jmlr class loads amsmath, amssymb, natbib, graphicx, url, and algorithm2e.
 \usepackage[utf8]{inputenc}
@@ -36,13 +36,17 @@
   \protected@edef\@currentlabelname{end of \@shorttitle}%
   \label{jmlrend}\null
   \global\let\@reprint\@empty}
+% arXiv preprint: blank the title-page proceedings/volume header while
+% keeping the copyright footer.
+\renewcommand{\ps@jmlrtps}{%
+  \let\@mkboth\@gobbletwo
+  \def\@oddhead{}\let\@evenhead\@oddhead
+  \def\@oddfoot{\@titlefoot}\let\@evenfoot\@oddfoot}
 \makeatother
 
 \newcommand{\widepaperfig}[1]{\makebox[\linewidth][c]{\includegraphics[width=1.04\linewidth]{#1}}}
 
-\jmlrvolume{299}
-\jmlryear{2026}
-\jmlrworkshop{CAMLIS 2026}
+\jmlryear{2026}% feeds only the title-page copyright footer
 
 \title[Cost-Aware Security Agent Evaluation]{Beyond Success Rate: Cost-Aware Evaluation of Offensive and Defensive Security Agents}
 
