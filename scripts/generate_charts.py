@@ -138,7 +138,7 @@ def marker_points(x, y, count=6):
     return np.array(points).T
 
 
-def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False):
+def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False, clean=False):
     fig, axes = plt.subplots(1, 2, figsize=figsize)
     for ax, p in zip(axes, panels):
         cloud = digitized(name, p["crop"], p["series"])
@@ -173,14 +173,14 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
         series.extend((key, np.asarray(values["x"]), np.asarray(values["y"]))
                       for key, values in p.get("extra", {}).items())
         for key, x, y in series:
-            if headline:
+            if headline or clean:
                 # Collapse the recovered line thickness to its centerline for a
-                # crisp headline chart without changing the digitized geometry.
+                # crisp chart without changing the digitized geometry.
                 ux, inverse = np.unique(x, return_inverse=True)
                 uy = np.array([np.median(y[inverse == i]) for i in range(len(ux))])
-                ax.plot(ux, uy, color=COLORS[key], linewidth=2.0,
-                        linestyle=HEADLINE_LINESTYLES[key], solid_capstyle="round",
-                        solid_joinstyle="round", zorder=3)
+                ax.plot(ux, uy, color=COLORS[key], linewidth=2.0 if headline else 1.55,
+                        linestyle=HEADLINE_LINESTYLES[key] if headline else "-",
+                        solid_capstyle="round", solid_joinstyle="round", zorder=3)
                 mx, my = marker_points(ux, uy, 3)
             else:
                 ax.scatter(x, y, s=.62, marker="s", linewidths=0,
@@ -216,10 +216,11 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
         fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=.29, wspace=.28)
     else:
         legend_handles, legend_labels, columns, rows = family_legend(labels)
+        legend_position = {"bbox_to_anchor": (.5, -.03)} if clean else {}
         fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
                    handlelength=1.8, columnspacing=1.2, fontsize=7.6,
-                   **LEGEND_BOX)
-        bottom = {1: .22, 2: .25, 3: .29, 4: .34}[rows]
+                   **legend_position, **LEGEND_BOX)
+        bottom = .33 if clean else {1: .22, 2: .25, 3: .29, 4: .34}[rows]
         fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=bottom, wspace=.30)
     finish(fig, name)
 
@@ -250,9 +251,9 @@ def cybench():
       ((63,47,1518,490),"Per-sample cost budget (USD)",(3.03e-4,3.91),None),
       ((1772,47,3194,490),"Cumulative tokens",(1.46e3,1.83e9),(1.4e3,1.2e9))]:
         panels.append(dict(crop=crop,series=dict(zip(labels,src)),xlabel=xlabel,
-                           ylabel="Cybench solved (%)",log=True,xlim=xlim,
+                           ylabel="Cybench solved (%)" if not panels else "",log=True,xlim=xlim,
                            **({"plot_xlim":plot_xlim} if plot_xlim else {})))
-    scaling_figure("cybench_scaling_panels",panels,labels)
+    scaling_figure("cybench_scaling_panels",panels,labels,clean=True)
 
 
 def bots():
