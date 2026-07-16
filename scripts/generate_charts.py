@@ -27,18 +27,16 @@ TAB = {"blue": (31,119,180), "orange": (255,127,14), "green": (44,160,44),
        "pink": (227,119,194)}
 COLORS = {"Opus 4.8": FOREST, "Opus 4.7": LEAF, "GPT-5.5": OLIVE,
           "GPT-5.5 high": "#A17818", "DeepSeek Flash": BLUE,
-          "DeepSeek Flash $0.80": "#7796A7", "DeepSeek Flash $4.20": "#4E7F9F",
-          "DeepSeek Pro": RUST, "Kimi K2.6": PURPLE,
-          "GPT-5.6 Sol": SOL, "GPT-5.6 Luna": LUNA, "Fable 5": FABLE}
+          "DeepSeek Flash $4.20": "#4E7F9F", "DeepSeek Pro": RUST,
+          "Kimi K2.6": PURPLE, "GPT-5.6 Sol": SOL,
+          "GPT-5.6 Luna": LUNA, "Fable 5": FABLE}
 DISPLAY = {"Opus 4.8": "Claude Opus 4.8", "Opus 4.7": "Claude Opus 4.7",
            "DeepSeek Flash": "DeepSeek v4 Flash",
-           "DeepSeek Flash $0.80": "DeepSeek v4 Flash $0.80",
            "DeepSeek Flash $4.20": "DeepSeek v4 Flash $4.20",
            "DeepSeek Pro": "DeepSeek v4 Pro", "Fable 5": "Claude Fable 5"}
 MARKERS = {"Opus 4.8": "o", "Opus 4.7": "s", "GPT-5.5": "^",
            "GPT-5.5 high": "v", "DeepSeek Flash": "D",
-           "DeepSeek Flash $0.80": "P", "DeepSeek Flash $4.20": "X",
-           "DeepSeek Pro": "<", "Kimi K2.6": ">",
+           "DeepSeek Flash $4.20": "X", "DeepSeek Pro": "<", "Kimi K2.6": ">",
            "GPT-5.6 Sol": "X", "GPT-5.6 Luna": "s", "Fable 5": "P"}
 HEADLINE_LINESTYLES = {
     "Opus 4.8": "-", "GPT-5.5": (0, (5, 2)),
@@ -50,7 +48,7 @@ HEADLINE_DISPLAY = {"GPT-5.6 Luna": "GPT-5.6 Luna (Cybench)",
 MODEL_FAMILIES = [
     ["Opus 4.8", "Opus 4.7"],
     ["GPT-5.5", "GPT-5.5 high"],
-    ["DeepSeek Flash", "DeepSeek Flash $0.80", "DeepSeek Flash $4.20", "DeepSeek Pro"],
+    ["DeepSeek Flash", "DeepSeek Flash $4.20", "DeepSeek Pro"],
     ["Kimi K2.6"],
 ]
 
@@ -241,8 +239,8 @@ def main_results():
 
 
 def cybench():
-    labels=["GPT-5.5","DeepSeek Flash $0.80","DeepSeek Flash","Kimi K2.6","DeepSeek Pro","Opus 4.7","Opus 4.8"]
-    src=["orange","green","blue","brown","pink","purple","red"]
+    labels=["GPT-5.5","DeepSeek Flash","Kimi K2.6","DeepSeek Pro","Opus 4.7","Opus 4.8"]
+    src=["orange","blue","brown","pink","purple","red"]
     panels=[]
     # Crops and xlims are anchored on the source axis ticks (y=100 tick row 46.5,
     # y=0 spine row 490; cost decades at cols 246.5..1308.5, token decades at
@@ -266,19 +264,17 @@ def bots():
 
 
 def tool_calls():
-    left = ["GPT-5.5", "Kimi K2.6", "DeepSeek Flash $0.80", "DeepSeek Pro",
-            "DeepSeek Flash", "Opus 4.8"]
+    left = ["GPT-5.5", "Kimi K2.6", "DeepSeek Pro", "DeepSeek Flash", "Opus 4.8"]
     right = ["Opus 4.8", "GPT-5.5", "GPT-5.5 high", "DeepSeek Pro",
              "DeepSeek Flash", "DeepSeek Flash $4.20"]
     all_labels = ["Opus 4.8", "GPT-5.5", "GPT-5.5 high", "DeepSeek Flash",
-                  "DeepSeek Flash $0.80", "DeepSeek Flash $4.20",
-                  "DeepSeek Pro", "Kimi K2.6"]
+                  "DeepSeek Flash $4.20", "DeepSeek Pro", "Kimi K2.6"]
     # Crops and xlims anchor on the source axis ticks (left: x=0 tick col 119.5,
     # 1.40625 px/call, y=100 row 53.5, y=0 row 497; right: x=0 tick col 1811.5,
     # 10.025 px/call, y=100 row 46.5, y=0 row 544) so pixels map to true data.
     LEFT_XLIM, RIGHT_XLIM = (0.36, 938.3), (0.05, 133.6)
     left_cloud = digitized("tool_call_scaling_panels", (120,54,1439,497),
-                           dict(zip(left, ["orange", "brown", "green", "pink", "blue", "red"])))
+                           dict(zip(left, ["orange", "brown", "pink", "blue", "red"])))
     right_cloud = digitized("tool_call_scaling_panels", (1812,47,3151,544),
                             dict(zip(right, ["blue", "green", "orange", "red", "brown", "purple"])))
     fig = plt.figure(figsize=(7.25, 5.5))
@@ -304,18 +300,18 @@ def tool_calls():
               xlim=(0, 120) if ax is axes[0] else xlim,
               xticks=[0, 20, 40, 60, 80, 100, 120])
 
-    for key in ["DeepSeek Flash", "DeepSeek Flash $0.80"]:
-        u, y = left_cloud[key]
-        x = LEFT_XLIM[0] + u * (LEFT_XLIM[1] - LEFT_XLIM[0])
-        keep = x >= 120
-        ux, inverse = np.unique(x[keep], return_inverse=True)
-        uy = np.array([np.median(y[keep][inverse == i]) for i in range(len(ux))])
-        inset.plot(ux, uy, color=COLORS[key], linewidth=1.35,
-                   solid_capstyle="round", solid_joinstyle="round")
-        mx, my = marker_points(ux, uy, count=3)
-        inset.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=3.2,
-                   color=COLORS[key], markeredgecolor="white", markeredgewidth=.35)
-    inset.set(xlim=(120, 930), ylim=(45, 89), title="Long tail\n120–930 calls",
+    key = "DeepSeek Flash"
+    u, y = left_cloud[key]
+    x = LEFT_XLIM[0] + u * (LEFT_XLIM[1] - LEFT_XLIM[0])
+    keep = x >= 120
+    ux, inverse = np.unique(x[keep], return_inverse=True)
+    uy = np.array([np.median(y[keep][inverse == i]) for i in range(len(ux))])
+    inset.plot(ux, uy, color=COLORS[key], linewidth=1.35,
+               solid_capstyle="round", solid_joinstyle="round")
+    mx, my = marker_points(ux, uy, count=3)
+    inset.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=3.2,
+               color=COLORS[key], markeredgecolor="white", markeredgewidth=.35)
+    inset.set(xlim=(120, 930), ylim=(45, 89), title="DeepSeek v4 Flash\n120–930 calls",
               xlabel="Tool-call cap")
     inset.set_xticks([120, 500, 900]); inset.set_yticks([50, 70, 85])
     inset.grid(axis="y", color=RULE, linewidth=.45, alpha=.75)
