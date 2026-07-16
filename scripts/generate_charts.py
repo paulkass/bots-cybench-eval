@@ -46,7 +46,7 @@ HEADLINE_LINESTYLES = {
     "GPT-5.6 Luna": (0, (5, 1, 1, 1)), "Fable 5": (0, (3, 1, 1, 1)),
 }
 HEADLINE_DISPLAY = {"GPT-5.6 Luna": "GPT-5.6 Luna (Cybench)",
-                    "Fable 5": "Claude Fable 5 (BOTSv1)"}
+                    "Fable 5": "Claude Fable 5 (BOTS v1)"}
 MODEL_FAMILIES = [
     ["Opus 4.8", "Opus 4.7"],
     ["GPT-5.5", "GPT-5.5 high"],
@@ -142,7 +142,7 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
     fig, axes = plt.subplots(1, 2, figsize=figsize)
     for ax, p in zip(axes, panels):
         cloud = digitized(name, p["crop"], p["series"])
-        # BOTSv1's cost panel also contains alpha=.38 dotted model-token-only
+        # BOTS v1's cost panel also contains alpha=.38 dotted model-token-only
         # companions. Faded antialias pixels from the solid paths have the same
         # composite color, so retain only reference pixels visibly above the
         # nearby solid trajectory (the token-only budget is never larger).
@@ -248,7 +248,7 @@ def cybench():
     # cols 1733.7..2899.5) so digitized pixels land at true data coordinates.
     for crop,xlabel,xlim,plot_xlim in [
       ((63,47,1518,490),"Per-sample cost budget (USD)",(3.03e-4,3.91),None),
-      ((1772,47,3194,490),"Cumulative tokens",(1.46e4,1.83e10),(1.4e4,1.2e10))]:
+      ((1772,47,3194,490),"Cumulative tokens",(1.46e3,1.83e9),(1.4e3,1.2e9))]:
         panels.append(dict(crop=crop,series=dict(zip(labels,src)),xlabel=xlabel,
                            ylabel="Cybench solved (%)",log=True,xlim=xlim,
                            **({"plot_xlim":plot_xlim} if plot_xlim else {})))
@@ -288,7 +288,7 @@ def tool_calls():
     # ponytail: Figure 6 needs its own layout; the other scaling figures retain the shared renderer.
     for ax, cloud, xlim, ylabel in [
             (axes[0], left_cloud, LEFT_XLIM, "Cybench solved (%)"),
-            (axes[1], right_cloud, RIGHT_XLIM, "BOTSv1 correct (%)")]:
+            (axes[1], right_cloud, RIGHT_XLIM, "BOTS v1 correct (%)")]:
         for key, (u, y) in cloud.items():
             x = xlim[0] + u * (xlim[1] - xlim[0])
             keep = x <= (120 if ax is axes[0] else xlim[1])
@@ -346,7 +346,7 @@ def decontamination():
 
 def refusals():
     groups=[
-        ("BOTSv1", ["Opus 4.8","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5","GPT-5.6 Luna"],
+        ("BOTS v1", ["Opus 4.8","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5","GPT-5.6 Luna"],
          [93.9,92.1,91.4,88.4,83.7], [100*2/93,0,0,100*5/93,0],
          ["2/93","0/93","0/93","5/93","0/93"]),
         ("Cybench", ["GPT-5.5","GPT-5.6 Luna","Opus 4.8","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5"],
@@ -359,20 +359,20 @@ def refusals():
         if bench == "Cybench":
             ax.barh(y,ref,left=perf,color=OLIVE,height=.56,hatch="///",edgecolor="white",linewidth=.3)
         else:
-            # BOTSv1 refusal events can coexist with earned points, so show
+            # BOTS v1 refusal events can coexist with earned points, so show
             # their independent rate as diamonds rather than stacked segments.
             rates = np.asarray(ref)
             shown = rates > 0
             ax.scatter(rates[shown], y[shown], marker="D", s=22, color=OLIVE,
                        edgecolor="white", linewidth=.55, zorder=5)
         ax.set(yticks=y,yticklabels=names,
-               xlim=(0,100 if bench == "BOTSv1" else 118),
+               xlim=(0,100 if bench == "BOTS v1" else 118),
                xlabel="Performance (%)")
         ax.set_xticks(np.arange(0,101,20))
         ax.invert_yaxis()
         ax.grid(axis="x",color=RULE,lw=.55); ax.set_axisbelow(True); ax.spines[["top","right","left"]].set_visible(False); ax.tick_params(axis="y",length=0)
         for yi,(p,count,rate) in enumerate(zip(perf,counts,ref)):
-            if bench == "BOTSv1":
+            if bench == "BOTS v1":
                 # Keep secondary refusal context inside the performance bar so
                 # it cannot collide with the neighboring panel's model labels.
                 ax.text(p-1.6,yi,f"{p:.1f}% · ref {count} ({rate:.1f}%)",ha="right",va="center",
@@ -384,7 +384,7 @@ def refusals():
                 Line2D([0],[0],linestyle="none",marker="D",markersize=5,
                        markerfacecolor=OLIVE,markeredgecolor="white"),
                 mpl.patches.Patch(facecolor=OLIVE,hatch="///")],
-               ["Performance","Refusal-event rate (BOTSv1)","Failed refusal (Cybench)"],
+               ["Performance","Refusal-event rate (BOTS v1)","Failed refusal (Cybench)"],
                loc="lower center",ncol=3,fontsize=7.5,**LEGEND_BOX)
     fig.subplots_adjust(left=.14,right=.995,top=.92,bottom=.22,wspace=.36)
     finish(fig,"gpt56_comparison_with_refusals")
