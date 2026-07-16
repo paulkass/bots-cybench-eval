@@ -373,8 +373,8 @@ def refusals():
             if bench == "BOTS v1":
                 # Keep secondary refusal context inside the performance bar so
                 # it cannot collide with the neighboring panel's model labels.
-                ax.text(p-1.6,yi,f"{p:.1f}% · ref {count} ({rate:.1f}%)",ha="right",va="center",
-                        fontsize=7.1,color="white")
+                label = f"{p:.1f}% · ref {count} ({rate:.1f}%)" if rate else f"{p:.1f}%"
+                ax.text(left[yi]-1.5,yi,label,ha="right",va="center",fontsize=7.1,color="white")
             else:
                 ax.text(101.5,yi,f"{p:.1f}% · ref {count}",va="center",
                         fontsize=7.4,color=MUTED)
