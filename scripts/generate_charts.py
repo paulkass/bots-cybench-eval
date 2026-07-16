@@ -293,9 +293,11 @@ def tool_calls():
         for key, (u, y) in cloud.items():
             x = xlim[0] + u * (xlim[1] - xlim[0])
             keep = x <= (120 if ax is axes[0] else xlim[1])
-            ax.scatter(x[keep], y[keep], s=.62, marker="s", linewidths=0,
-                       color=COLORS[key], alpha=.98, rasterized=True)
-            mx, my = marker_points(x[keep], y[keep], count=4)
+            ux, inverse = np.unique(x[keep], return_inverse=True)
+            uy = np.array([np.median(y[keep][inverse == i]) for i in range(len(ux))])
+            ax.plot(ux, uy, color=COLORS[key], linewidth=1.55,
+                    solid_capstyle="round", solid_joinstyle="round")
+            mx, my = marker_points(ux, uy, count=4)
             ax.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=3.8,
                     color=COLORS[key], markeredgecolor="white", markeredgewidth=.4, zorder=4)
         style(ax, "Non-submit tool-call cap", ylabel,
@@ -306,9 +308,11 @@ def tool_calls():
         u, y = left_cloud[key]
         x = LEFT_XLIM[0] + u * (LEFT_XLIM[1] - LEFT_XLIM[0])
         keep = x >= 120
-        inset.scatter(x[keep], y[keep], s=.5, marker="s", linewidths=0,
-                      color=COLORS[key], alpha=.98, rasterized=True)
-        mx, my = marker_points(x[keep], y[keep], count=3)
+        ux, inverse = np.unique(x[keep], return_inverse=True)
+        uy = np.array([np.median(y[keep][inverse == i]) for i in range(len(ux))])
+        inset.plot(ux, uy, color=COLORS[key], linewidth=1.35,
+                   solid_capstyle="round", solid_joinstyle="round")
+        mx, my = marker_points(ux, uy, count=3)
         inset.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=3.2,
                    color=COLORS[key], markeredgecolor="white", markeredgewidth=.35)
     inset.set(xlim=(120, 930), ylim=(45, 89), title="Long tail\n120–930 calls",
