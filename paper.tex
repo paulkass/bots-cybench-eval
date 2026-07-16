@@ -293,22 +293,22 @@ DeepSeek v4 Flash provides the clearest illustration of cost scaling: replaying 
 
 \begin{table}[t]
 \centering
-\caption{Cybench hard-variant operating points. GPT-5.6 and Fable use high reasoning effort; raw success counts refusals as failures. Refusal rates are Luna 8.5\%, Terra 33.3\%, Sol 90.6\%, and Fable 100\%. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits. GPT-5.5 and the successful Luna retry are grouped under the common \$2.10 analysis row although their successful log headers had no prospective cap. The Opus row is the latest July run; the scaling and bootstrap appendix retains its previously audited June run. DeepSeek v4 Pro is normalized to the 39-challenge denominator after one sandbox-initialization failure.}
+\caption{Cybench hard-variant operating points. GPT-5.6 and Fable use high reasoning effort; raw success counts refusals as failures. Refusals are failed sample-epochs over loaded sample-epochs. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits. GPT-5.5 and the successful Luna retry are grouped under the common \$2.10 analysis row although their successful log headers had no prospective cap. The Opus row is the latest July run; the scaling and bootstrap appendix retains its previously audited June run. DeepSeek v4 Pro is normalized to the 39-challenge denominator after one sandbox-initialization failure; its refusal denominator remains the 114 loaded sample-epochs.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{llrrrrr}
+\begin{tabular}{llrrrrrr}
 \toprule
-Model & cost cap & success rate & solved equiv. & run cost & \$/solve & mean tool calls \\
+Model & cost cap & success rate & solved equiv. & refusals & run cost & \$/solve & mean tool calls \\
 \midrule
-GPT-5.5 & \$2.10 & \textbf{94.1\%} & \textbf{36.7} & \$42.47 & \$1.16 & \textbf{20.6} \\
-DeepSeek v4 Flash & \$2.10 & 86.4\% & 33.7 & \$48.88 & \$1.45 & 144.7 \\
-GPT-5.6 Luna & \$2.10 & 79.5\% & 31.0 & \$40.66 & \$1.31 & 34.4 \\
-Claude Opus 4.8 & \$2.10 & 76.2\% & 29.7 & \$94.58 & \$3.18 & 23.8 \\
-DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & \$30.43 & \textbf{\$1.03} & 95.9 \\
-GPT-5.6 Terra & \$2.10 & 65.8\% & 25.7 & \$36.63 & \$1.43 & 15.7 \\
-DeepSeek v4 Pro & \$0.75 & 43.9\% & 17.1 & \$64.58 & \$3.78 & 21.3 \\
-GPT-5.6 Sol & \$2.10 & 9.4\% & 3.7 & \$1.55 & \$0.42 & 1.4 \\
-Claude Fable 5 & \$2.10 & 0.0\% & 0.0 & \$1.64 & -- & 0.0 \\
+GPT-5.5 & \$2.10 & \textbf{94.1\%} & \textbf{36.7} & 7/117 & \$42.47 & \$1.16 & \textbf{20.6} \\
+DeepSeek v4 Flash & \$2.10 & 86.4\% & 33.7 & 0/117 & \$48.88 & \$1.45 & 144.7 \\
+GPT-5.6 Luna & \$2.10 & 79.5\% & 31.0 & 10/117 & \$40.66 & \$1.31 & 34.4 \\
+Claude Opus 4.8 & \$2.10 & 76.2\% & 29.7 & 5/117 & \$94.58 & \$3.18 & 23.8 \\
+DeepSeek v4 Flash & \$0.80 & 76.1\% & 29.7 & 0/117 & \$30.43 & \textbf{\$1.03} & 95.9 \\
+GPT-5.6 Terra & \$2.10 & 65.8\% & 25.7 & 39/117 & \$36.63 & \$1.43 & 15.7 \\
+DeepSeek v4 Pro & \$0.75 & 43.9\% & 17.1 & 0/114 & \$64.58 & \$3.78 & 21.3 \\
+GPT-5.6 Sol & \$2.10 & 9.4\% & 3.7 & 106/117 & \$1.55 & \$0.42 & 1.4 \\
+Claude Fable 5 & \$2.10 & 0.0\% & 0.0 & 117/117 & \$1.64 & -- & 0.0 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -324,23 +324,23 @@ DeepSeek v4 Flash supplies the clearest weak budget effect: doubling its cap fro
 
 \begin{table}[t]
 \centering
-\caption{BOTS v1 full-run results, including the latest high-effort GPT-5.6 and Fable runs. BOTS points use \texttt{bots\_points}; model + tools (\$) adds priced Brave Search and WhoisXMLAPI calls.}
+\caption{BOTS v1 full-run results, including the latest high-effort GPT-5.6 and Fable runs. BOTS points use \texttt{bots\_points}; model + tools (\$) adds priced Brave Search and WhoisXMLAPI calls. Refusals are affected sample-epochs out of 93 and may coexist with earned points.}
 \label{tab:bots}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{llrrrrrr}
+\begin{tabular}{llrrrrrrr}
 \toprule
-Model & cost cap & BOTS points & score (\%) & binary acc. & model + tools (\$) & \$/1k pts & total tool calls \\
+Model & cost cap & BOTS points & score (\%) & binary acc. & refusals & model + tools (\$) & \$/1k pts & total tool calls \\
 \midrule
-Claude Opus 4.8 & \$2.10 & \textbf{9{,}666.7 / 10{,}300} & \textbf{93.9\%} & 96.8\% & \$28.80 & \textbf{\$2.98} & 603 \\
-GPT-5.6 Terra & \$2.10 & 9{,}485.0 / 10{,}300 & 92.1\% & 95.7\% & \$33.66 & \$3.55 & 1{,}567 \\
-GPT-5.6 Sol & \$2.10 & 9{,}416.7 / 10{,}300 & 91.4\% & \textbf{97.8\%} & \$44.29 & \$4.70 & 1{,}357 \\
-Claude Fable 5 & \$2.10 & 9{,}108.3 / 10{,}300 & 88.4\% & 95.7\% & \$32.04 & \$3.52 & \textbf{309} \\
-GPT-5.6 Luna & \$2.10 & 8{,}625.0 / 10{,}300 & 83.7\% & 93.5\% & \$29.66 & \$3.44 & 1{,}867 \\
-GPT-5.5 (high effort) & \$2.10 & 8{,}383.3 / 10{,}300 & 81.4\% & 91.4\% & \$64.57 & \$7.70 & 1{,}580 \\
-GPT-5.5 & \$2.10 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & \$56.42 & \$6.76 & 1{,}481 \\
-DeepSeek v4 Pro & \$2.10 & 8{,}013.3 / 10{,}300 & 77.8\% & 84.9\% & \$71.82 & \$8.96 & 3{,}363 \\
-DeepSeek v4 Flash & \$4.20 & 7{,}610.0 / 10{,}300 & 73.9\% & 81.7\% & \$39.29 & \$5.16 & 4{,}938 \\
-DeepSeek v4 Flash & \$2.10 & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & \$43.50 & \$5.79 & 4{,}450 \\
+Claude Opus 4.8 & \$2.10 & \textbf{9{,}666.7 / 10{,}300} & \textbf{93.9\%} & 96.8\% & 2/93 & \$28.80 & \textbf{\$2.98} & 603 \\
+GPT-5.6 Terra & \$2.10 & 9{,}485.0 / 10{,}300 & 92.1\% & 95.7\% & 0/93 & \$33.66 & \$3.55 & 1{,}567 \\
+GPT-5.6 Sol & \$2.10 & 9{,}416.7 / 10{,}300 & 91.4\% & \textbf{97.8\%} & 0/93 & \$44.29 & \$4.70 & 1{,}357 \\
+Claude Fable 5 & \$2.10 & 9{,}108.3 / 10{,}300 & 88.4\% & 95.7\% & 5/93 & \$32.04 & \$3.52 & \textbf{309} \\
+GPT-5.6 Luna & \$2.10 & 8{,}625.0 / 10{,}300 & 83.7\% & 93.5\% & 0/93 & \$29.66 & \$3.44 & 1{,}867 \\
+GPT-5.5 (high effort) & \$2.10 & 8{,}383.3 / 10{,}300 & 81.4\% & 91.4\% & 0/93 & \$64.57 & \$7.70 & 1{,}580 \\
+GPT-5.5 & \$2.10 & 8{,}345.0 / 10{,}300 & 81.0\% & 90.3\% & 0/93 & \$56.42 & \$6.76 & 1{,}481 \\
+DeepSeek v4 Pro & \$2.10 & 8{,}013.3 / 10{,}300 & 77.8\% & 84.9\% & 0/93 & \$71.82 & \$8.96 & 3{,}363 \\
+DeepSeek v4 Flash & \$4.20 & 7{,}610.0 / 10{,}300 & 73.9\% & 81.7\% & 0/93 & \$39.29 & \$5.16 & 4{,}938 \\
+DeepSeek v4 Flash & \$2.10 & 7{,}518.3 / 10{,}300 & 73.0\% & 82.8\% & 0/93 & \$43.50 & \$5.79 & 4{,}450 \\
 \bottomrule
 \end{tabular}}
 \end{table}
