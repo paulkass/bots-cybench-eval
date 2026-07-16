@@ -16,6 +16,7 @@
 
 # Generated paper outputs
 *.pdf
+paper-arxiv.zip
 
 # Editor/OS noise
 .DS_Store
