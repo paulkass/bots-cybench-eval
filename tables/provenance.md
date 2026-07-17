@@ -2,7 +2,7 @@
 
 Companion provenance for `paper.tex`. This file preserves source mapping for quantitative claims without copying raw logs into the paper. Source-of-truth artifacts live in a separate source evaluation repository, referenced below as `source-eval-repo/`. Raw `.eval` logs should not be copied into this paper repository or submitted as artifacts without a separate sanitization pass.
 
-Audit state when this note was updated: paper repository branch `main`; latest GPT-5.6/Fable source results from clean source branch `worktree-gpt56-evals` at `0a630e4` (`Track Fable and refusals in eval charts`). Earlier paper rows retain their previously audited source artifacts.
+Audit state when this note was updated: paper repository branch `main`; latest decontamination results from clean source branch `worktree-gpt56-evals` at `b769542` (`Chart expanded decontamination results`). Earlier paper rows retain their previously audited source artifacts.
 
 ## Source artifacts inspected
 
@@ -25,6 +25,7 @@ Audit state when this note was updated: paper repository branch `main`; latest G
 - `source-eval-repo/charts/botsv1_tool_calls.png`
 - `source-eval-repo/charts/botsv1_decontamination.csv`
 - `source-eval-repo/charts/botsv1_decontamination.md`
+- `source-eval-repo/charts/make_botsv1_decontamination.py`
 - `source-eval-repo/charts/make_report.py`
 - `source-eval-repo/charts/make_botsv1_report.py`
 - `source-eval-repo/charts/botsv1_tool_costs.py`
@@ -165,10 +166,10 @@ Source table/chart: `source-eval-repo/charts/botsv1_decontamination.csv`, `sourc
 | GPT-5.5 full agent + tools | `logs/2026-06-14T21-12-20-00-00_botsv_6cHBshKy4Xxt82no2geqK3.eval` | Charted 3-epoch baseline: 8,345/10,300 points (81.0%), 90.3% binary accuracy, 1,481 non-submit tool events. |
 | GPT-5.5 no tools, `prereq_context=true` | `logs/2026-06-23T22-21-31-00-00_botsv_hRdzhJdiadJDPZs8SaC5ie.eval` | Single epoch memory-only probe: 6,400/10,300 points (62.1%), 74.2% binary accuracy, 0 tool events, `$0.4553` model cost. |
 | GPT-5.5 no tools, `prereq_context=false` | `logs/2026-06-23T22-43-04-00-00_botsv_NaJvXYaArgXZEXFgKjiKAV.eval` | Single epoch memory-only probe: 5,650/10,300 points (54.9%), 71.0% binary accuracy, 0 tool events, `$0.6940` model cost. |
+| GPT-5.6 Luna no tools, `prereq_context=true` / `false` | `logs/2026-07-17T04-22-27-00-00_botsv_CQ4fUot8Ws3AQo7XZdy2cz.eval`; `logs/2026-07-17T05-55-04-00-00_botsv_HiUbvL2CYAbZAmSBhFKrUH.eval` | 1,950 (18.9%) / 1,350 (13.1%) points; 22.6% / 12.9% binary; 0 non-submit tool events. |
+| GPT-5.6 Terra no tools, `prereq_context=true` / `false` | `logs/2026-07-17T05-55-04-00-00_botsv_PJ6FcFYHuq8qKgpaiCLRCn.eval`; `logs/2026-07-17T06-24-56-00-00_botsv_WwQZfo3EHGuV6XogqBnocP.eval` | 4,050 (39.3%) / 1,900 (18.4%) points; 38.7% / 19.4% binary; 0 non-submit tool events. |
+| GPT-5.6 Sol no tools, `prereq_context=true` / `false` | `logs/2026-07-17T06-24-56-00-00_botsv_FdtZ2uSRzqV8HS5bPZJ3Ey.eval`; `logs/2026-07-17T06-54-08-00-00_botsv_EjSUdRbqiy3Jm7sxyoUw93.eval` | 7,950 (77.2%) / 5,200 (50.5%) points; 83.9% / 67.7% binary; 0 non-submit tool events. |
+| Claude Fable 5 no tools, `prereq_context=true` / `false` | `logs/2026-07-17T06-54-07-00-00_botsv_BmNoeCD4L8fnZUMqbDcmBr.eval`; `logs/2026-07-17T07-22-40-00-00_botsv_JGpXGVV5nSmxq2HErbKNUG.eval` | 2,050 (19.9%) / 1,500 (14.6%) points; 38.7% / 29.0% binary; 0 non-submit tool events. |
 | DeepSeek v4 Flash no-tools attempts | `logs/2026-06-23T23-02-47-00-00_botsv_czbzdhrvvc4M5ScvGAem9B.eval`, `logs/2026-06-23T23-09-56-00-00_botsv_Ceycej2VdhBaq4xz5oftMU.eval` | Blocked before scored samples by OpenRouter `401 User not found`; omitted from chart rather than scored as zero. |
 
-The no-tools solver registers no Splunk, web, bash, Python, or other tools. `prereq_context=true` appends official prerequisite question/answer context for dependent questions; `false` uses only the official question text. These probes support the claim that BOTSv1 absolute scores are contaminated by public-answer memorization or leakage.
-
-## Additional experiment recommendation
-
-No additional experiments are currently planned. Existing Cybench and BOTSv1 logs support the uncertainty, paired-contrast, prerequisite-context, hint/miss-loss, and Claude Opus 4.8 Cybench checks summarized in the `paper.tex` appendix. If future experiments are explicitly approved, keep them to Cybench or BOTSv1 and run them through Inspect under the applicable operational constraints. The highest-value conditional follow-ups are a BOTSv1 contamination probe (answer-before-query audit or perturbed questions) or a `prereq_context=false` ablation for the top model.
+The no-tools solver registers no Splunk, web, bash, Python, or other tools. `prereq_context=true` appends official prerequisite question/answer context for dependent questions; `false` uses only the official question text. Scores show a model-dependent direct answer-recovery signal; they do not identify whether the mechanism is memorization, training-data leakage, prior knowledge, or inference from the prompt.

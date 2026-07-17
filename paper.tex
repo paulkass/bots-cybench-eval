@@ -115,7 +115,7 @@ Our contributions are as follows:
   \item A cost-success comparison of shared Cybench and BOTS v1 model operating points using a common harness;
   \item A paired budget-headroom analysis showing where additional per-sample spend changes observed scores;
   \item Model-token plus priced-tool cost accounting for SOC investigation, including cost per 1,000 BOTS points;
-  \item BOTS v1 no-tools controls showing that public SOC benchmarks require decontamination checks before absolute scores are interpreted as live investigation skill.
+  \item No-tools controls showing substantial model-dependent direct answer recovery on public BOTS v1 and therefore the need for decontamination checks before interpreting absolute scores.
 \end{itemize}
 
 \begin{figure}[t!]
@@ -358,48 +358,48 @@ On Cybench, policy gating instead dominates the lower GPT-5.6 and Fable results:
 
 These full-agent scores should be interpreted alongside the contamination controls in Section~\ref{sec:bots-contamination}, not as a clean public leaderboard.
 
-\section{BOTS v1 Contamination Controls}
+\section{Decontamination Controls}
 \label{sec:bots-contamination}
 
-BOTS v1 is valuable because it supplies realistic Splunk data and official scoring, however it is also public and old.
-We therefore include a no-tools probe as a contamination control.
-The no-tools condition provides no Splunk, web, bash, Python, or other tools; it asks the model to answer from the question text, optional prerequisite context, and prior knowledge only.
+\subsection{BOTS v1}
+BOTS v1 is valuable because it supplies realistic Splunk data and official scoring, but it is also public and old.
+We therefore run single-epoch no-tools probes that provide no Splunk, web, bash, Python, or other tools and ask the model to answer from the question text, optional official prerequisite Q\&A, and prior knowledge only.
 
-We find the results too high to treat absolute BOTS v1 scores as clean evidence of live investigation skill.
-With prerequisite context enabled, Claude Opus 4.8 scores 7,700/10,300 points (74.8\%) and GPT-5.5 scores 6,400/10,300 (62.1\%) with zero tool events.
-With prerequisite context disabled, Claude still scores 5,150 points (50.0\%) and GPT-5.5 scores 5,650 points (54.9\%).
-These controls do not make BOTS useless; they make decontamination controls mandatory.
-No-tools, no-context, perturbed-question, answer-before-query, private-holdout, or fresh-incident checks should accompany any public SOC benchmark before absolute scores are interpreted as capability evidence.
-BOTS remains useful as a reproducible harness and cost-accounting testbed; it should not be used as a clean leaderboard by itself.
+The expanded results are strongly model-dependent.
+Without prerequisite context, GPT-5.6 Sol scores 5,200/10,300 points (50.5\%), GPT-5.5 scores 54.9\%, and Claude Opus 4.8 scores 50.0\%, all with zero non-submit tool events.
+By contrast, GPT-5.6 Luna, Terra, and Claude Fable 5 score 13.1\%, 18.4\%, and 14.6\%, respectively.
+Official prerequisite Q\&A raises every no-tools score, most sharply for Sol (50.5\% to 77.2\%) and Claude Opus 4.8 (50.0\% to 74.8\%).
+This spread argues against treating the probe as a uniform task-easiness correction: prompt-only answer recovery varies substantially by model and context, consistent with benchmark contamination but not diagnostic of its mechanism.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/botsv1_decontamination}
-\caption{BOTS v1 no-tools contamination probe. No-tools rows are single-epoch controls; full-agent baselines are three-epoch mean runs. Only completed no-tools probes are shown.}
+\caption{BOTS v1 no-tools contamination probe. No-tools rows are single-epoch controls with zero non-submit tool events; full-agent baselines are three-epoch mean runs. Prior Q\&A denotes official prerequisite question-answer context.}
 \label{fig:bots-decontamination}
 \end{figure}
 
 \begin{table}[t]
 \centering
-\caption{BOTS v1 no-tools contamination-control results.}
+\caption{BOTS v1 decontamination-control results, scored with \texttt{bots\_points}.}
 \label{tab:bots-no-tools}
 \small
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llrrr@{}}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrr@{}}
 \toprule
-Model & Condition & BOTS score (\%) & Binary acc. & Tool events \\
+Model & Full agent & No tools + prior Q\&A & Question only \\
 \midrule
-Claude Opus 4.8 & full agent + tools & 93.9\% & 96.8\% & 603 \\
-Claude Opus 4.8 & no tools, prereq context & 74.8\% & 77.4\% & 0 \\
-Claude Opus 4.8 & no tools, question only & 50.0\% & 58.1\% & 0 \\
-GPT-5.5 & full agent + tools & 81.0\% & 90.3\% & 1{,}481 \\
-GPT-5.5 & no tools, prereq context & 62.1\% & 74.2\% & 0 \\
-GPT-5.5 & no tools, question only & 54.9\% & 71.0\% & 0 \\
+Claude Opus 4.8 & 93.9\% & 74.8\% & 50.0\% \\
+GPT-5.5 & 81.0\% & 62.1\% & 54.9\% \\
+GPT-5.6 Luna & 83.7\% & 18.9\% & 13.1\% \\
+GPT-5.6 Terra & 92.1\% & 39.3\% & 18.4\% \\
+GPT-5.6 Sol & 91.4\% & 77.2\% & 50.5\% \\
+Claude Fable 5 & 88.4\% & 19.9\% & 14.6\% \\
 \bottomrule
 \end{tabular*}
 \end{table}
 
-The completed no-tools probes contain zero tool events.
-Table~\ref{tab:bots-no-tools} includes only completed probes.
+These controls do not make BOTS useless; they make decontamination controls mandatory.
+No-tools, perturbed-question, answer-before-query, private-holdout, or fresh-incident checks should accompany public SOC benchmarks before absolute scores are interpreted as live investigation skill.
+BOTS remains useful as a reproducible harness and cost-accounting testbed, not as a clean leaderboard by itself.
 
 \section{Scaling Findings}
 \label{sec:scaling-findings}
@@ -499,7 +499,7 @@ Security-agent evaluation should be cost-aware and workflow-specific.
 Offensive CTFs and defensive SOC investigations stress different behaviors and show different scaling patterns.
 We find that more test-time compute can improve CTF success for some frontier/shared models, especially Claude Opus 4.8 and DeepSeek v4 Flash under retrospective caps; the new GPT-5.6 and Fable runs also show that policy refusals can dominate offensive scores.
 We also find that SOC work does not scale with raw budget in the same way; GPT-5.6 Terra and Sol approach the leading Claude Opus 4.8 score, while success still depends on disciplined tool use, telemetry navigation, and selective enrichment.
-Public SOC benchmarks remain valuable, but our no-tools BOTS v1 controls show that their absolute scores require decontamination checks before they are used as capability claims.
+Public SOC benchmarks remain valuable, but the high and model-dependent no-tools BOTS v1 scores show that absolute scores require decontamination checks before they are used as capability claims.
 
 \bibliography{references}
 
@@ -558,6 +558,10 @@ Claude Opus 4.8, no tools, prereq context & 2026-06-23 21:32:08 & Table~\ref{tab
 Claude Opus 4.8, no tools, question only & 2026-06-23 21:51:42 & Table~\ref{tab:bots-no-tools} \\
 GPT-5.5, no tools, prereq context & 2026-06-23 22:21:31 & Table~\ref{tab:bots-no-tools} \\
 GPT-5.5, no tools, question only & 2026-06-23 22:43:04 & Table~\ref{tab:bots-no-tools} \\
+GPT-5.6 Luna, no tools, prior Q\&A / question only & 2026-07-17 04:22:27; 05:55:04 & Table~\ref{tab:bots-no-tools} \\
+GPT-5.6 Terra, no tools, prior Q\&A / question only & 2026-07-17 05:55:04; 06:24:56 & Table~\ref{tab:bots-no-tools} \\
+GPT-5.6 Sol, no tools, prior Q\&A / question only & 2026-07-17 06:24:56; 06:54:08 & Table~\ref{tab:bots-no-tools} \\
+Claude Fable 5, no tools, prior Q\&A / question only & 2026-07-17 06:54:07; 07:22:40 & Table~\ref{tab:bots-no-tools} \\
 \bottomrule
 \end{tabular}
 \end{table}

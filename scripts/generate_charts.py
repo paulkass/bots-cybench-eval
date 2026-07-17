@@ -327,21 +327,22 @@ def tool_calls():
 
 
 def decontamination():
-    models=["Claude Opus 4.8","GPT-5.5"]
-    vals=[[93.9,74.8,50.0],[81.0,62.1,54.9]]
-    labels=["Full agent + tools","No tools + context","No tools, question only"]
+    models=["Opus 4.8","GPT-5.5","GPT-5.6\nLuna","GPT-5.6\nTerra","GPT-5.6\nSol","Fable 5"]
+    vals=np.array([[93.9,74.8,50.0],[81.0,62.1,54.9],[83.7,18.9,13.1],
+                   [92.1,39.3,18.4],[91.4,77.2,50.5],[88.4,19.9,14.6]])
+    labels=["Full agent + tools","No tools + prior Q&A","No tools, question only"]
     colors=[FOREST,OLIVE,LEAF]
-    fig,axs=plt.subplots(1,2,figsize=(7.25,2.55),sharey=True)
-    for i,(ax,model,v) in enumerate(zip(axs,models,vals)):
-        bars=ax.bar(range(3),v,color=colors,width=.62,
-                    hatch=[None, "///", "xxx"], edgecolor=[FOREST, INK, INK], linewidth=.45)
-        ax.bar_label(bars,labels=[f"{x:.1f}%" for x in v],padding=2,fontsize=8)
-        style(ax,"", "BOTS points (%)" if i==0 else "")
-        ax.set_xticks([]); ax.text(.5,-.12,model,transform=ax.transAxes,ha="center",weight="bold")
-    fig.legend([mpl.patches.Patch(facecolor=c, hatch=h, edgecolor=INK, linewidth=.45)
-                for c,h in zip(colors,[None,"///","xxx"])],labels,
-               loc="lower center",ncol=3,fontsize=7.8,**LEGEND_BOX)
-    fig.subplots_adjust(left=.09,right=.99,top=.93,bottom=.30,wspace=.16)
+    hatches=[None,"///","xxx"]
+    x=np.arange(len(models)); width=.25
+    fig,ax=plt.subplots(figsize=(7.25,2.7))
+    for i,(label,color,hatch) in enumerate(zip(labels,colors,hatches)):
+        bars=ax.bar(x+(i-1)*width,vals[:,i],width,label=label,color=color,
+                    hatch=hatch,edgecolor=INK,linewidth=.45)
+        ax.bar_label(bars,labels=[f"{v:.1f}" for v in vals[:,i]],padding=2,fontsize=6.5)
+    style(ax,"","BOTS points (%)")
+    ax.set_ylim(0,105); ax.set_xticks(x,models,fontsize=7.4)
+    ax.legend(loc="lower center",bbox_to_anchor=(.5,-.34),ncol=3,fontsize=7.4,**LEGEND_BOX)
+    fig.subplots_adjust(left=.085,right=.995,top=.95,bottom=.30)
     finish(fig,"botsv1_decontamination")
 
 
