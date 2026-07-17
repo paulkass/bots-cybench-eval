@@ -234,10 +234,10 @@ def main_results():
     labels = original + ["GPT-5.6 Sol", "GPT-5.6 Luna", "Fable 5"]
     scaling_figure("main_results_chart", [
       dict(crop=(117,27,1037,477), series=dict(zip(original,["blue","orange","green"])),
-           extra=additions["cybench_cost"], xlabel="Per-sample cost budget (USD)",
+           extra=additions["cybench_cost"], xlabel="Cybench: per-sample cost budget (USD)",
            ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,7)),
       dict(crop=(1207,27,2128,477), series=dict(zip(original,["blue","orange","green"])),
-           extra=additions["botsv1_tool_calls"], xlabel="Non-submit tool-call cap",
+           extra=additions["botsv1_tool_calls"], xlabel="BOTS v1: non-submit tool-call cap",
            ylabel="Answers correct (%)", log=False, xscale="symlog",
            xlim=(0,137), plot_xlim=(0,140), xticks=[0, 5, 10, 20, 50, 100, 140]),
     ], labels, (7.25,3.0), headline=True)
