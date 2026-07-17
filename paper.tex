@@ -125,13 +125,15 @@ On Cybench, retrospective budget caps show clear headroom for Claude Opus 4.8 an
 On BOTS v1, extra budget is less predictive: the direct DeepSeek v4 Flash cap increase produces little gain, and high tool volume often accompanies lower scores.
 The defensive signal is therefore not raw reasoning budget alone; it is disciplined tool use, telemetry navigation, and selective enrichment.
 
-Our contributions are as follows:
+\noindent\begin{minipage}{\linewidth}
+\hspace*{\parindent}Our contributions are as follows:
 \begin{itemize}
   \item A cost-success comparison of shared Cybench and BOTS v1 model operating points using a common harness;
   \item A paired budget-headroom analysis showing where additional per-sample spend changes observed scores;
   \item Model-token plus priced-tool cost accounting for SOC investigation, including cost per 1,000 BOTS points;
   \item No-tools controls showing substantial model-dependent direct answer recovery on public BOTS v1 and therefore the need for decontamination checks before interpreting absolute scores.
 \end{itemize}
+\end{minipage}
 
 \section{Related Work}
 \label{sec:related-work}
