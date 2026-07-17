@@ -301,7 +301,7 @@ DeepSeek v4 Flash provides the clearest illustration of cost scaling: replaying 
 
 \begin{table}[t]
 \centering
-\caption{Cybench hard-variant operating points. GPT-5.6 and Fable use high reasoning effort; raw success counts refusals as failures. Refusals are failed sample-epochs over loaded sample-epochs. The DeepSeek v4 Flash \$0.80 row is a retrospective cap; tool calls exclude submits. GPT-5.5 and the successful Luna retry are grouped under the common \$2.10 analysis row although their successful log headers had no prospective cap. The Opus row is the latest July run; the scaling and bootstrap appendix retains its previously audited June run. DeepSeek v4 Pro is normalized to the 39-challenge denominator after one sandbox-initialization failure; its refusal denominator remains the 114 loaded sample-epochs.}
+\caption{Cybench operating points. GPT-5.6 and Fable use \texttt{high} reasoning effort. Refusals are counted as failures. GPT-5.5 had the highest outright success rate while DeepSeke v4 Flash was the most cost-efficient. Notably, frontier models like Claude Fable 5 and GPT-5.6-Sol had strong guardrails preventing them from completing the tasks. But even smaller GPT-5.6 models (Terra and Luna) had weaker guardrails enabling them to stay competitive despite refusals.}
 \label{tab:cybench}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrr}
@@ -332,7 +332,7 @@ DeepSeek v4 Flash supplies the clearest weak budget effect: doubling its cap fro
 
 \begin{table}[t]
 \centering
-\caption{BOTS v1 full-run results, including the latest high-effort GPT-5.6 and Fable runs. BOTS points use \texttt{bots\_points}; model + tools (\$) adds priced Brave Search and WhoisXMLAPI calls. Refusals are affected sample-epochs out of 93 and may coexist with earned points.}
+\caption{BOTS v1 full-run results, including the latest high-effort GPT-5.6 and Fable runs. BOTS points use \texttt{bots\_points}; model + tools (\$) adds priced Brave Search and WhoisXMLAPI calls. "Refusal" columns measure how many sample-epochs out of 93 have been affected by guardrail refusals. Notably, Claude Fable 5 refused to complete a cybersecurity investigate or defensive tasks 5 times out of the 93 sample-epochs. }
 \label{tab:bots}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrrrrrr}
@@ -360,7 +360,7 @@ On Cybench, policy gating instead dominates the lower GPT-5.6 and Fable results:
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/gpt56_comparison_with_refusals}
-\caption{Performance and policy refusals for the GPT-5.6-focused comparison. Hatched segments show refusal events in both panels. Left: BOTS v1 refusal rates overlay the performance bars because affected sample-epochs may still earn points when a later attempt succeeds. Right: Cybench refusal outcomes are failures and therefore stack beyond, rather than overlap, solved share.}
+\caption{Performance and policy refusals for the GPT-5.6-focused comparison. Hatched segments show refusal events in both panels. \textbf{Left:} BOTS v1 refusal rates overlay the performance bars because affected sample-epochs may still earn points when a later attempt succeeds. \textbf{Right:} Cybench refusal outcomes are failures and therefore stack beyond, rather than overlap, solved share.}
 \label{fig:gpt56-refusals}
 \end{figure}
 
@@ -426,7 +426,8 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/cybench_scaling_panels}
-\caption{Cybench scaling curves for the previously audited model subset. Left: success versus retrospective per-sample cost budget (USD, log scale). Right: success versus cumulative tokens (input, output, cached, and reasoning). Success keeps rising toward the run limits: extra compute buys additional solves, most visibly for DeepSeek v4 Flash and Claude Opus 4.8, while GPT-5.5 solves most challenges at low per-sample spend.}
+\caption{Cybench scaling curves for the previously audited model subset. 
+\textbf{Left:} success versus retrospective per-sample cost budget (USD, log scale). \textbf{Right:} success versus cumulative tokens (input, output, cached, and reasoning). Success keeps rising toward the run limits: extra compute buys additional solves, most visibly for DeepSeek v4 Flash and Claude Opus 4.8, while GPT-5.5 solves most challenges at low per-sample spend.}
 \label{fig:cybench-scaling-panels}
 \end{figure}
 
@@ -440,7 +441,7 @@ Figure~\ref{fig:tool-call-scaling-panels} separately compares tool-call scaling 
 \begin{figure}[t]
 \centering
 \widepaperfig{figures/tool_call_scaling_panels}
-\caption{Tool-call scaling: success at cap $x$ counts a sample-epoch only if it succeeded within $x$ non-submit tool calls. Top: Cybench success on a linear 0--120-call axis, with the inset continuing the DeepSeek v4 Flash trajectory over the 120--930-call long tail; most models saturate within ${\sim}50$ calls, but DeepSeek v4 Flash keeps extracting solves past 800 --- on offense, interaction volume can substitute for per-call quality. Bottom: BOTS v1 binary accuracy; the ordering inverts, with Claude Opus 4.8 highest at the fewest calls and the DeepSeek runs plateauing lower despite several times more. High tool volume is not a proxy for defensive score.}
+\caption{Tool-call scaling: success at cap $x$ counts a sample-epoch only if it succeeded within $x$ non-submit tool calls. \textbf{Top:} Cybench success on a linear 0--120-call axis, with the inset continuing the DeepSeek v4 Flash trajectory over the 120--930-call long tail; most models saturate within ${\sim}50$ calls, but DeepSeek v4 Flash keeps extracting solves past 800 --- on offense, interaction volume can substitute for per-call quality. \textbf{Bottom:} BOTS v1 binary accuracy; the ordering inverts, with Claude Opus 4.8 highest at the fewest calls and the DeepSeek runs plateauing lower despite invoking more tools. High tool volume is not a proxy for defensive score.}
 \label{fig:tool-call-scaling-panels}
 \end{figure}
 
@@ -489,7 +490,7 @@ The bootstrap intervals in Appendix~\ref{app:uncertainty} are descriptive robust
 
 Our defensive analysis covers only the 31 scored BOTS v1 Po1s0n1vy/Cerber questions, after excluding the official warm-up, and uses a public Splunk dataset.
 BOTS v2 and v3 extend v1: v2 covers a 51-question Frothly enterprise intrusion with a much larger endpoint, network, email, and web dataset, while v3 uses a 58-question cloud-heavy Frothly scenario spanning AWS CloudTrail, osquery, Windows, and network telemetry.
-Comparable multi-model results for these later versions are not yet available, so extending the same cost-aware analysis to BOTS v2 and v3 is future work.
+Comparable multi-model results for these later versions are not yet available, so extending the same cost-aware analysis to BOTS v2 and v3 is in scope for future work.
 We therefore present the SOC conclusion as an evaluation-design result rather than a final claim about production SOC readiness.
 
 \section{Artifact and Ethical Considerations}
