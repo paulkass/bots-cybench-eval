@@ -23,7 +23,7 @@ MUTED, RULE, WASH = "#606A63", "#C9D0C8", "#F2F5EA"
 # Model families use distinct hues; variants stay recognizable by shade.
 ANTHROPIC = {"opus48": FOREST, "opus47": LEAF, "fable": "#3F8A5B"}
 OPENAI = {"gpt55": "#A65A00", "gpt55_high": "#C77700",
-          "sol": "#E69F00", "luna": "#7F4500"}
+          "sol": "#E69F00", "terra": "#D17F22", "luna": "#7F4500"}
 DEEPSEEK = {"flash": "#2563A8", "flash_high": "#5B8DB8", "pro": "#174A7A"}
 KIMI = "#7A5195"
 TAB = {"blue": (31,119,180), "orange": (255,127,14), "green": (44,160,44),
@@ -32,7 +32,8 @@ TAB = {"blue": (31,119,180), "orange": (255,127,14), "green": (44,160,44),
 COLORS = {"Opus 4.8": ANTHROPIC["opus48"], "Opus 4.7": ANTHROPIC["opus47"],
           "Fable 5": ANTHROPIC["fable"], "GPT-5.5": OPENAI["gpt55"],
           "GPT-5.5 high": OPENAI["gpt55_high"], "GPT-5.6 Sol": OPENAI["sol"],
-          "GPT-5.6 Luna": OPENAI["luna"], "DeepSeek Flash": DEEPSEEK["flash"],
+          "GPT-5.6 Terra": OPENAI["terra"], "GPT-5.6 Luna": OPENAI["luna"],
+          "DeepSeek Flash": DEEPSEEK["flash"],
           "DeepSeek Flash $4.20": DEEPSEEK["flash_high"],
           "DeepSeek Pro": DEEPSEEK["pro"], "Kimi K2.6": KIMI}
 DISPLAY = {"Opus 4.8": "Claude Opus 4.8", "Opus 4.7": "Claude Opus 4.7",
@@ -340,17 +341,21 @@ def decontamination():
     vals=np.array([[93.9,74.8,50.0],[81.0,62.1,54.9],[83.7,18.9,13.1],
                    [92.1,39.3,18.4],[91.4,77.2,50.5],[88.4,19.9,14.6]])
     labels=["Full agent + tools","No tools + prior Q&A","No tools, question only"]
-    colors=[FOREST,OLIVE,LEAF]
     hatches=[None,"///","xxx"]
+    model_colors=[COLORS[key] for key in
+                  ["Opus 4.8","GPT-5.5","GPT-5.6 Luna","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5"]]
     x=np.arange(len(models)); width=.25
     fig,ax=plt.subplots(figsize=(7.25,2.7))
-    for i,(label,color,hatch) in enumerate(zip(labels,colors,hatches)):
-        bars=ax.bar(x+(i-1)*width,vals[:,i],width,label=label,color=color,
+    for i,hatch in enumerate(hatches):
+        bars=ax.bar(x+(i-1)*width,vals[:,i],width,color=model_colors,
                     hatch=hatch,edgecolor=INK,linewidth=.45)
         ax.bar_label(bars,labels=[f"{v:.1f}" for v in vals[:,i]],padding=2,fontsize=6.5)
     style(ax,"","BOTS points (%)")
     ax.set_ylim(0,105); ax.set_xticks(x,models,fontsize=7.4)
-    ax.legend(loc="lower center",bbox_to_anchor=(.5,-.34),ncol=3,fontsize=7.4,**LEGEND_BOX)
+    condition_handles=[mpl.patches.Patch(facecolor=MUTED,hatch=hatch,
+                       edgecolor=INK,label=label) for label,hatch in zip(labels,hatches)]
+    ax.legend(handles=condition_handles,loc="lower center",bbox_to_anchor=(.5,-.34),
+              ncol=3,fontsize=7.4,**LEGEND_BOX)
     fig.subplots_adjust(left=.085,right=.995,top=.95,bottom=.30)
     finish(fig,"botsv1_decontamination")
 
@@ -366,12 +371,13 @@ def refusals():
     ]
     fig,axs=plt.subplots(1,2,figsize=(7.25,3.05))
     for i,(ax,(bench,names,perf,ref,counts)) in enumerate(zip(axs,groups)):
-        y=np.arange(len(names)); ax.barh(y,perf,color=FOREST,height=.56)
+        y=np.arange(len(names)); model_colors=[COLORS[name] for name in names]
+        ax.barh(y,perf,color=model_colors,height=.56)
         rates = np.asarray(ref)
         # BOTS v1 refusal events can coexist with earned points, so overlay the
         # hatch within the performance bar; Cybench refusals remain stacked failures.
         left = np.maximum(np.asarray(perf)-rates, 0) if bench == "BOTS v1" else perf
-        ax.barh(y,rates,left=left,color=OLIVE,height=.56,hatch="///",
+        ax.barh(y,rates,left=left,color=model_colors,height=.56,hatch="///",
                 edgecolor="white",linewidth=.3)
         ax.set(yticks=y,yticklabels=names,
                xlim=(0,100 if bench == "BOTS v1" else 118),
@@ -388,9 +394,9 @@ def refusals():
             else:
                 ax.text(101.5,yi,f"{p:.1f}% · ref {count}",va="center",
                         fontsize=7.4,color=MUTED)
-    fig.legend([mpl.patches.Patch(color=FOREST),
-                mpl.patches.Patch(facecolor=OLIVE,hatch="///")],
-               ["Performance","Refusal events"],
+    fig.legend([mpl.patches.Patch(color=MUTED),
+                mpl.patches.Patch(facecolor=MUTED,hatch="///")],
+               ["Completed Challenges","Refused Challenges"],
                loc="lower center",ncol=3,fontsize=7.5,**LEGEND_BOX)
     fig.subplots_adjust(left=.14,right=.995,top=.92,bottom=.22,wspace=.36)
     finish(fig,"gpt56_comparison_with_refusals")
