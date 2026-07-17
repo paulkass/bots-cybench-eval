@@ -78,7 +78,7 @@ Our results show distinct scaling regimes for red- and blue-team tasks.
 Offensive CTF performance improves with additional test-time compute, and scaled open-weight models can approach frontier proprietary systems while remaining cost-competitive.
 Defensive SOC investigation does not scale in the same way: success depends more heavily on disciplined tool use, telemetry navigation, and selective enrichment than on raw reasoning budget alone.
 We argue that security-agent benchmarks should measure economic efficiency and operational fit alongside task success.
-Cost-aware, SOC-native evaluations provide a clearer picture of which models are practically useful today and where defensive agents still need to improve. We present an interactive website with our results \href{https://evals.frontier.security}{https://evals.frontier.security}.
+Cost-aware, SOC-native evaluations provide a clearer picture of which models are practically useful today and where defensive agents still need to improve. We present an interactive website with our results as \href{https://evals.frontier.security}{https://evals.frontier.security}.
 \end{abstract}
 
 \begin{keywords}
@@ -98,7 +98,8 @@ cybersecurity benchmarks, AI agents, security operations centers, Cybench, BOTS,
 Security-agent evaluations often ask how far a model can go when it is given a generous inference budget and an offensive task: solve a CTF, find a vulnerability, write an exploit, or automate a penetration-testing step.
 Recent Claude Mythos Preview evaluations exemplify this regime, combining CTF suites, multi-step cyber ranges, and vulnerability-discovery/exploit-development evaluations with million-token budgets and attacker-directed execution access \citep{aisi2026mythos,anthropic2026mythos}.
 Those measurements are useful because they track capabilities that attackers can use.
-They are incomplete because operational security is not a peak-capability exercise.
+However, they are incomplete because operational security is not a peak-capability exercise.
+Measuring capability at a cost limit is much more indicative of how these measurements can be valuable in production systems.
 A security operations center (SOC) needs agents that can navigate telemetry, choose searches, decide when enrichment is worth paying for, and return analyst-grade answers under a budget.
 
 We therefore make cost the common axis for comparing offensive and defensive security agents.
