@@ -20,16 +20,21 @@ OUT, SRC = ROOT / "figures", Path(__file__).with_name("chart_sources")
 FONT = "/usr/share/texmf/fonts/opentype/public/lm/lmsans10-regular.otf"
 FOREST, LEAF, OLIVE, INK = "#1F5137", "#567461", "#6E711C", "#151A16"
 MUTED, RULE, WASH = "#606A63", "#C9D0C8", "#F2F5EA"
-BLUE, RUST, PURPLE = "#2563A8", "#A64B35", "#756187"
-SOL, FABLE, LUNA = "#7A5AF8", "#C24164", "#D97706"
+# Model families use distinct hues; variants stay recognizable by shade.
+ANTHROPIC = {"opus48": FOREST, "opus47": LEAF, "fable": "#3F8A5B"}
+OPENAI = {"gpt55": "#A65A00", "gpt55_high": "#C77700",
+          "sol": "#E69F00", "luna": "#7F4500"}
+DEEPSEEK = {"flash": "#2563A8", "flash_high": "#5B8DB8", "pro": "#174A7A"}
+KIMI = "#7A5195"
 TAB = {"blue": (31,119,180), "orange": (255,127,14), "green": (44,160,44),
        "red": (214,39,40), "purple": (148,103,189), "brown": (140,86,75),
        "pink": (227,119,194)}
-COLORS = {"Opus 4.8": FOREST, "Opus 4.7": LEAF, "GPT-5.5": OLIVE,
-          "GPT-5.5 high": "#A17818", "DeepSeek Flash": BLUE,
-          "DeepSeek Flash $4.20": "#4E7F9F", "DeepSeek Pro": RUST,
-          "Kimi K2.6": PURPLE, "GPT-5.6 Sol": SOL,
-          "GPT-5.6 Luna": LUNA, "Fable 5": FABLE}
+COLORS = {"Opus 4.8": ANTHROPIC["opus48"], "Opus 4.7": ANTHROPIC["opus47"],
+          "Fable 5": ANTHROPIC["fable"], "GPT-5.5": OPENAI["gpt55"],
+          "GPT-5.5 high": OPENAI["gpt55_high"], "GPT-5.6 Sol": OPENAI["sol"],
+          "GPT-5.6 Luna": OPENAI["luna"], "DeepSeek Flash": DEEPSEEK["flash"],
+          "DeepSeek Flash $4.20": DEEPSEEK["flash_high"],
+          "DeepSeek Pro": DEEPSEEK["pro"], "Kimi K2.6": KIMI}
 DISPLAY = {"Opus 4.8": "Claude Opus 4.8", "Opus 4.7": "Claude Opus 4.7",
            "DeepSeek Flash": "DeepSeek v4 Flash",
            "DeepSeek Flash $4.20": "DeepSeek v4 Flash $4.20",
@@ -56,8 +61,7 @@ mpl.rcParams.update({"font.family": "Latin Modern Sans", "font.size": 8.2,
     "axes.labelcolor": INK, "axes.edgecolor": INK, "text.color": INK,
     "xtick.color": MUTED, "ytick.color": MUTED, "axes.linewidth": .65,
     "figure.facecolor": "white", "savefig.facecolor": "white"})
-LEGEND_BOX = {"frameon": True, "fancybox": False, "framealpha": .96,
-              "facecolor": "white", "edgecolor": RULE}
+LEGEND_BOX = {"frameon": False}
 
 
 def finish(fig, name):
@@ -195,8 +199,8 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
             ax.legend([Line2D([0],[0],color=MUTED,lw=1.5),
                        Line2D([0],[0],color=MUTED,lw=1.5,ls=":")],
                       ["Model + priced tools", "Model tokens only"],
-                      loc="upper left", fontsize=7.2, handlelength=2.2,
-                      **LEGEND_BOX)
+                      loc="upper left", fontsize=6.2, handlelength=1.6,
+                      handletextpad=.5, labelspacing=.25, **LEGEND_BOX)
     if headline:
         # Matplotlib fills legend columns top-to-bottom: keep each model family
         # together and pad shorter columns to the GPT family's three rows.
