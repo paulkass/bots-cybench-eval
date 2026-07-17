@@ -43,8 +43,7 @@ HEADLINE_LINESTYLES = {
     "DeepSeek Flash": (0, (3, 1)), "GPT-5.6 Sol": (0, (1, 1)),
     "GPT-5.6 Luna": (0, (5, 1, 1, 1)), "Fable 5": (0, (3, 1, 1, 1)),
 }
-HEADLINE_DISPLAY = {"GPT-5.6 Luna": "GPT-5.6 Luna (Cybench)",
-                    "Fable 5": "Claude Fable 5 (BOTS v1)"}
+HEADLINE_DISPLAY = {"Fable 5": "Claude Fable 5 (BOTS v1)"}
 MODEL_FAMILIES = [
     ["Opus 4.8", "Opus 4.7"],
     ["GPT-5.5", "GPT-5.5 high"],
@@ -199,19 +198,25 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
                       loc="upper left", fontsize=7.2, handlelength=2.2,
                       **LEGEND_BOX)
     if headline:
-        legend_order = ["Opus 4.8", "GPT-5.6 Sol", "GPT-5.5",
-                        "GPT-5.6 Luna", "DeepSeek Flash", "Fable 5"]
-        headline_handles = [
-            Line2D([0], [0], color=COLORS[key], lw=2,
-                   linestyle=HEADLINE_LINESTYLES[key], marker=MARKERS[key],
-                   markersize=4.2, markeredgecolor="white", markeredgewidth=.35,
-                   label=HEADLINE_DISPLAY.get(key, DISPLAY.get(key, key)))
-            for key in legend_order
-        ]
-        fig.legend(headline_handles, [h.get_label() for h in headline_handles],
-                   loc="lower center", ncol=3, frameon=False, fontsize=7.3,
-                   handlelength=2.2, columnspacing=1.35)
-        fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=.29, wspace=.28)
+        # Matplotlib fills legend columns top-to-bottom: keep each model family
+        # together and pad shorter columns to the GPT family's three rows.
+        legend_order = ["Opus 4.8", "Fable 5", None,
+                        "GPT-5.5", "GPT-5.6 Sol", "GPT-5.6 Luna",
+                        "DeepSeek Flash", None, None]
+        headline_handles, headline_labels = [], []
+        for key in legend_order:
+            if key is None:
+                headline_handles.append(Line2D([], [], linestyle="none", alpha=0))
+                headline_labels.append("")
+            else:
+                headline_handles.append(Line2D(
+                    [0], [0], color=COLORS[key], lw=2,
+                    linestyle=HEADLINE_LINESTYLES[key], marker=MARKERS[key],
+                    markersize=4.2, markeredgecolor="white", markeredgewidth=.35))
+                headline_labels.append(HEADLINE_DISPLAY.get(key, DISPLAY.get(key, key)))
+        fig.legend(headline_handles, headline_labels, loc="lower center", ncol=3,
+                   frameon=False, fontsize=7.3, handlelength=2.2, columnspacing=1.35)
+        fig.subplots_adjust(left=.085, right=.99, top=.98, bottom=.34, wspace=.28)
     else:
         legend_handles, legend_labels, columns, rows = family_legend(labels)
         legend_position = {"bbox_to_anchor": (.5, -.03)} if clean else {}
