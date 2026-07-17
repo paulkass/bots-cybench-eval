@@ -97,7 +97,7 @@ cybersecurity benchmarks, AI agents, security operations centers, Cybench, BOTS,
 \begin{figure}[t!]
 \centering
 \widepaperfig{figures/main_results_chart}
-\caption{Resource scaling for five models on Cybench and six on BOTS v1. \textbf{Left:} Cybench success versus a retrospective per-sample cost budget: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{Right:} BOTS v1 binary answer accuracy versus a per-sample cap on non-submit tool calls, shown on a symmetric-log axis. Claude Fable 5 appears only  BOTS v1 due to refusals on Cybench. These GPT-5.6 and Fable runs use \texttt{high} reasoning effort. Offensive success climbs steadily with spend, while defensively the strongest models are near-maximal within ${\sim}20$ tool calls. DeepSeek v4 Flash needs over 100 to plateau lower --- defense tracks tool discipline, not volume.}
+\caption{Resource scaling for various models on Cybench and BOTS v1. \textbf{Left:} Cybench success rate versus a per-sample cost budget cap: a challenge counts as solved at budget $x$ only if its model-token spend was at most $x$. \textbf{Right:} BOTS v1 binary answer accuracy versus a per-sample cap on tool calls, shown on a symmetric-log axis. Claude Fable 5 appears only BOTS v1 due to refusals on Cybench. These GPT-5.6 and Fable runs use \texttt{high} reasoning effort. Offensive success climbs steadily with spend, while defensively the strongest models are near-maximal within ${\sim}20$ tool calls. Notably, DeepSeek v4 Flash does over 100 tool-calls to plateau lower --- defense tracks tool discipline, not volume.}
 \label{fig:main-results-chart}
 \end{figure}
 
