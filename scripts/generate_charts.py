@@ -141,15 +141,16 @@ def marker_points(x, y, count=6):
 
 
 def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False, clean=False):
+    source_name = name.removesuffix("_social")
     fig, axes = plt.subplots(1, 2, figsize=figsize)
     for ax, p in zip(axes, panels):
-        cloud = digitized(name, p["crop"], p["series"])
+        cloud = digitized(source_name, p["crop"], p["series"])
         # BOTS v1's cost panel also contains alpha=.38 dotted model-token-only
         # companions. Faded antialias pixels from the solid paths have the same
         # composite color, so retain only reference pixels visibly above the
         # nearby solid trajectory (the token-only budget is never larger).
         if p.get("reference"):
-            reference = digitized(name, p["crop"], p["series"], source_alpha=.38)
+            reference = digitized(source_name, p["crop"], p["series"], source_alpha=.38)
             for key, (u, y) in reference.items():
                 solid_u, solid_y = cloud[key]
                 bins = np.rint(solid_u * 1000).astype(int)
@@ -233,11 +234,11 @@ def scaling_figure(name, panels, labels, figsize=(7.25, 3.05), *, headline=False
     finish(fig, name)
 
 
-def main_results():
+def main_results(social=False):
     original = ["Opus 4.8", "GPT-5.5", "DeepSeek Flash"]
     additions = json.loads((SRC / "main_results_additions.json").read_text())
     labels = original + ["GPT-5.6 Sol", "GPT-5.6 Luna", "Fable 5"]
-    scaling_figure("main_results_chart", [
+    scaling_figure("main_results_chart" + ("_social" if social else ""), [
       dict(crop=(117,27,1037,477), series=dict(zip(original,["blue","orange","green"])),
            extra=additions["cybench_cost"], xlabel="Cybench: per-sample cost budget (USD)",
            ylabel="Challenges solved (%)", log=True, xlim=(4e-4,5), plot_xlim=(4e-4,7)),
@@ -248,7 +249,7 @@ def main_results():
     ], labels, (7.25,3.0), headline=True)
 
 
-def cybench():
+def cybench(social=False):
     labels=["GPT-5.5","DeepSeek Flash","Kimi K2.6","DeepSeek Pro","Opus 4.7","Opus 4.8"]
     src=["orange","blue","brown","pink","purple","red"]
     panels=[]
@@ -258,10 +259,11 @@ def cybench():
     for crop,xlabel,xlim,plot_xlim in [
       ((63,47,1518,490),"Per-sample cost budget (USD)",(3.03e-4,3.91),None),
       ((1772,47,3194,490),"Cumulative tokens",(1.46e3,1.83e9),(1.4e3,1.2e9))]:
-        panels.append(dict(crop=crop,series=dict(zip(labels,src)),xlabel=xlabel,
-                           ylabel="Cybench solved (%)" if not panels else "",log=True,xlim=xlim,
+        panels.append(dict(crop=crop,series=dict(zip(labels,src)),
+                           xlabel=f"Cybench: {xlabel}" if social else xlabel,
+                           ylabel="Cybench solved (%)" if social or not panels else "",log=True,xlim=xlim,
                            **({"plot_xlim":plot_xlim} if plot_xlim else {})))
-    scaling_figure("cybench_scaling_panels",panels,labels,clean=True)
+    scaling_figure("cybench_scaling_panels" + ("_social" if social else ""),panels,labels,clean=True)
 
 
 def bots():
@@ -273,7 +275,7 @@ def bots():
     ],labels)
 
 
-def tool_calls():
+def tool_calls(social=False):
     left = ["GPT-5.5", "Kimi K2.6", "DeepSeek Pro", "DeepSeek Flash", "Opus 4.8"]
     right = ["Opus 4.8", "GPT-5.5", "GPT-5.5 high", "DeepSeek Pro",
              "DeepSeek Flash", "DeepSeek Flash $4.20"]
@@ -321,7 +323,8 @@ def tool_calls():
     mx, my = marker_points(ux, uy, count=3)
     inset.plot(mx, my, linestyle="none", marker=MARKERS[key], markersize=3.2,
                color=COLORS[key], markeredgecolor="white", markeredgewidth=.35)
-    inset.set(xlim=(120, 930), ylim=(45, 89), title="DeepSeek v4 Flash\n120–930 calls",
+    inset.set(xlim=(120, 930), ylim=(45, 89),
+              title=("Cybench: " if social else "") + "DeepSeek v4 Flash\n120–930 calls",
               xlabel="Tool-call cap")
     inset.set_xticks([120, 500, 900]); inset.set_yticks([50, 70, 85])
     inset.grid(axis="y", color=RULE, linewidth=.45, alpha=.75)
@@ -333,10 +336,10 @@ def tool_calls():
     fig.legend(legend_handles, legend_labels, loc="lower center", ncol=columns,
                handlelength=1.8, columnspacing=1.2, fontsize=7.6, **LEGEND_BOX)
     fig.subplots_adjust(left=.085, right=.99, top=.95, bottom=.22)
-    finish(fig, "tool_call_scaling_panels")
+    finish(fig, "tool_call_scaling_panels" + ("_social" if social else ""))
 
 
-def decontamination():
+def decontamination(social=False):
     models=["Opus 4.8","GPT-5.5","GPT-5.6\nLuna","GPT-5.6\nTerra","GPT-5.6\nSol","Fable 5"]
     vals=np.array([[93.9,74.8,50.0],[81.0,62.1,54.9],[83.7,18.9,13.1],
                    [92.1,39.3,18.4],[91.4,77.2,50.5],[88.4,19.9,14.6]])
@@ -350,17 +353,17 @@ def decontamination():
         bars=ax.bar(x+(i-1)*width,vals[:,i],width,color=model_colors,
                     hatch=hatch,edgecolor=INK,linewidth=.45)
         ax.bar_label(bars,labels=[f"{v:.1f}" for v in vals[:,i]],padding=2,fontsize=6.5)
-    style(ax,"","BOTS points (%)")
+    style(ax,"","BOTS v1 points (%)" if social else "BOTS points (%)")
     ax.set_ylim(0,105); ax.set_xticks(x,models,fontsize=7.4)
     condition_handles=[mpl.patches.Patch(facecolor=MUTED,hatch=hatch,
                        edgecolor=INK,label=label) for label,hatch in zip(labels,hatches)]
     ax.legend(handles=condition_handles,loc="lower center",bbox_to_anchor=(.5,-.34),
               ncol=3,fontsize=7.4,**LEGEND_BOX)
     fig.subplots_adjust(left=.085,right=.995,top=.95,bottom=.30)
-    finish(fig,"botsv1_decontamination")
+    finish(fig,"botsv1_decontamination" + ("_social" if social else ""))
 
 
-def refusals():
+def refusals(social=False):
     groups=[
         ("BOTS v1", ["Opus 4.8","GPT-5.6 Terra","GPT-5.6 Sol","Fable 5","GPT-5.6 Luna"],
          [93.9,92.1,91.4,88.4,83.7], [100*2/93,0,0,100*5/93,0],
@@ -381,7 +384,7 @@ def refusals():
                 edgecolor="white",linewidth=.3)
         ax.set(yticks=y,yticklabels=names,
                xlim=(0,100 if bench == "BOTS v1" else 118),
-               xlabel="Performance (%)")
+               xlabel="Performance (%)", title=bench if social else "")
         ax.set_xticks(np.arange(0,101,20))
         ax.invert_yaxis()
         ax.grid(axis="x",color=RULE,lw=.55); ax.set_axisbelow(True); ax.spines[["top","right","left"]].set_visible(False); ax.tick_params(axis="y",length=0)
@@ -399,14 +402,19 @@ def refusals():
                ["Completed Challenges","Refused Challenges"],
                loc="lower center",ncol=3,fontsize=7.5,**LEGEND_BOX)
     fig.subplots_adjust(left=.14,right=.995,top=.92,bottom=.22,wspace=.36)
-    finish(fig,"gpt56_comparison_with_refusals")
+    finish(fig,"gpt56_comparison_with_refusals" + ("_social" if social else ""))
 
 
 def main():
     OUT.mkdir(exist_ok=True)
     main_results(); cybench(); bots(); tool_calls(); decontamination(); refusals()
+    main_results(social=True); cybench(social=True); tool_calls(social=True)
+    decontamination(social=True); refusals(social=True)
     names=["main_results_chart","cybench_scaling_panels","botsv1_scaling_panels","tool_call_scaling_panels","botsv1_decontamination","gpt56_comparison_with_refusals"]
-    assert all((OUT/f"{n}.png").stat().st_size > 10_000 for n in names)
-    print("Regenerated six paper charts")
+    social_names=["main_results_chart_social","cybench_scaling_panels_social",
+                  "tool_call_scaling_panels_social","botsv1_decontamination_social",
+                  "gpt56_comparison_with_refusals_social"]
+    assert all((OUT/f"{n}.png").stat().st_size > 10_000 for n in names + social_names)
+    print("Regenerated six paper charts and five social copies")
 
 if __name__ == "__main__": main()
